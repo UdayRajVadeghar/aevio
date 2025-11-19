@@ -34,7 +34,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="relative z-10 w-full max-w-md"
       >
-        <div className="relative overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-white/80 dark:bg-black/80 backdrop-blur-md shadow-2xl p-8">
+        <div className="relative overflow-hidden rounded-2xl border border-black/10 dark:border-white/[0.15] bg-white/80 dark:bg-neutral-900/60 backdrop-blur-xl shadow-2xl p-8">
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="flex justify-center mb-6">

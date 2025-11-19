@@ -19,7 +19,7 @@ export function SocialButton({
     <button
       type="button"
       className={cn(
-        "relative flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-900 dark:text-white text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]",
+        "relative flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white text-sm font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]",
         className
       )}
       {...props}

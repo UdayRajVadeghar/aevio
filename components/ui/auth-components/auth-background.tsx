@@ -13,7 +13,8 @@ export const AuthBackground = () => {
   if (!mounted) return null;
 
   return (
-    <div className="absolute inset-0 w-full h-full overflow-hidden bg-white dark:bg-black pointer-events-none">
+    <div className="absolute inset-0 w-full h-full overflow-hidden bg-white dark:bg-neutral-950 pointer-events-none">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,#e5e5e5,transparent)] dark:bg-[radial-gradient(circle_500px_at_50%_200px,#262626,transparent)] opacity-40" />
       {/* Grid Pattern */}
       <div
         className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07]"
