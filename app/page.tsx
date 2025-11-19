@@ -1,9 +1,9 @@
 "use client";
 
-import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
-import { Dither } from "@/components/ui/dither";
-import { HeroVisual } from "@/components/ui/hero-visual";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { BentoCard, BentoGrid } from "@/components/ui/hero-section/bento-grid";
+import { Dither } from "@/components/ui/hero-section/dither";
+import { HeroVisual } from "@/components/ui/hero-section/hero-visual";
+import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
 import { ArrowRight, BarChart3, Brain, Lock, Zap } from "lucide-react";
 
 export default function Home() {
