@@ -38,7 +38,7 @@ export const BentoCard = ({
   return (
     <div
       className={cn(
-        "row-span-1 group/bento hover:shadow-xl transition duration-200 shadow-input dark:shadow-none p-4 bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 justify-between flex flex-col space-y-4 overflow-hidden relative",
+        "row-span-1 group/bento hover:shadow-xl transition duration-200 shadow-input dark:shadow-none p-4 bg-white dark:bg-neutral-900 border border-black/10 dark:border-white/10 justify-between flex flex-col space-y-4 overflow-hidden relative dark:hover:bg-neutral-800 dark:hover:border-white/20",
         // Sharp edges as requested
         "rounded-none",
         className

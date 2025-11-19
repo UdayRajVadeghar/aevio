@@ -7,7 +7,17 @@ import { IntuitiveInteractions } from "@/components/ui/intuitive-interactions/in
 import { FeaturesOrbit } from "@/components/ui/landing/features-orbit";
 import { LightRays } from "@/components/ui/magic-ui/light-rays";
 import { GymNeonShowcase } from "@/components/ui/showcase/gym-neon-showcase";
-import { ArrowRight, BarChart3, Brain, Lock, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Activity,
+  ArrowRight,
+  Brain,
+  Cpu,
+  Lock,
+  Network,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
@@ -108,59 +118,109 @@ export default function Home() {
       {/* Features / Bento Grid */}
       <section className="py-24 px-6 bg-neutral-50 dark:bg-black">
         <div className="max-w-7xl mx-auto mb-16">
-          <h2 className="text-4xl font-bold tracking-tighter mb-6">
-            SYSTEM ARCHITECTURE
-          </h2>
-          <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">
-            Our neural engine processes your biological data points to
-            reconstruct your daily performance capacity.
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-4xl font-bold tracking-tighter mb-6">
+              THE AEVIO ENGINE
+            </h2>
+            <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">
+              The neural architecture powering your biological optimization. We
+              don't just track data; we interpret the signal in the noise.
+            </p>
+          </motion.div>
         </div>
 
         <BentoGrid>
           <BentoCard
-            title="Neural Analysis"
-            description="Advanced pattern recognition for your health metrics."
+            title="Neural Synapse"
+            description="Proprietary AI that decodes your biological signals into actionable insights."
             header={
-              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
-                <Brain className="w-12 h-12 opacity-20" />
+              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center overflow-hidden">
+                <motion.div
+                  animate={{
+                    scale: [1, 1.1, 1],
+                    opacity: [0.5, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <Brain className="w-12 h-12 text-neutral-800 dark:text-neutral-200 opacity-80" />
+                </motion.div>
               </div>
             }
             className="md:col-span-2"
-            icon={<Brain className="w-4 h-4" />}
+            icon={<Cpu className="w-4 h-4" />}
           />
           <BentoCard
-            title="Real-time Sync"
-            description="Zero-latency synchronization across all devices."
+            title="Quantum Link"
+            description="State synchronization across your digital ecosystem with zero latency."
             header={
-              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
-                <Zap className="w-12 h-12 opacity-20" />
+              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center overflow-hidden">
+                <motion.div
+                  animate={{
+                    rotate: [0, 360],
+                  }}
+                  transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                >
+                  <Network className="w-12 h-12 text-neutral-800 dark:text-neutral-200 opacity-80" />
+                </motion.div>
               </div>
             }
             className="md:col-span-1"
             icon={<Zap className="w-4 h-4" />}
           />
           <BentoCard
-            title="Encrypted Core"
-            description="Your biological data is encrypted at rest."
+            title="Vault Zero"
+            description="Military-grade AES-256 encryption. Your data remains yours, always."
             header={
-              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
-                <Lock className="w-12 h-12 opacity-20" />
+              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center overflow-hidden">
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <ShieldCheck className="w-12 h-12 text-neutral-800 dark:text-neutral-200 opacity-80" />
+                </motion.div>
               </div>
             }
             className="md:col-span-1"
             icon={<Lock className="w-4 h-4" />}
           />
           <BentoCard
-            title="Predictive Analytics"
-            description="Forecast your energy levels based on sleep debt."
+            title="Predictive State"
+            description="Forecast your cognitive and physical capacity 24 hours in advance."
             header={
-              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
-                <BarChart3 className="w-12 h-12 opacity-20" />
+              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center overflow-hidden gap-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="w-2 bg-neutral-400 dark:bg-neutral-600 rounded-full"
+                    animate={{
+                      height: [20, 40, 20],
+                      backgroundColor: ["#a3a3a3", "#525252", "#a3a3a3"],
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: i * 0.2,
+                    }}
+                  />
+                ))}
               </div>
             }
             className="md:col-span-2"
-            icon={<BarChart3 className="w-4 h-4" />}
+            icon={<Activity className="w-4 h-4" />}
           />
         </BentoGrid>
       </section>
