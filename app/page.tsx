@@ -4,6 +4,7 @@ import { BentoCard, BentoGrid } from "@/components/ui/hero-section/bento-grid";
 import { Dither } from "@/components/ui/hero-section/dither";
 import { HeroVisual } from "@/components/ui/hero-section/hero-visual";
 import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
+import { IntuitiveInteractions } from "@/components/ui/intuitive-interactions/intuitive-interactions";
 import { LightRays } from "@/components/ui/magic-ui/light-rays";
 import { GymNeonShowcase } from "@/components/ui/showcase/gym-neon-showcase";
 import { ArrowRight, BarChart3, Brain, Lock, Zap } from "lucide-react";
@@ -163,10 +164,14 @@ export default function Home() {
           />
         </BentoGrid>
       </section>
+
       {/* Showcase Section */}
       <section className="py-24 px-6 border-b border-black/10 dark:border-white/10">
         <GymNeonShowcase />
       </section>
+
+      {/* Intuitive Interactions Section */}
+      <IntuitiveInteractions />
 
       {/* Footer */}
       <footer className="border-t border-black/10 dark:border-white/10 py-12 px-6 bg-white dark:bg-black">
