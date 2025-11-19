@@ -5,7 +5,7 @@ import { Dither } from "@/components/ui/hero-section/dither";
 import { HeroVisual } from "@/components/ui/hero-section/hero-visual";
 import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
 import { LightRays } from "@/components/ui/magic-ui/light-rays";
-import { FeatureShowcase } from "@/components/ui/showcase/feature-showcase";
+import { GymNeonShowcase } from "@/components/ui/showcase/gym-neon-showcase";
 import { ArrowRight, BarChart3, Brain, Lock, Zap } from "lucide-react";
 import Link from "next/link";
 
@@ -104,20 +104,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Showcase Section */}
-      <section className="py-24 px-6 border-b border-black/10 dark:border-white/10">
-        <div className="max-w-7xl mx-auto mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tighter mb-4">
-            INTUITIVE INTERACTIONS
-          </h2>
-          <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
-            Designed for speed and fluidity. Every interaction is a
-            micro-delight.
-          </p>
-        </div>
-        <FeatureShowcase />
-      </section>
-
       {/* Features / Bento Grid */}
       <section className="py-24 px-6 bg-neutral-50 dark:bg-black">
         <div className="max-w-7xl mx-auto mb-16">
@@ -176,6 +162,10 @@ export default function Home() {
             icon={<BarChart3 className="w-4 h-4" />}
           />
         </BentoGrid>
+      </section>
+      {/* Showcase Section */}
+      <section className="py-24 px-6 border-b border-black/10 dark:border-white/10">
+        <GymNeonShowcase />
       </section>
 
       {/* Footer */}
