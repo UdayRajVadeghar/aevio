@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import { Copy } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function CopyCard() {
   const [status, setStatus] = useState<"idle" | "copied">("idle");
@@ -42,7 +41,7 @@ export function CopyCard() {
                 className="flex-1 flex items-center justify-center gap-2 text-sm font-medium text-neutral-700 hover:bg-white hover:shadow-sm rounded-full transition-all duration-200"
               >
                 <Copy className="w-4 h-4" />
-                <span>Copy</span>
+                <span>Create Plan</span>
               </button>
               <div className="w-px h-4 bg-neutral-300 my-auto mx-1" />
               <button className="flex-1 flex items-center justify-center text-sm font-medium text-neutral-700 hover:bg-white hover:shadow-sm rounded-full transition-all duration-200">
@@ -62,7 +61,6 @@ export function CopyCard() {
               <motion.span
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                delay={0.1}
               >
                 Copied to Figma
               </motion.span>
@@ -73,4 +71,3 @@ export function CopyCard() {
     </div>
   );
 }
-

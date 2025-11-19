@@ -1,8 +1,8 @@
 "use client";
 
 import { CopyCard } from "./copy-card";
-import { SaveCollectionsCard } from "./save-collections-card";
 import { LeaveCommentsCard } from "./leave-comments-card";
+import { SaveCollectionsCard } from "./save-collections-card";
 
 export function IntuitiveInteractions() {
   return (
@@ -10,10 +10,11 @@ export function IntuitiveInteractions() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-16">
           <h2 className="text-4xl font-bold tracking-tighter mb-6">
-            INTUITIVE INTERACTIONS
+            What you can do with AEVIO
           </h2>
           <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">
-             Micro-interactions that feel natural and responsive.
+            AEVIO is more than just a journal. It's a tool that helps you track
+            your health and fitness.
           </p>
         </div>
 
@@ -25,11 +26,10 @@ export function IntuitiveInteractions() {
             <SaveCollectionsCard />
           </div>
           <div className="h-[400px]">
-             <LeaveCommentsCard />
+            <LeaveCommentsCard />
           </div>
         </div>
       </div>
     </section>
   );
 }
-
