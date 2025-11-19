@@ -1,65 +1,158 @@
-import Image from "next/image";
+"use client";
+
+import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
+import { Dither } from "@/components/ui/dither";
+import { RetroCode } from "@/components/ui/retro-code";
+import { ArrowRight, BarChart3, Brain, Lock, Zap } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
+    <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-x-hidden font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
+      <Dither />
+
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full z-50 border-b border-black/10 dark:border-white/10 bg-white/80 dark:bg-black/80 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="font-bold text-xl tracking-tighter flex items-center gap-2">
+            <div className="w-4 h-4 bg-black dark:bg-white" />
+            aevio
+          </div>
+          <div className="flex gap-6 text-sm font-medium">
             <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              href="#"
+              className="hover:underline underline-offset-4 decoration-dotted"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
+              Product
+            </a>
             <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              href="#"
+              className="hover:underline underline-offset-4 decoration-dotted"
             >
-              Learning
-            </a>{" "}
-            center.
+              Manifesto
+            </a>
+            <a
+              href="#"
+              className="hover:underline underline-offset-4 decoration-dotted"
+            >
+              Pricing
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 px-6 border-b border-black/10 dark:border-white/10">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-8">
+            <div className="inline-block border border-black dark:border-white px-3 py-1 text-xs font-mono uppercase tracking-widest">
+              v1.0.0 Public Beta
+            </div>
+            <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-[0.9]">
+              METRICS <br />
+              FOR THE <br />
+              <span className="text-neutral-400 dark:text-neutral-600">
+                UNBOUND
+              </span>
+            </h1>
+            <p className="text-lg md:text-xl text-neutral-600 dark:text-neutral-400 max-w-md leading-relaxed">
+              The minimal AI journal for high-performance individuals. Track
+              sleep, fitness, and cognitive load without the noise.
+            </p>
+
+            <div className="flex flex-wrap gap-4">
+              <button className="group relative px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all">
+                <span className="flex items-center gap-2">
+                  Start Tracking{" "}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </button>
+              <button className="px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all">
+                Read Manifesto
+              </button>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900 blur-lg opacity-50" />
+            <RetroCode className="shadow-2xl" />
+            {/* Decorative elements */}
+            <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-black dark:bg-white z-0 opacity-10 pattern-dots" />
+          </div>
+        </div>
+      </section>
+
+      {/* Features / Bento Grid */}
+      <section className="py-24 px-6 bg-neutral-50 dark:bg-black">
+        <div className="max-w-7xl mx-auto mb-16">
+          <h2 className="text-4xl font-bold tracking-tighter mb-6">
+            SYSTEM ARCHITECTURE
+          </h2>
+          <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">
+            Our neural engine processes your biological data points to
+            reconstruct your daily performance capacity.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <BentoGrid>
+          <BentoCard
+            title="Neural Analysis"
+            description="Advanced pattern recognition for your health metrics."
+            header={
+              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
+                <Brain className="w-12 h-12 opacity-20" />
+              </div>
+            }
+            className="md:col-span-2"
+            icon={<Brain className="w-4 h-4" />}
+          />
+          <BentoCard
+            title="Real-time Sync"
+            description="Zero-latency synchronization across all devices."
+            header={
+              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
+                <Zap className="w-12 h-12 opacity-20" />
+              </div>
+            }
+            className="md:col-span-1"
+            icon={<Zap className="w-4 h-4" />}
+          />
+          <BentoCard
+            title="Encrypted Core"
+            description="Your biological data is encrypted at rest."
+            header={
+              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
+                <Lock className="w-12 h-12 opacity-20" />
+              </div>
+            }
+            className="md:col-span-1"
+            icon={<Lock className="w-4 h-4" />}
+          />
+          <BentoCard
+            title="Predictive Analytics"
+            description="Forecast your energy levels based on sleep debt."
+            header={
+              <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
+                <BarChart3 className="w-12 h-12 opacity-20" />
+              </div>
+            }
+            className="md:col-span-2"
+            icon={<BarChart3 className="w-4 h-4" />}
+          />
+        </BentoGrid>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-black/10 dark:border-white/10 py-12 px-6 bg-white dark:bg-black">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2 font-bold">
+            <div className="w-3 h-3 bg-black dark:bg-white" />
+            AEVIO INC.
+          </div>
+          <div className="text-xs text-neutral-500 font-mono">
+            © 2024 AEVIO SYSTEM. ALL RIGHTS RESERVED.
+          </div>
         </div>
-      </main>
-    </div>
+      </footer>
+    </main>
   );
 }
