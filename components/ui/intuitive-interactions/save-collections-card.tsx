@@ -1,91 +1,89 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { LayoutGrid, PlusCircle, Moon, Smartphone, Bookmark } from "lucide-react";
+import { Dumbbell, Activity, Flame, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ListItemProps {
   icon: React.ReactNode;
   label: string;
-  hasBookmark?: boolean;
-  isBookmarked?: boolean;
-  onBookmarkToggle?: () => void;
+  isActive?: boolean;
 }
 
-function ListItem({ icon, label, hasBookmark, isBookmarked, onBookmarkToggle }: ListItemProps) {
+function ListItem({ icon, label, isActive }: ListItemProps) {
   return (
-    <div className="group flex items-center justify-between p-3 rounded-xl hover:bg-neutral-50 transition-colors cursor-pointer">
+    <motion.div
+      animate={{
+        backgroundColor: isActive ? "rgba(245, 245, 245, 1)" : "rgba(255, 255, 255, 0)",
+        scale: isActive ? 1.02 : 1,
+      }}
+      transition={{ duration: 0.3 }}
+      className="group flex items-center justify-between p-3 rounded-xl transition-colors cursor-default"
+    >
       <div className="flex items-center gap-3">
-        <div className="text-neutral-500">{icon}</div>
-        <span className="text-sm font-medium text-neutral-700">{label}</span>
+        <div className={cn("transition-colors duration-300", isActive ? "text-black" : "text-neutral-500")}>
+          {icon}
+        </div>
+        <span className={cn("text-sm font-medium transition-colors duration-300", isActive ? "text-black font-semibold" : "text-neutral-700")}>
+            {label}
+        </span>
       </div>
-      {hasBookmark && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onBookmarkToggle?.();
-          }}
-          className="relative p-1 rounded-full hover:bg-neutral-200/50 transition-colors"
-        >
-          <motion.div
-            whileTap={{ scale: 0.8 }}
-            animate={{ scale: isBookmarked ? 1.1 : 1 }}
-            transition={{ type: "spring", stiffness: 400, damping: 15 }}
-          >
-            <Bookmark
-              className={cn(
-                "w-5 h-5 transition-colors duration-300",
-                isBookmarked ? "fill-black text-black" : "text-neutral-400"
-              )}
-            />
-          </motion.div>
-        </button>
+      {isActive && (
+        <motion.div
+          layoutId="active-dot"
+          className="w-2 h-2 rounded-full bg-black"
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        />
       )}
-       {!hasBookmark && (
-         <div className="w-5 h-5 rounded-full border border-neutral-200 group-hover:border-neutral-300" />
-       )}
-    </div>
+    </motion.div>
   );
 }
 
 export function SaveCollectionsCard() {
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % 4);
+    }, 1500); // Switch every 1.5s
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="flex flex-col h-full p-6 bg-white rounded-3xl shadow-sm border border-neutral-100">
       <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-1">Save to collections</h3>
+        <h3 className="text-lg font-semibold mb-1">Health Snapshot</h3>
         <p className="text-sm text-neutral-500">
-          Collect your favorite designs and upload your own screenshots.
+          Track every aspect of your physical journey in one place.
         </p>
       </div>
 
       <div className="w-full bg-white rounded-2xl border border-neutral-100 p-2 shadow-sm">
          <div className="px-3 py-2 text-xs font-medium text-neutral-400 uppercase tracking-wider">
-            Quick save
+            Metrics
          </div>
         <ListItem
-          icon={<LayoutGrid className="w-5 h-5" />}
-          label="Library"
-          hasBookmark
-          isBookmarked={isBookmarked}
-          onBookmarkToggle={() => setIsBookmarked(!isBookmarked)}
+          icon={<Dumbbell className="w-5 h-5" />}
+          label="Workouts"
+          isActive={activeIndex === 0}
         />
         <ListItem
-          icon={<PlusCircle className="w-5 h-5" />}
-          label="Create collection"
+          icon={<Activity className="w-5 h-5" />}
+          label="Health Tracking"
+          isActive={activeIndex === 1}
         />
         <ListItem
-          icon={<Moon className="w-5 h-5" />}
-          label="Dark Mode"
+          icon={<Flame className="w-5 h-5" />}
+          label="Calories"
+          isActive={activeIndex === 2}
         />
         <ListItem
-          icon={<Smartphone className="w-5 h-5" />}
-          label="Launch Screens"
+          icon={<Trophy className="w-5 h-5" />}
+          label="Streak"
+          isActive={activeIndex === 3}
         />
       </div>
     </div>
   );
 }
-
