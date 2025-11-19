@@ -1,6 +1,5 @@
 "use client";
 
-import { DotPattern } from "@/components/ui/magic-ui/dot-pattern";
 import { OrbitingCircles } from "@/components/ui/magic-ui/orbiting-circles";
 import { cn } from "@/lib/utils";
 import { 
@@ -27,18 +26,6 @@ export function FeaturesOrbit({ className }: { className?: string }) {
          {/* The Bubble - Spinning */}
          <div className="absolute inset-[-40px] rounded-full border border-neutral-200/30 dark:border-neutral-700/30 bg-transparent shadow-xl animate-spin [animation-duration:20s] group-hover:[animation-play-state:paused] overflow-hidden">
             
-            {/* Dot Pattern Background Inside Bubble */}
-             <DotPattern
-                 className={cn(
-                     "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
-                 )}
-                 width={10}
-                 height={10}
-                 cr={1}
-                 cx={1}
-                 cy={1}
-             />
-
             {/* Inner details to make spin visible */}
             <div className="absolute top-8 right-10 h-8 w-14 rotate-45 rounded-full bg-gradient-to-b from-white to-transparent opacity-60 blur-sm" />
             <div className="absolute bottom-10 left-12 h-6 w-10 rotate-45 rounded-full bg-gradient-to-t from-white to-transparent opacity-40 blur-sm" />
