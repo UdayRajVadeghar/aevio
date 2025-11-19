@@ -8,7 +8,16 @@ import { ArrowRight, BarChart3, Brain, Lock, Zap } from "lucide-react";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-x-hidden font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
+    <main className="relative min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-x-hidden font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
+      {/* Light Mode "Vapor" Background */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none dark:hidden overflow-hidden"
+        aria-hidden="true"
+      >
+        <div className="absolute -top-[30%] -left-[10%] w-[80%] h-[80%] rounded-full bg-black/[0.02] blur-[120px]" />
+        <div className="absolute -bottom-[30%] -right-[10%] w-[80%] h-[80%] rounded-full bg-black/[0.02] blur-[120px]" />
+      </div>
+
       <Dither />
 
       {/* Navigation */}
