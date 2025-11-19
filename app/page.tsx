@@ -2,7 +2,8 @@
 
 import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
 import { Dither } from "@/components/ui/dither";
-import { RetroCode } from "@/components/ui/retro-code";
+import { HeroVisual } from "@/components/ui/hero-visual";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ArrowRight, BarChart3, Brain, Lock, Zap } from "lucide-react";
 
 export default function Home() {
@@ -17,25 +18,28 @@ export default function Home() {
             <div className="w-4 h-4 bg-black dark:bg-white" />
             aevio
           </div>
-          <div className="flex gap-6 text-sm font-medium">
-            <a
-              href="#"
-              className="hover:underline underline-offset-4 decoration-dotted"
-            >
-              Product
-            </a>
-            <a
-              href="#"
-              className="hover:underline underline-offset-4 decoration-dotted"
-            >
-              Manifesto
-            </a>
-            <a
-              href="#"
-              className="hover:underline underline-offset-4 decoration-dotted"
-            >
-              Pricing
-            </a>
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex gap-6 text-sm font-medium">
+              <a
+                href="#"
+                className="hover:underline underline-offset-4 decoration-dotted"
+              >
+                Product
+              </a>
+              <a
+                href="#"
+                className="hover:underline underline-offset-4 decoration-dotted"
+              >
+                Manifesto
+              </a>
+              <a
+                href="#"
+                className="hover:underline underline-offset-4 decoration-dotted"
+              >
+                Pricing
+              </a>
+            </div>
+            <ThemeToggle />
           </div>
         </div>
       </nav>
@@ -74,7 +78,7 @@ export default function Home() {
 
           <div className="relative">
             <div className="absolute -inset-1 bg-gradient-to-r from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900 blur-lg opacity-50" />
-            <RetroCode className="shadow-2xl" />
+            <HeroVisual className="shadow-2xl" />
             {/* Decorative elements */}
             <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-black dark:bg-white z-0 opacity-10 pattern-dots" />
           </div>
