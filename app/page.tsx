@@ -5,6 +5,7 @@ import { Dither } from "@/components/ui/hero-section/dither";
 import { HeroVisual } from "@/components/ui/hero-section/hero-visual";
 import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
 import { ArrowRight, BarChart3, Brain, Lock, Zap } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -73,12 +74,15 @@ export default function Home() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <button className="group relative px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all">
+              <Link
+                href="/authentication?view=signup"
+                className="group relative px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all"
+              >
                 <span className="flex items-center gap-2">
                   Start Tracking{" "}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </span>
-              </button>
+              </Link>
               <button className="px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all">
                 Read Manifesto
               </button>
