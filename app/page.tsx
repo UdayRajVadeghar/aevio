@@ -2,9 +2,9 @@
 
 import { BentoCard, BentoGrid } from "@/components/ui/hero-section/bento-grid";
 import { Dither } from "@/components/ui/hero-section/dither";
-import { HeroVisual } from "@/components/ui/hero-section/hero-visual";
 import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
 import { IntuitiveInteractions } from "@/components/ui/intuitive-interactions/intuitive-interactions";
+import { FeaturesOrbit } from "@/components/ui/landing/features-orbit";
 import { LightRays } from "@/components/ui/magic-ui/light-rays";
 import { GymNeonShowcase } from "@/components/ui/showcase/gym-neon-showcase";
 import { ArrowRight, BarChart3, Brain, Lock, Zap } from "lucide-react";
@@ -98,7 +98,7 @@ export default function Home() {
 
           <div className="relative">
             <div className="absolute -inset-1 bg-gradient-to-r from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900 blur-lg opacity-50" />
-            <HeroVisual className="shadow-2xl" />
+            <FeaturesOrbit />
             {/* Decorative elements */}
             <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-black dark:bg-white z-0 opacity-10 pattern-dots" />
           </div>
@@ -165,13 +165,13 @@ export default function Home() {
         </BentoGrid>
       </section>
 
+      {/* Intuitive Interactions Section */}
+      <IntuitiveInteractions />
+
       {/* Showcase Section */}
       <section className="py-24 px-6 border-b border-black/10 dark:border-white/10">
         <GymNeonShowcase />
       </section>
-
-      {/* Intuitive Interactions Section */}
-      <IntuitiveInteractions />
 
       {/* Footer */}
       <footer className="border-t border-black/10 dark:border-white/10 py-12 px-6 bg-white dark:bg-black">
