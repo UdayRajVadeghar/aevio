@@ -9,9 +9,9 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
-export default function AuthenticationPage() {
+function AuthenticationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const viewParam = searchParams.get("view");
@@ -140,5 +140,13 @@ export default function AuthenticationPage() {
         </div>
       </div>
     </AuthLayout>
+  );
+}
+
+export default function AuthenticationPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AuthenticationContent />
+    </Suspense>
   );
 }
