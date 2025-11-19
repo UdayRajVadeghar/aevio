@@ -7,6 +7,7 @@ import { IntegrationDiagram } from "@/components/ui/integration-diagram";
 import { IntuitiveInteractions } from "@/components/ui/intuitive-interactions/intuitive-interactions";
 import { FeaturesOrbit } from "@/components/ui/landing/features-orbit";
 import { LightRays } from "@/components/ui/magic-ui/light-rays";
+import { PreFooterCTA } from "@/components/ui/pre-footer-cta";
 import { GymNeonShowcase } from "@/components/ui/showcase/gym-neon-showcase";
 import { motion } from "framer-motion";
 import {
@@ -232,9 +233,10 @@ export default function Home() {
       <IntegrationDiagram />
 
       {/* Showcase Section */}
-      <section className="py-24 px-6 border-b border-black/10 dark:border-white/10">
-        <GymNeonShowcase />
-      </section>
+
+      <GymNeonShowcase />
+
+      <PreFooterCTA />
 
       {/* Footer */}
       <footer className="border-t border-black/10 dark:border-white/10 py-12 px-6 bg-white dark:bg-black">
