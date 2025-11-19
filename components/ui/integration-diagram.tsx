@@ -25,7 +25,6 @@ const Connection = ({
   curvature = 0.5,
   isDashed = false,
   isActive = false, // controls if the dot is moving
-  onComplete,
 }: {
   fromRef: React.RefObject<HTMLDivElement | null>;
   toRef: React.RefObject<HTMLDivElement | null>;
@@ -33,7 +32,6 @@ const Connection = ({
   curvature?: number;
   isDashed?: boolean;
   isActive?: boolean;
-  onComplete?: () => void;
 }) => {
   const [pathD, setPathD] = useState("");
   const [svgDimensions, setSvgDimensions] = useState({ width: 0, height: 0 });
@@ -103,19 +101,18 @@ const Connection = ({
           <motion.circle
             initial={{ opacity: 0, "--offset-distance": "0%" } as any}
             animate={{ opacity: 1, "--offset-distance": "100%" } as any}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, transition: { duration: 0.2 } }}
             transition={{
-              duration: 1.5,
-              ease: "easeInOut",
+              duration: 2,
+              ease: [0.22, 1, 0.36, 1], // Custom sleek easing
             }}
-            onAnimationComplete={onComplete}
-            r="4"
+            r="3" // Slightly smaller for sleekness
             fill="#f97316"
             style={{
               offsetPath: `path('${pathD}')`,
               offsetDistance: "var(--offset-distance)",
             } as React.CSSProperties}
-            className="drop-shadow-[0_0_8px_rgba(249,115,22,0.8)] absolute"
+            className="drop-shadow-[0_0_6px_rgba(249,115,22,0.8)] absolute" // Adjusted shadow
           />
         )}
       </AnimatePresence>
@@ -144,21 +141,17 @@ export const IntegrationDiagram = () => {
   // Phase 2: Hub -> Destinations
   const [phase, setPhase] = useState<1 | 2>(1);
 
-  // Trigger for Phase 1
-  const handlePhase1Complete = () => {
-    setPhase(2);
-  };
-
-  // Trigger for Phase 2
-  const handlePhase2Complete = () => {
-    // Reset to Phase 1 immediately to create a continuous loop
-    setPhase(1);
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPhase((prev) => (prev === 1 ? 2 : 1));
+    }, 2200); // Slightly longer than animation duration (2s) to allow for pause/reset
+    return () => clearTimeout(timer);
+  }, [phase]);
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full max-w-5xl mx-auto h-[600px] flex items-center justify-between p-8 bg-white dark:bg-neutral-950 rounded-xl overflow-hidden"
+      className="relative w-full max-w-5xl mx-auto h-[600px] flex items-center justify-between p-8 bg-transparent rounded-xl overflow-hidden"
     >
       {/* SVG Layer for Connections */}
       {/* Phase 1 Connections: Inputs -> Hub */}
@@ -167,7 +160,6 @@ export const IntegrationDiagram = () => {
         fromRef={productRef}
         toRef={hubRef}
         isActive={phase === 1}
-        onComplete={handlePhase1Complete}
         curvature={0.4}
       />
       <Connection
@@ -175,7 +167,6 @@ export const IntegrationDiagram = () => {
         fromRef={agentRef}
         toRef={hubRef}
         isActive={phase === 1}
-        // Only one callback needed to trigger phase change
         curvature={0.4}
       />
 
@@ -186,7 +177,6 @@ export const IntegrationDiagram = () => {
         toRef={accountingRef}
         isDashed
         isActive={phase === 2}
-        onComplete={handlePhase2Complete} // Trigger reset after one of them completes
         curvature={0.4}
       />
       <Connection
