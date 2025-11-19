@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -12,11 +14,9 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 body {
@@ -43,13 +43,11 @@ body {
   background: #a3a3a3;
 }
 
-@media (prefers-color-scheme: dark) {
-  ::-webkit-scrollbar-thumb {
-    background: #333;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
+.dark ::-webkit-scrollbar-thumb {
+  background: #333;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 /* Dot Pattern */
@@ -58,8 +56,6 @@ body {
   background-size: 16px 16px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .pattern-dots {
-    background-image: radial-gradient(#fff 1px, transparent 1px);
-  }
+.dark .pattern-dots {
+  background-image: radial-gradient(#fff 1px, transparent 1px);
 }

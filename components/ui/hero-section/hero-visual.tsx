@@ -67,7 +67,7 @@ export const HeroVisual = ({ className }: { className?: string }) => {
               </span>
             </div>
             <div className="font-mono text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed h-12">
-              <TypingEffect text="Reflecting on deep work. Energy flows where focus goes..." />
+              <TypingEffect text="hello world" />
             </div>
           </div>
 
