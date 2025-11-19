@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatedBeam } from "@/components/ui/magic-ui/animated-beam";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
@@ -10,7 +11,7 @@ import {
   TrendingUp,
   Utensils,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const TypingEffect = ({ text }: { text: string }) => {
   const [displayedText, setDisplayedText] = useState("");
@@ -36,8 +37,17 @@ const TypingEffect = ({ text }: { text: string }) => {
 };
 
 export const HeroVisual = ({ className }: { className?: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const brainRef = useRef<HTMLDivElement>(null);
+  const journalRef = useRef<HTMLDivElement>(null);
+  const streakRef = useRef<HTMLDivElement>(null);
+  const fuelRef = useRef<HTMLDivElement>(null);
+  const bioRef = useRef<HTMLDivElement>(null);
+  const growthRef = useRef<HTMLDivElement>(null);
+
   return (
     <div
+      ref={containerRef}
       className={cn(
         "relative w-full h-[600px] flex items-center justify-center overflow-visible",
         className
@@ -57,7 +67,10 @@ export const HeroVisual = ({ className }: { className?: string }) => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="relative z-20"
         >
-          <div className="w-64 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-neutral-200/50 dark:border-neutral-800/50 rounded-2xl p-4 shadow-sm hover:scale-105 transition-transform duration-500">
+          <div
+            ref={journalRef}
+            className="w-64 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-neutral-200/50 dark:border-neutral-800/50 rounded-2xl p-4 shadow-sm hover:scale-105 transition-transform duration-500"
+          >
             <div className="flex items-center gap-3 mb-3 border-b border-neutral-100 dark:border-neutral-800/50 pb-2">
               <div className="p-1.5 bg-orange-100/50 dark:bg-orange-900/20 rounded-lg text-orange-600 dark:text-orange-400">
                 <FileText size={14} />
@@ -70,9 +83,6 @@ export const HeroVisual = ({ className }: { className?: string }) => {
               <TypingEffect text="hello world" />
             </div>
           </div>
-
-          {/* Connection Line */}
-          <div className="absolute left-1/2 -bottom-8 w-[1px] h-8 bg-gradient-to-b from-neutral-200 dark:from-neutral-800 to-transparent" />
         </motion.div>
 
         {/* Central Core Section */}
@@ -84,7 +94,10 @@ export const HeroVisual = ({ className }: { className?: string }) => {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="relative hidden md:block"
           >
-            <div className="w-40 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-neutral-200/50 dark:border-neutral-800/50 rounded-2xl p-4 shadow-sm hover:scale-105 transition-transform duration-500">
+            <div
+              ref={streakRef}
+              className="w-40 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-neutral-200/50 dark:border-neutral-800/50 rounded-2xl p-4 shadow-sm hover:scale-105 transition-transform duration-500"
+            >
               <div className="flex items-center justify-between mb-2">
                 <div className="p-1.5 bg-purple-100/50 dark:bg-purple-900/20 rounded-lg text-purple-600 dark:text-purple-400">
                   <Repeat size={14} />
@@ -113,8 +126,6 @@ export const HeroVisual = ({ className }: { className?: string }) => {
                 ))}
               </div>
             </div>
-            {/* Connection Line */}
-            <div className="absolute -right-8 top-1/2 h-[1px] w-8 bg-gradient-to-r from-neutral-200 dark:from-neutral-800 to-transparent" />
           </motion.div>
 
           {/* Core */}
@@ -134,7 +145,10 @@ export const HeroVisual = ({ className }: { className?: string }) => {
                 animate={{ scale: [1.2, 1, 1.2], opacity: [0, 0.5, 0] }}
                 transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
               />
-              <div className="w-20 h-20 bg-white dark:bg-black rounded-full flex items-center justify-center shadow-2xl border border-neutral-100 dark:border-neutral-800 relative z-10">
+              <div
+                ref={brainRef}
+                className="w-20 h-20 bg-white dark:bg-black rounded-full flex items-center justify-center shadow-2xl border border-neutral-100 dark:border-neutral-800 relative z-10"
+              >
                 <Brain
                   className="w-8 h-8 text-neutral-800 dark:text-neutral-200"
                   strokeWidth={1.5}
@@ -150,10 +164,10 @@ export const HeroVisual = ({ className }: { className?: string }) => {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="relative hidden md:block"
           >
-            {/* Connection Line */}
-            <div className="absolute -left-8 top-1/2 h-[1px] w-8 bg-gradient-to-l from-neutral-200 dark:from-neutral-800 to-transparent" />
-
-            <div className="w-40 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-neutral-200/50 dark:border-neutral-800/50 rounded-2xl p-4 shadow-sm hover:scale-105 transition-transform duration-500">
+            <div
+              ref={fuelRef}
+              className="w-40 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-neutral-200/50 dark:border-neutral-800/50 rounded-2xl p-4 shadow-sm hover:scale-105 transition-transform duration-500"
+            >
               <div className="flex items-center justify-between mb-2">
                 <div className="p-1.5 bg-yellow-100/50 dark:bg-yellow-900/20 rounded-lg text-yellow-600 dark:text-yellow-400">
                   <Utensils size={14} />
@@ -183,12 +197,6 @@ export const HeroVisual = ({ className }: { className?: string }) => {
 
         {/* Bottom Section: Split Nodes */}
         <div className="flex items-start gap-6 relative z-20">
-          {/* Connection Lines */}
-          <div className="absolute left-1/2 -top-8 w-[1px] h-8 bg-gradient-to-t from-neutral-200 dark:from-neutral-800 to-transparent -translate-x-1/2" />
-          <div className="absolute left-1/2 -top-4 w-32 h-[1px] bg-neutral-200 dark:bg-neutral-800 -translate-x-1/2" />
-          <div className="absolute left-[calc(50%-4rem)] -top-4 w-[1px] h-4 bg-neutral-200 dark:bg-neutral-800" />
-          <div className="absolute right-[calc(50%-4rem)] -top-4 w-[1px] h-4 bg-neutral-200 dark:bg-neutral-800" />
-
           {/* Left Node: Health (Body) */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -196,27 +204,29 @@ export const HeroVisual = ({ className }: { className?: string }) => {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="w-48 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-neutral-200/50 dark:border-neutral-800/50 rounded-2xl p-4 shadow-sm hover:scale-105 transition-transform duration-500"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-rose-100/50 dark:bg-rose-900/20 rounded-lg text-rose-600 dark:text-rose-400">
-                  <Activity size={14} />
+            <div ref={bioRef}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-rose-100/50 dark:bg-rose-900/20 rounded-lg text-rose-600 dark:text-rose-400">
+                    <Activity size={14} />
+                  </div>
+                  <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+                    Bio
+                  </span>
                 </div>
-                <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
-                  Bio
+                <span className="text-xs font-bold text-neutral-900 dark:text-white font-mono">
+                  98%
                 </span>
               </div>
-              <span className="text-xs font-bold text-neutral-900 dark:text-white font-mono">
-                98%
-              </span>
-            </div>
-            <div className="flex items-end gap-[2px] h-8 w-full opacity-50">
-              {[40, 70, 50, 90, 60, 80, 50, 70, 40, 60].map((h, i) => (
-                <div
-                  key={i}
-                  className="flex-1 bg-rose-500 rounded-t-sm"
-                  style={{ height: `${h}%` }}
-                />
-              ))}
+              <div className="flex items-end gap-[2px] h-8 w-full opacity-50">
+                {[40, 70, 50, 90, 60, 80, 50, 70, 40, 60].map((h, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 bg-rose-500 rounded-t-sm"
+                    style={{ height: `${h}%` }}
+                  />
+                ))}
+              </div>
             </div>
           </motion.div>
 
@@ -227,28 +237,79 @@ export const HeroVisual = ({ className }: { className?: string }) => {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="w-48 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-neutral-200/50 dark:border-neutral-800/50 rounded-2xl p-4 shadow-sm hover:scale-105 transition-transform duration-500"
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-emerald-100/50 dark:bg-emerald-900/20 rounded-lg text-emerald-600 dark:text-emerald-400">
-                  <TrendingUp size={14} />
+            <div ref={growthRef}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-emerald-100/50 dark:bg-emerald-900/20 rounded-lg text-emerald-600 dark:text-emerald-400">
+                    <TrendingUp size={14} />
+                  </div>
+                  <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+                    Growth
+                  </span>
                 </div>
-                <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
-                  Growth
-                </span>
               </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-[10px] text-neutral-500">
-                <span>Cognitive</span>
-                <span className="text-emerald-500">+12%</span>
-              </div>
-              <div className="h-1 w-full bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 w-[75%]" />
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] text-neutral-500">
+                  <span>Cognitive</span>
+                  <span className="text-emerald-500">+12%</span>
+                </div>
+                <div className="h-1 w-full bg-neutral-100 dark:bg-neutral-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 w-[75%]" />
+                </div>
               </div>
             </div>
           </motion.div>
         </div>
       </div>
+
+      {/* Animated Beams */}
+      <AnimatedBeam
+        containerRef={containerRef}
+        fromRef={brainRef}
+        toRef={journalRef}
+        curvature={-20}
+        endYOffset={10}
+        gradientStartColor="#a3a3a3" // neutral-400
+        gradientStopColor="#ea580c" // orange-600
+      />
+      <AnimatedBeam
+        containerRef={containerRef}
+        fromRef={brainRef}
+        toRef={streakRef}
+        curvature={20}
+        endYOffset={-10}
+        gradientStartColor="#a3a3a3"
+        gradientStopColor="#9333ea" // purple-600
+        reverse
+      />
+      <AnimatedBeam
+        containerRef={containerRef}
+        fromRef={brainRef}
+        toRef={fuelRef}
+        curvature={-20}
+        endYOffset={-10}
+        gradientStartColor="#a3a3a3"
+        gradientStopColor="#ca8a04" // yellow-600
+      />
+      <AnimatedBeam
+        containerRef={containerRef}
+        fromRef={brainRef}
+        toRef={bioRef}
+        curvature={20}
+        endYOffset={10}
+        gradientStartColor="#a3a3a3"
+        gradientStopColor="#e11d48" // rose-600
+        reverse
+      />
+      <AnimatedBeam
+        containerRef={containerRef}
+        fromRef={brainRef}
+        toRef={growthRef}
+        curvature={-20}
+        endYOffset={10}
+        gradientStartColor="#a3a3a3"
+        gradientStopColor="#059669" // emerald-600
+      />
     </div>
   );
 };

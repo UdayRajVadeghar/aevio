@@ -4,6 +4,7 @@ import { BentoCard, BentoGrid } from "@/components/ui/hero-section/bento-grid";
 import { Dither } from "@/components/ui/hero-section/dither";
 import { HeroVisual } from "@/components/ui/hero-section/hero-visual";
 import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
+import { LightRays } from "@/components/ui/magic-ui/light-rays";
 import { ArrowRight, BarChart3, Brain, Lock, Zap } from "lucide-react";
 import Link from "next/link";
 
@@ -15,8 +16,12 @@ export default function Home() {
         className="absolute inset-0 z-0 pointer-events-none dark:hidden overflow-hidden"
         aria-hidden="true"
       >
-        <div className="absolute -top-[30%] -left-[10%] w-[80%] h-[80%] rounded-full bg-black/[0.02] blur-[120px]" />
-        <div className="absolute -bottom-[30%] -right-[10%] w-[80%] h-[80%] rounded-full bg-black/[0.02] blur-[120px]" />
+        <LightRays
+          color="rgba(0, 0, 0, 0.05)"
+          blendMode="multiply"
+          count={20}
+          speed={8}
+        />
       </div>
 
       <Dither />
