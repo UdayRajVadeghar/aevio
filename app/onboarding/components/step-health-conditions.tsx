@@ -3,7 +3,7 @@
 import { useOnboardingStore } from "@/lib/store/onboarding-store";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { ArrowRight, AlertCircle, Check } from "lucide-react";
+import { AlertCircle, ArrowRight, Check } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -14,8 +14,10 @@ const healthConditionsSchema = z.object({
 
 export function StepHealthConditions() {
   const { data, updateData, setStep } = useOnboardingStore();
-  
-  const [selectedConditions, setSelectedConditions] = useState<string[]>(data.healthConditions || []);
+
+  const [selectedConditions, setSelectedConditions] = useState<string[]>(
+    data.healthConditions || []
+  );
 
   const handleContinue = () => {
     // Always valid as it's optional
@@ -24,22 +26,22 @@ export function StepHealthConditions() {
   };
 
   const toggleCondition = (id: string) => {
-    if (id === 'none') {
-        if (selectedConditions.includes('none')) {
-            setSelectedConditions([]);
-        } else {
-            setSelectedConditions(['none']);
-        }
-        return;
+    if (id === "none") {
+      if (selectedConditions.includes("none")) {
+        setSelectedConditions([]);
+      } else {
+        setSelectedConditions(["none"]);
+      }
+      return;
     }
 
     // If selecting a condition, remove 'none' if present
-    let newConditions = selectedConditions.filter(c => c !== 'none');
+    let newConditions = selectedConditions.filter((c) => c !== "none");
 
     if (newConditions.includes(id)) {
-        newConditions = newConditions.filter(c => c !== id);
+      newConditions = newConditions.filter((c) => c !== id);
     } else {
-        newConditions.push(id);
+      newConditions.push(id);
     }
     setSelectedConditions(newConditions);
   };
@@ -66,46 +68,49 @@ export function StepHealthConditions() {
           Health Conditions
         </h2>
         <p className="text-lg text-muted-foreground">
-          Do you have any existing health conditions? This helps us personalize your insights.
+          Do you have any existing health conditions? This helps us personalize
+          your insights.
         </p>
       </div>
 
       <div className="space-y-8">
         <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex gap-3 items-start text-yellow-700 dark:text-yellow-400">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-            <p className="text-sm leading-relaxed">
-                <strong>Disclaimer:</strong> Aevio is not a medical device and does not provide medical diagnosis or treatment. The information collected is solely for personalized wellness insights.
-            </p>
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <p className="text-sm leading-relaxed">
+            <strong>Disclaimer:</strong> Aevio is not a medical device and does
+            not provide medical diagnosis or treatment. The information
+            collected is solely for personalized wellness insights.
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-3">
-            {conditionsList.map((condition) => {
-                const isSelected = selectedConditions.includes(condition.id);
-                return (
-                    <button
-                        key={condition.id}
-                        onClick={() => toggleCondition(condition.id)}
-                        className={cn(
-                            "group flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-200",
-                            isSelected
-                                ? "border-primary bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
-                                : "bg-card hover:border-primary/50 hover:bg-accent/50"
-                        )}
-                    >
-                        <span className="text-sm font-medium">{condition.label}</span>
-                        {isSelected && <Check className="w-4 h-4" />}
-                    </button>
-                );
-            })}
+          {conditionsList.map((condition) => {
+            const isSelected = selectedConditions.includes(condition.id);
+            return (
+              <button
+                key={condition.id}
+                onClick={() => toggleCondition(condition.id)}
+                className={cn(
+                  "group flex items-center gap-2 px-5 py-3 rounded-full border transition-all duration-200",
+                  isSelected
+                    ? "border-primary bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+                    : "bg-card hover:border-primary/50 hover:bg-accent/50"
+                )}
+              >
+                <span className="text-sm font-medium">{condition.label}</span>
+                {isSelected && <Check className="w-4 h-4" />}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div className="pt-8 flex justify-between">
-         <button
-            onClick={() => setStep(4)}
-            className="px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        <button
+          onClick={() => setStep(4)}
+          className="px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
-            Back
+          Back
         </button>
         <button
           onClick={handleContinue}
@@ -118,4 +123,3 @@ export function StepHealthConditions() {
     </motion.div>
   );
 }
-

@@ -3,7 +3,7 @@
 import { useOnboardingStore } from "@/lib/store/onboarding-store";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { ArrowRight, Book, Moon, Sun, Smile, Check } from "lucide-react";
+import { ArrowRight, Book, Check, Moon, Smile, Sun } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -16,7 +16,7 @@ const journalingSchema = z.object({
 
 export function StepJournaling() {
   const { data, updateData, setStep } = useOnboardingStore();
-  
+
   const [formData, setFormData] = useState({
     style: data.journaling.style || "",
     timeOfDay: data.journaling.timeOfDay || "",
@@ -27,16 +27,32 @@ export function StepJournaling() {
     // Validation is trivial as everything is optional, but keeping pattern
     const result = journalingSchema.safeParse(formData);
     if (result.success) {
-        updateData("journaling", formData);
-        setStep(4);
+      updateData("journaling", formData);
+      setStep(4);
     }
   };
 
   const journalingStyles = [
-    { id: "freestyle", label: "Freestyle", description: "Write whatever comes to mind" },
-    { id: "gratitude", label: "Gratitude", description: "Focus on what you're thankful for" },
-    { id: "guided", label: "Guided", description: "Follow prompts and questions" },
-    { id: "bullet", label: "Bullet Journal", description: "Short, structured points" },
+    {
+      id: "freestyle",
+      label: "Freestyle",
+      description: "Write whatever comes to mind",
+    },
+    {
+      id: "gratitude",
+      label: "Gratitude",
+      description: "Focus on what you're thankful for",
+    },
+    {
+      id: "guided",
+      label: "Guided",
+      description: "Follow prompts and questions",
+    },
+    {
+      id: "bullet",
+      label: "Bullet Journal",
+      description: "Short, structured points",
+    },
   ];
 
   const timeOptions = [
@@ -64,7 +80,9 @@ export function StepJournaling() {
       <div className="space-y-8">
         {/* Journaling Style */}
         <div className="space-y-4">
-          <label className="text-sm font-medium">Preferred Journaling Style</label>
+          <label className="text-sm font-medium">
+            Preferred Journaling Style
+          </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {journalingStyles.map((style) => (
               <button
@@ -78,10 +96,23 @@ export function StepJournaling() {
                 )}
               >
                 <div className="flex items-center justify-between w-full mb-2">
-                    <span className={cn("font-semibold", formData.style === style.id ? "text-primary" : "text-foreground")}>{style.label}</span>
-                    {formData.style === style.id && <Check className="w-4 h-4 text-primary" />}
+                  <span
+                    className={cn(
+                      "font-semibold",
+                      formData.style === style.id
+                        ? "text-primary"
+                        : "text-foreground"
+                    )}
+                  >
+                    {style.label}
+                  </span>
+                  {formData.style === style.id && (
+                    <Check className="w-4 h-4 text-primary" />
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground text-left">{style.description}</p>
+                <p className="text-sm text-muted-foreground text-left">
+                  {style.description}
+                </p>
               </button>
             ))}
           </div>
@@ -92,55 +123,61 @@ export function StepJournaling() {
           <label className="text-sm font-medium">Best Time to Journal</label>
           <div className="flex flex-wrap gap-3">
             {timeOptions.map((time) => {
-                const Icon = time.icon;
-                return (
-                    <button
-                        key={time.id}
-                        onClick={() => setFormData({ ...formData, timeOfDay: time.id })}
-                        className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-200",
-                        formData.timeOfDay === time.id
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "bg-card hover:bg-accent"
-                        )}
-                    >
-                        <Icon className="w-4 h-4" />
-                        <span className="text-sm font-medium">{time.label}</span>
-                    </button>
-                );
+              const Icon = time.icon;
+              return (
+                <button
+                  key={time.id}
+                  onClick={() =>
+                    setFormData({ ...formData, timeOfDay: time.id })
+                  }
+                  className={cn(
+                    "flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-200",
+                    formData.timeOfDay === time.id
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "bg-card hover:bg-accent"
+                  )}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="text-sm font-medium">{time.label}</span>
+                </button>
+              );
             })}
           </div>
         </div>
 
         {/* Mood Tracking Toggle */}
         <div className="flex items-center justify-between p-6 rounded-2xl border bg-card/50">
-            <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-blue-500/10 text-blue-500">
-                    <Smile className="w-6 h-6" />
-                </div>
-                <div className="space-y-1">
-                    <h3 className="font-medium">Enable Mood Tracking</h3>
-                    <p className="text-sm text-muted-foreground">Track your emotional well-being over time</p>
-                </div>
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-full bg-blue-500/10 text-blue-500">
+              <Smile className="w-6 h-6" />
             </div>
-             <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                    type="checkbox" 
-                    checked={formData.moodTracking} 
-                    onChange={(e) => setFormData({...formData, moodTracking: e.target.checked})}
-                    className="sr-only peer" 
-                />
-                <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-            </label>
+            <div className="space-y-1">
+              <h3 className="font-medium">Enable Mood Tracking</h3>
+              <p className="text-sm text-muted-foreground">
+                Track your emotional well-being over time
+              </p>
+            </div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.moodTracking}
+              onChange={(e) =>
+                setFormData({ ...formData, moodTracking: e.target.checked })
+              }
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+          </label>
         </div>
       </div>
 
       <div className="pt-8 flex justify-between">
-         <button
-            onClick={() => setStep(2)}
-            className="px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        <button
+          onClick={() => setStep(2)}
+          className="px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
-            Back
+          Back
         </button>
         <button
           onClick={handleContinue}
@@ -153,4 +190,3 @@ export function StepJournaling() {
     </motion.div>
   );
 }
-
