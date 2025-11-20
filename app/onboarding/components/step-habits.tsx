@@ -8,7 +8,6 @@ import {
   Ban,
   BookOpen,
   Brain,
-  Check,
   Droplets,
   Dumbbell,
   Footprints,
@@ -160,7 +159,7 @@ export function StepHabits() {
               onChange={(e) => setTrackHabits(e.target.checked)}
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
           </label>
         </div>
 
@@ -196,10 +195,10 @@ export function StepHabits() {
                   className={cn(
                     "relative flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-200 group",
                     isSelected
-                      ? "border-foreground/20 bg-accent"
+                      ? "border-green-400 bg-green-50 dark:bg-green-950/20"
                       : isDisabled
                       ? "opacity-50 cursor-not-allowed bg-muted/50"
-                      : "bg-card hover:border-foreground/20 hover:bg-accent/50"
+                      : "bg-card hover:border-green-400/50 hover:bg-green-50/50 dark:hover:bg-green-950/20"
                   )}
                 >
                   <div
@@ -217,9 +216,7 @@ export function StepHabits() {
                     </div>
                   </div>
                   {isSelected && (
-                    <div className="absolute top-4 right-4 text-foreground">
-                      <Check className="w-4 h-4" />
-                    </div>
+                    <div className="absolute top-4 right-4 text-green-500"></div>
                   )}
                 </button>
               );
@@ -240,7 +237,7 @@ export function StepHabits() {
         </button>
         <button
           onClick={handleContinue}
-          className="group relative inline-flex items-center justify-center rounded-full bg-primary px-8 py-4 text-base font-medium text-primary-foreground shadow-xl transition-all hover:bg-primary/90 hover:shadow-primary/25 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95"
+          className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-base font-medium text-white shadow-xl shadow-blue-600/25 transition-all hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
         >
           Continue
           <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

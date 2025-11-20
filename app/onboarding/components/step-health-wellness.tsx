@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import {
   Activity,
   ArrowRight,
-  Check,
   Ruler,
   Target,
   Utensils,
@@ -144,7 +143,7 @@ export function StepHealthWellness() {
               onChange={(e) =>
                 setFormData({ ...formData, height: Number(e.target.value) })
               }
-              className="w-full accent-primary h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+              className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-blue-500/50 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:hover:scale-110 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-blue-500 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:transition-all"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>120 cm</span>
@@ -175,7 +174,7 @@ export function StepHealthWellness() {
               onChange={(e) =>
                 setFormData({ ...formData, weight: Number(e.target.value) })
               }
-              className="w-full accent-primary h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+              className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-red-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:shadow-red-500/50 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:hover:scale-110 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-red-500 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:transition-all"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>30 kg</span>
@@ -200,20 +199,34 @@ export function StepHealthWellness() {
                   setFormData({ ...formData, activityLevel: level.id })
                 }
                 className={cn(
-                  "relative flex flex-col items-start p-4 rounded-xl border text-left transition-all duration-200 hover:border-primary/50 hover:bg-accent/50",
+                  "relative flex flex-col items-start p-4 rounded-xl border text-left transition-all duration-200 hover:border-green-400/50 hover:bg-green-50/50 dark:hover:bg-green-950/20",
                   formData.activityLevel === level.id
-                    ? "border-primary bg-primary/5 ring-1 ring-primary"
+                    ? "border-green-400 bg-green-50 dark:bg-green-950/20 ring-1 ring-green-400"
                     : "bg-card"
                 )}
               >
-                <span className="font-medium text-sm">{level.label}</span>
-                <span className="text-xs text-muted-foreground mt-1">
+                <span
+                  className={cn(
+                    "font-medium text-sm",
+                    formData.activityLevel === level.id
+                      ? "text-green-700 dark:text-green-400"
+                      : ""
+                  )}
+                >
+                  {level.label}
+                </span>
+                <span
+                  className={cn(
+                    "text-xs mt-1",
+                    formData.activityLevel === level.id
+                      ? "text-green-600 dark:text-green-500"
+                      : "text-muted-foreground"
+                  )}
+                >
                   {level.description}
                 </span>
                 {formData.activityLevel === level.id && (
-                  <div className="absolute top-2 right-2 text-primary">
-                    <Check className="w-4 h-4" />
-                  </div>
+                  <div className="absolute top-2 right-2 text-green-500"></div>
                 )}
               </button>
             ))}
@@ -236,9 +249,9 @@ export function StepHealthWellness() {
                   setFormData({ ...formData, primaryGoal: goal.id })
                 }
                 className={cn(
-                  "relative flex items-center justify-center p-3 rounded-xl border text-center transition-all duration-200 hover:border-primary/50 hover:bg-accent/50",
+                  "relative flex items-center justify-center p-3 rounded-xl border text-center transition-all duration-200 hover:border-green-400/50 hover:bg-green-50/50 dark:hover:bg-green-950/20",
                   formData.primaryGoal === goal.id
-                    ? "border-primary bg-primary/5 ring-1 ring-primary text-primary font-medium"
+                    ? "border-green-400 bg-green-50 dark:bg-green-950/20 ring-1 ring-green-400 text-green-700 dark:text-green-400"
                     : "bg-card"
                 )}
               >
@@ -265,9 +278,9 @@ export function StepHealthWellness() {
                   setFormData({ ...formData, dietaryPreference: diet.id })
                 }
                 className={cn(
-                  "px-3 py-2 rounded-full border text-xs transition-all duration-200 hover:border-primary/50 hover:bg-accent/50",
+                  "px-3 py-2 rounded-full border text-xs transition-all duration-200 hover:border-green-400/50 hover:bg-green-50/50 dark:hover:bg-green-950/20",
                   formData.dietaryPreference === diet.id
-                    ? "border-primary bg-primary/10 text-primary"
+                    ? "border-green-400 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400"
                     : "bg-card"
                 )}
               >
@@ -287,7 +300,7 @@ export function StepHealthWellness() {
         </button>
         <button
           onClick={handleContinue}
-          className="group relative inline-flex items-center justify-center rounded-full bg-primary px-8 py-4 text-base font-medium text-primary-foreground shadow-xl transition-all hover:bg-primary/90 hover:shadow-primary/25 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95"
+          className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-base font-medium text-white shadow-xl shadow-blue-600/25 transition-all hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
         >
           Continue
           <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

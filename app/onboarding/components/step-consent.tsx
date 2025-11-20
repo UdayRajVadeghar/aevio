@@ -103,10 +103,10 @@ export function StepConsent() {
                   }}
                   className="sr-only peer"
                 />
-                <div className="w-6 h-6 border-2 border-muted-foreground rounded-md peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center">
+                <div className="w-6 h-6 border-2 border-muted-foreground rounded-md peer-checked:bg-green-500 peer-checked:border-green-500 transition-all flex items-center justify-center">
                   <Check
                     className={cn(
-                      "w-4 h-4 text-primary-foreground transition-transform scale-0",
+                      "w-4 h-4 text-white transition-transform scale-0",
                       consent && "scale-100"
                     )}
                   />
@@ -154,7 +154,7 @@ export function StepConsent() {
         </button>
         <button
           onClick={handleContinue}
-          className="group relative inline-flex items-center justify-center rounded-full bg-primary px-8 py-4 text-base font-medium text-primary-foreground shadow-xl transition-all hover:bg-primary/90 hover:shadow-primary/25 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95"
+          className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-base font-medium text-white shadow-xl shadow-blue-600/25 transition-all hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
         >
           I Agree & Continue
           <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
