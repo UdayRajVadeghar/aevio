@@ -24,6 +24,7 @@ model User {
   updatedAt     DateTime  @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
+  profile       UserProfile?
 
   @@unique([email])
   @@map("user")
@@ -72,4 +73,61 @@ model Verification {
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("verification")
+}
+
+model UserProfile {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Basic Profile
+  dateOfBirth           DateTime?
+  age                   Int?
+  gender                String?   // "male", "female", "other", "prefer_not_to_say"
+  timezone              String?
+
+  // Health & Wellness
+  height                Float?    // cm
+  weight                Float?    // kg
+  activityLevel         String?   // "sedentary", "light", "moderate", "active", "athlete"
+  primaryGoal           String?   // "lose_weight", "build_muscle", "improve_sleep", etc.
+  dietaryPreference     String?   // "veg", "non_veg", "vegan", "keto"
+
+  // Journaling
+  journalingStyle       String?   // "daily_reflections", "gratitude", "mood_logs", "freeform"
+  journalingTimeOfDay   String?   // "morning", "evening", "no_preference"
+  moodTrackingEnabled   Boolean   @default(false)
+
+  // Health Conditions
+  healthConditions      String[]  // Array of conditions
+
+  // Consent & Goals
+  dataUsageConsent      Boolean   @default(false)
+  thirtyDayGoal         String?
+
+  // Onboarding Status
+  onboardingCompleted   Boolean   @default(false)
+  onboardingStep        Int       @default(0)
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  habits                Habit[]
+}
+
+model Habit {
+  id              String        @id @default(cuid())
+  profileId       String
+  profile         UserProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  name            String        // "Water intake", "Steps", "Sleep", etc.
+  type            String        // "boolean", "count", "duration"
+  target          Float?        // Target value (8 glasses, 10000 steps, etc.)
+  unit            String?       // "glasses", "steps", "hours"
+  enabled         Boolean       @default(true)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([profileId])
 }
