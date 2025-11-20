@@ -169,10 +169,10 @@ export function StepBasicProfile() {
   };
 
   const genderOptions = [
-    { id: "male", label: "Male", icon: Mars },
-    { id: "female", label: "Female", icon: Venus },
-    { id: "other", label: "Other", icon: Users },
-    { id: "skip", label: "Skip", icon: Minus },
+    { id: "male", label: "Male", icon: Mars, color: "text-blue-500" },
+    { id: "female", label: "Female", icon: Venus, color: "text-pink-500" },
+    { id: "other", label: "Other", icon: Users, color: "text-gray-500" },
+    { id: "skip", label: "Skip", icon: Minus, color: "text-red-500" },
   ];
 
   return (
@@ -183,7 +183,7 @@ export function StepBasicProfile() {
       className="w-full space-y-8"
     >
       <div className="space-y-2">
-        <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+        <h2 className="text-4xl font-bold tracking-tight text-foreground">
           Basic Profile
         </h2>
         <p className="text-lg text-muted-foreground">
@@ -201,18 +201,18 @@ export function StepBasicProfile() {
             Full Name
           </label>
           <div className="relative">
-            <User className="absolute left-4 top-3 h-5 w-5 text-muted-foreground transition-colors group-focus-within:text-blue-500" />
+            <User className="absolute left-4 top-3 h-5 w-5 text-muted-foreground transition-colors group-focus-within:text-foreground text-red-500" />
             <input
               id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={cn(
-                "flex h-12 w-full rounded-xl border border-input bg-background/50 px-12 py-2 text-base shadow-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/20 hover:border-blue-500/30",
+                "flex h-12 w-full rounded-xl border border-input bg-background/50 px-12 py-2 text-base shadow-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/10 hover:border-foreground/20",
                 errors.name &&
                   "border-destructive focus-visible:ring-destructive"
               )}
-              placeholder="John Doe"
+              placeholder=""
             />
           </div>
           {errors.name && (
@@ -235,13 +235,13 @@ export function StepBasicProfile() {
             <PopoverTrigger asChild>
               <button
                 className={cn(
-                  "flex h-12 w-full items-center justify-start text-left rounded-xl border border-input bg-background/50 px-4 py-2 text-base shadow-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/20 hover:border-blue-500/30",
+                  "flex h-12 w-full items-center justify-start text-left rounded-xl border border-input bg-background/50 px-4 py-2 text-base shadow-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/10 hover:border-foreground/20",
                   !dob && "text-muted-foreground",
                   errors.dob &&
                     "border-destructive focus-visible:ring-destructive"
                 )}
               >
-                <CalendarIcon className="mr-2 h-5 w-5" />
+                <CalendarIcon className="mr-2 h-5 w-5 text-blue-500" />
                 {dob ? format(dob, "PPP") : <span>Pick a date</span>}
               </button>
             </PopoverTrigger>
@@ -382,14 +382,14 @@ export function StepBasicProfile() {
                   className={cn(
                     "relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300 hover:shadow-md group",
                     isSelected
-                      ? "border-blue-500 bg-blue-500/5 shadow-md shadow-blue-500/10 scale-[1.02]"
-                      : "border-input bg-card hover:border-blue-500/50 hover:bg-blue-500/5"
+                      ? "border-green-400 bg-green-50 dark:bg-green-950/20 shadow-md shadow-green-400/10 scale-[1.02]"
+                      : "border-input bg-card hover:border-foreground/40 hover:bg-foreground/5"
                   )}
                 >
                   {isSelected && (
                     <motion.div
                       layoutId="gender-check"
-                      className="absolute top-2 right-2 text-blue-500"
+                      className="absolute top-2 right-2 text-green-500"
                     >
                       <Check className="w-4 h-4" />
                     </motion.div>
@@ -398,18 +398,21 @@ export function StepBasicProfile() {
                     className={cn(
                       "p-3 rounded-full mb-3 transition-colors duration-300",
                       isSelected
-                        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                        : "bg-muted text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:bg-blue-500/10"
+                        ? "bg-foreground/10"
+                        : "bg-muted group-hover:bg-foreground/10"
                     )}
                   >
-                    <Icon className="w-6 h-6" />
+                    <Icon
+                      className={cn(
+                        "w-6 h-6 transition-colors duration-300",
+                        option.color
+                      )}
+                    />
                   </div>
                   <span
                     className={cn(
                       "text-sm font-medium transition-colors",
-                      isSelected
-                        ? "text-blue-600 dark:text-blue-400"
-                        : "text-muted-foreground group-hover:text-foreground"
+                      option.color
                     )}
                   >
                     {option.label}
@@ -424,7 +427,7 @@ export function StepBasicProfile() {
       <div className="pt-8 flex justify-end">
         <button
           onClick={handleContinue}
-          className="group relative inline-flex items-center justify-center rounded-full bg-primary px-8 py-4 text-base font-medium text-primary-foreground shadow-xl transition-all hover:bg-primary/90 hover:shadow-primary/25 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95"
+          className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-base font-medium text-white shadow-xl shadow-blue-600/25 transition-all hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
         >
           Continue
           <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

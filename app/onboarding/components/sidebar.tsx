@@ -43,10 +43,10 @@ export function Sidebar() {
                 className={cn(
                   "relative z-10 flex items-center justify-center size-8 rounded-full border-2 transition-all duration-300",
                   isActive
-                    ? "border-primary bg-background text-primary ring-4 ring-primary/10"
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 ring-4 ring-blue-500/20"
                     : isCompleted
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-muted-foreground/30 bg-background text-muted-foreground"
+                    ? "border-green-500 bg-green-500 text-white"
+                    : "border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
                 )}
               >
                 {isCompleted ? (

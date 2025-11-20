@@ -3,7 +3,7 @@
 import { useOnboardingStore } from "@/lib/store/onboarding-store";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { ArrowRight, Book, Check, Moon, Smile, Sun } from "lucide-react";
+import { ArrowRight, Book, Moon, Smile, Sun } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -96,8 +96,8 @@ export function StepJournaling() {
                 className={cn(
                   "relative flex flex-col items-start p-6 rounded-2xl border transition-all duration-300 hover:shadow-md group",
                   formData.style === style.id
-                    ? "border-primary bg-primary/5 shadow-sm"
-                    : "border-input bg-card hover:border-primary/50"
+                    ? "border-green-400 bg-green-50 dark:bg-green-950/20 shadow-sm"
+                    : "border-input bg-card hover:border-green-400/50 hover:bg-green-50/50 dark:hover:bg-green-950/20"
                 )}
               >
                 <div className="flex items-center justify-between w-full mb-2">
@@ -105,15 +105,12 @@ export function StepJournaling() {
                     className={cn(
                       "font-semibold",
                       formData.style === style.id
-                        ? "text-primary"
+                        ? "text-green-700 dark:text-green-400"
                         : "text-foreground"
                     )}
                   >
                     {style.label}
                   </span>
-                  {formData.style === style.id && (
-                    <Check className="w-4 h-4 text-primary" />
-                  )}
                 </div>
                 <p className="text-sm text-muted-foreground text-left">
                   {style.description}
@@ -140,20 +137,12 @@ export function StepJournaling() {
                   className={cn(
                     "flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-200",
                     formData.timeOfDay === time.id
-                      ? "border-primary bg-primary"
-                      : "bg-card hover:bg-accent"
+                      ? "border-green-400 bg-green-50 dark:bg-green-950/20"
+                      : "bg-card hover:bg-green-50 dark:hover:bg-green-950/20 hover:border-green-400/50"
                   )}
                 >
                   <Icon className={cn("w-4 h-4", time.color)} />
-                  <span
-                    className={cn(
-                      "text-sm font-medium",
-                      formData.timeOfDay === time.id &&
-                        "text-primary-foreground"
-                    )}
-                  >
-                    {time.label}
-                  </span>
+                  <span className="text-sm font-medium">{time.label}</span>
                 </button>
               );
             })}
@@ -182,7 +171,7 @@ export function StepJournaling() {
               }
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
           </label>
         </div>
       </div>
@@ -196,7 +185,7 @@ export function StepJournaling() {
         </button>
         <button
           onClick={handleContinue}
-          className="group relative inline-flex items-center justify-center rounded-full bg-primary px-8 py-4 text-base font-medium text-primary-foreground shadow-xl transition-all hover:bg-primary/90 hover:shadow-primary/25 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:scale-95"
+          className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-base font-medium text-white shadow-xl shadow-blue-600/25 transition-all hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
         >
           Continue
           <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
