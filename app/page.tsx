@@ -2,7 +2,6 @@
 
 import { BentoCard, BentoGrid } from "@/components/ui/hero-section/bento-grid";
 import { Dither } from "@/components/ui/hero-section/dither";
-import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
 import { IntegrationDiagram } from "@/components/ui/integration-diagram";
 import { IntuitiveInteractions } from "@/components/ui/intuitive-interactions/intuitive-interactions";
 import { FeaturesOrbit } from "@/components/ui/landing/features-orbit";
@@ -40,38 +39,7 @@ export default function Home() {
 
       <Dither />
 
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 border-b border-black/10 dark:border-white/10 bg-white/80 dark:bg-black/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="font-bold text-xl tracking-tighter flex items-center gap-2">
-            <div className="w-4 h-4 bg-black dark:bg-white" />
-            aevio
-          </div>
-          <div className="flex items-center gap-6">
-            <div className="hidden md:flex gap-6 text-sm font-medium">
-              <a
-                href="#"
-                className="hover:underline underline-offset-4 decoration-dotted"
-              >
-                Product
-              </a>
-              <a
-                href="#"
-                className="hover:underline underline-offset-4 decoration-dotted"
-              >
-                Manifesto
-              </a>
-              <a
-                href="#"
-                className="hover:underline underline-offset-4 decoration-dotted"
-              >
-                Pricing
-              </a>
-            </div>
-            <ThemeToggle />
-          </div>
-        </div>
-      </nav>
+
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6 border-b border-black/10 dark:border-white/10">
