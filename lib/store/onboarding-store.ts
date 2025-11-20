@@ -47,16 +47,20 @@ export const useOnboardingStore = create<OnboardingState>()(
       },
       setStep: (step) => set({ currentStep: step }),
       updateData: (section, data) =>
-        set((state) => ({
-          data: {
-            ...state.data,
-            [section]: {
-              // @ts-ignore - dynamic access
-              ...state.data[section as keyof typeof state.data],
-              ...data,
+        set((state) => {
+          const currentValue = state.data[section as keyof typeof state.data];
+          // Handle arrays directly without spreading
+          const newValue = Array.isArray(data) ? data : {
+            ...(typeof currentValue === 'object' ? currentValue : {}),
+            ...data,
+          };
+          return {
+            data: {
+              ...state.data,
+              [section]: newValue,
             },
-          },
-        })),
+          };
+        }),
       saveProgress: async () => {
         // Simulate API call
         console.log('Saving progress...', get().data);
