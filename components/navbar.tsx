@@ -4,6 +4,7 @@ import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
 import { cn } from "@/lib/utils";
 import {
     AnimatePresence,
+    LayoutGroup,
     motion,
     useMotionValueEvent,
     useScroll,
@@ -39,60 +40,65 @@ export function Navbar() {
     }
   });
 
+  const springTransition = {
+    type: "spring" as const,
+    stiffness: 80,
+    damping: 15,
+    mass: 1,
+  };
+
   return (
-    <>
-      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4">
+    <LayoutGroup>
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4 pointer-events-none">
         <motion.header
           layout
           initial={{ width: "100%", maxWidth: "1200px", borderRadius: "1rem" }}
           animate={{
-            width: isScrolled ? "fit-content" : "100%",
-            maxWidth: isScrolled ? "600px" : "1200px",
+            width: isScrolled ? "auto" : "100%",
+            maxWidth: isScrolled ? "800px" : "1200px",
             borderRadius: isScrolled ? "9999px" : "1rem",
             y: isScrolled ? 10 : 0,
           }}
-          transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 30,
-          }}
+          transition={springTransition}
           className={cn(
-            "relative flex items-center justify-between px-4 py-3 backdrop-blur-md border transition-colors duration-300",
+            "relative flex items-center justify-between px-4 py-3 backdrop-blur-md border transition-colors duration-500 pointer-events-auto",
             isScrolled
               ? "bg-background/80 border-border/50 shadow-lg"
               : "bg-transparent border-transparent"
           )}
         >
           {/* Logo */}
-          <div className="flex items-center gap-2 mr-4">
+          <motion.div layout className="flex items-center gap-2 mr-4">
             <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
               <Zap size={18} fill="currentColor" />
             </div>
             <AnimatePresence>
               {!isScrolled && (
                 <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
+                  initial={{ opacity: 0, width: 0, x: -10 }}
+                  animate={{ opacity: 1, width: "auto", x: 0 }}
+                  exit={{ opacity: 0, width: 0, x: -10 }}
+                  transition={springTransition}
                   className="font-bold text-lg tracking-tight overflow-hidden whitespace-nowrap"
                 >
                   Aevio
                 </motion.span>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
 
           {/* Desktop Nav Items */}
-          <div className="hidden md:flex items-center gap-1">
-            <AnimatePresence mode="wait">
+          <div className="hidden md:flex items-center gap-1 relative h-10">
+            <AnimatePresence>
               {isScrolled ? (
                 // Compact Mode: Show "Menu" trigger
                 <motion.div
                   key="compact-menu"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="relative"
+                  initial={{ opacity: 0, scale: 0.9, position: "absolute" }}
+                  animate={{ opacity: 1, scale: 1, position: "relative" }}
+                  exit={{ opacity: 0, scale: 0.9, position: "absolute" }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="relative flex items-center justify-center w-full h-full"
                 >
                   <button
                     onClick={() => setIsCompactMenuOpen(!isCompactMenuOpen)}
@@ -101,7 +107,7 @@ export function Navbar() {
                     Menu
                     <ChevronRight
                       className={cn(
-                        "size-4 transition-transform",
+                        "size-4 transition-transform duration-300",
                         isCompactMenuOpen && "rotate-90"
                       )}
                     />
@@ -111,9 +117,10 @@ export function Navbar() {
                   <AnimatePresence>
                     {isCompactMenuOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        initial={{ opacity: 0, y: 10, scale: 0.95, filter: "blur(10px)" }}
+                        animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95, filter: "blur(10px)" }}
+                        transition={{ duration: 0.2 }}
                         className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 p-2 bg-background/90 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl flex flex-col gap-1 overflow-hidden"
                       >
                         {navItems.map((item) => (
@@ -134,10 +141,11 @@ export function Navbar() {
                 // Expanded Mode: Show full list
                 <motion.nav
                   key="expanded-nav"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-1"
+                  initial={{ opacity: 0, position: "absolute" }}
+                  animate={{ opacity: 1, position: "relative" }}
+                  exit={{ opacity: 0, position: "absolute" }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="flex items-center gap-1 h-full"
                 >
                   {navItems.map((item) => (
                     <Link
@@ -154,14 +162,15 @@ export function Navbar() {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-2 ml-4">
+          <motion.div layout className="flex items-center gap-2 ml-4">
             <ThemeToggle />
             <AnimatePresence>
               {!isScrolled && (
                 <motion.div
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
+                  initial={{ opacity: 0, width: 0, x: 10 }}
+                  animate={{ opacity: 1, width: "auto", x: 0 }}
+                  exit={{ opacity: 0, width: 0, x: 10 }}
+                  transition={springTransition}
                   className="overflow-hidden"
                 >
                   <Link
@@ -190,7 +199,7 @@ export function Navbar() {
             >
               <Menu size={20} />
             </button>
-          </div>
+          </motion.div>
         </motion.header>
       </div>
 
@@ -248,6 +257,6 @@ export function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </LayoutGroup>
   );
 }

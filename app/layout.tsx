@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/navbar";
+import { SmoothScroll } from "@/components/smooth-scroll";
 import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -35,8 +36,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          {children}
+          <SmoothScroll>
+            <Navbar />
+            {children}
+          </SmoothScroll>
         </ThemeProvider>
       </body>
     </html>
