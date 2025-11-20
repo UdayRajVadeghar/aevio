@@ -183,7 +183,7 @@ export function StepBasicProfile() {
       className="w-full space-y-8"
     >
       <div className="space-y-2">
-        <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/50 bg-clip-text text-transparent">
+        <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
           Basic Profile
         </h2>
         <p className="text-lg text-muted-foreground">
@@ -193,22 +193,22 @@ export function StepBasicProfile() {
 
       <div className="space-y-8">
         {/* Name Input */}
-        <div className="space-y-2 group">
+        <div className="space-y-3 group">
           <label
             htmlFor="name"
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            className="block text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
             Full Name
           </label>
           <div className="relative">
-            <User className="absolute left-4 top-3 h-5 w-5 text-muted-foreground transition-colors group-focus-within:text-primary" />
+            <User className="absolute left-4 top-3 h-5 w-5 text-muted-foreground transition-colors group-focus-within:text-blue-500" />
             <input
               id="name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={cn(
-                "flex h-12 w-full rounded-xl border border-input bg-background/50 px-12 py-2 text-base shadow-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/20 hover:border-primary/30",
+                "flex h-12 w-full rounded-xl border border-input bg-background/50 px-12 py-2 text-base shadow-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/20 hover:border-blue-500/30",
                 errors.name &&
                   "border-destructive focus-visible:ring-destructive"
               )}
@@ -227,15 +227,15 @@ export function StepBasicProfile() {
         </div>
 
         {/* DOB Input */}
-        <div className="space-y-2 flex flex-col">
-          <label className="text-sm font-medium leading-none">
+        <div className="flex flex-col gap-3">
+          <label className="block text-sm font-medium leading-none">
             Date of Birth
           </label>
           <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
             <PopoverTrigger asChild>
               <button
                 className={cn(
-                  "flex h-12 w-full items-center justify-start text-left rounded-xl border border-input bg-background/50 px-4 py-2 text-base shadow-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/20 hover:border-primary/30",
+                  "flex h-12 w-full items-center justify-start text-left rounded-xl border border-input bg-background/50 px-4 py-2 text-base shadow-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/20 hover:border-blue-500/30",
                   !dob && "text-muted-foreground",
                   errors.dob &&
                     "border-destructive focus-visible:ring-destructive"
@@ -366,8 +366,8 @@ export function StepBasicProfile() {
         </div>
 
         {/* Gender Selection */}
-        <div className="space-y-4">
-          <label className="text-sm font-medium leading-none">
+        <div className="space-y-3">
+          <label className="block text-sm font-medium leading-none">
             Gender (Optional)
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -382,14 +382,14 @@ export function StepBasicProfile() {
                   className={cn(
                     "relative flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-300 hover:shadow-md group",
                     isSelected
-                      ? "border-primary bg-primary/5 shadow-md scale-[1.02]"
-                      : "border-input bg-card hover:border-primary/50 hover:bg-accent/50"
+                      ? "border-blue-500 bg-blue-500/5 shadow-md shadow-blue-500/10 scale-[1.02]"
+                      : "border-input bg-card hover:border-blue-500/50 hover:bg-blue-500/5"
                   )}
                 >
                   {isSelected && (
                     <motion.div
                       layoutId="gender-check"
-                      className="absolute top-2 right-2 text-primary"
+                      className="absolute top-2 right-2 text-blue-500"
                     >
                       <Check className="w-4 h-4" />
                     </motion.div>
@@ -398,8 +398,8 @@ export function StepBasicProfile() {
                     className={cn(
                       "p-3 rounded-full mb-3 transition-colors duration-300",
                       isSelected
-                        ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground group-hover:text-primary group-hover:bg-primary/10"
+                        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                        : "bg-muted text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:bg-blue-500/10"
                     )}
                   >
                     <Icon className="w-6 h-6" />
@@ -408,7 +408,7 @@ export function StepBasicProfile() {
                     className={cn(
                       "text-sm font-medium transition-colors",
                       isSelected
-                        ? "text-primary"
+                        ? "text-blue-600 dark:text-blue-400"
                         : "text-muted-foreground group-hover:text-foreground"
                     )}
                   >
