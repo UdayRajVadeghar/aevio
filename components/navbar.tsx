@@ -9,10 +9,11 @@ import {
   useMotionValueEvent,
   useScroll,
 } from "framer-motion";
-import { ChevronRight, Menu, X, Zap } from "lucide-react";
+import { ChevronRight, Menu, X, Zap, User, LogOut } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useSession, signOut } from "@/lib/auth-client";
 
 interface NavItem {
   label: string;
@@ -28,10 +29,14 @@ const navItems: NavItem[] = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCompactMenuOpen, setIsCompactMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  const { data: session, isPending } = useSession();
 
   if (pathname?.startsWith("/onboarding")) {
     return null;
@@ -45,6 +50,12 @@ export function Navbar() {
       setIsScrolled(false);
     }
   });
+
+  const handleLogout = async () => {
+    await signOut();
+    setIsUserMenuOpen(false);
+    router.push("/");
+  };
 
   const springTransition = {
     type: "spring" as const,
@@ -189,33 +200,96 @@ export function Navbar() {
           {/* Right Actions */}
           <div className="flex items-center gap-2 ml-4">
             <ThemeToggle />
-            <AnimatePresence>
-              {!isScrolled && (
-                <motion.div
-                  initial={{ opacity: 0, width: 0, x: 10 }}
-                  animate={{ opacity: 1, width: "auto", x: 0 }}
-                  exit={{ opacity: 0, width: 0, x: 10 }}
-                  transition={springTransition}
-                  className="overflow-hidden"
+
+            {session?.user ? (
+              // Logged in: Show user menu
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className={cn(
+                    "flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors",
+                    isScrolled ? "size-9" : "size-10"
+                  )}
                 >
-                  <Link
-                    href="/login"
-                    className="hidden sm:block px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-                  >
-                    Log in
-                  </Link>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <Link
-              href="/signup"
-              className={cn(
-                "px-4 py-2 text-sm font-medium rounded-full bg-foreground text-background hover:bg-foreground/90 transition-colors whitespace-nowrap",
-                isScrolled ? "px-5" : "px-4"
-              )}
-            >
-              Get Started
-            </Link>
+                  <User size={isScrolled ? 18 : 20} />
+                </button>
+
+                {/* User Dropdown Menu */}
+                <AnimatePresence>
+                  {isUserMenuOpen && (
+                    <motion.div
+                      initial={{
+                        opacity: 0,
+                        y: 10,
+                        scale: 0.95,
+                        filter: "blur(10px)",
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        filter: "blur(0px)",
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: 10,
+                        scale: 0.95,
+                        filter: "blur(10px)",
+                      }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full right-0 mt-2 w-56 p-2 bg-background/90 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl overflow-hidden"
+                    >
+                      <div className="px-4 py-3 border-b border-border/50">
+                        <p className="text-sm font-medium text-foreground">
+                          {session.user.name || "User"}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {session.user.email}
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 px-4 py-2 mt-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                      >
+                        <LogOut size={16} />
+                        Log out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              // Not logged in: Show login/signup buttons
+              <>
+                <AnimatePresence>
+                  {!isScrolled && (
+                    <motion.div
+                      initial={{ opacity: 0, width: 0, x: 10 }}
+                      animate={{ opacity: 1, width: "auto", x: 0 }}
+                      exit={{ opacity: 0, width: 0, x: 10 }}
+                      transition={springTransition}
+                      className="overflow-hidden"
+                    >
+                      <Link
+                        href="/authentication"
+                        className="hidden sm:block px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                      >
+                        Log in
+                      </Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <Link
+                  href="/authentication"
+                  className={cn(
+                    "px-4 py-2 text-sm font-medium rounded-full bg-foreground text-background hover:bg-foreground/90 transition-colors whitespace-nowrap",
+                    isScrolled ? "px-5" : "px-4"
+                  )}
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
 
             {/* Mobile Menu Toggle */}
             <button
@@ -264,20 +338,48 @@ export function Navbar() {
                 </Link>
               ))}
               <hr className="border-border my-4" />
-              <Link
-                href="/login"
-                className="text-xl font-medium text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Log in
-              </Link>
-              <Link
-                href="/signup"
-                className="text-xl font-medium text-primary hover:text-primary/80 transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Get Started
-              </Link>
+
+              {session?.user ? (
+                // Logged in: Show user info and logout
+                <>
+                  <div className="px-4 py-3 bg-muted/30 rounded-lg">
+                    <p className="text-sm font-medium text-foreground">
+                      {session.user.name || "User"}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {session.user.email}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="flex items-center gap-2 text-xl font-medium text-destructive hover:text-destructive/80 transition-colors"
+                  >
+                    <LogOut size={20} />
+                    Log out
+                  </button>
+                </>
+              ) : (
+                // Not logged in: Show login/signup
+                <>
+                  <Link
+                    href="/authentication"
+                    className="text-xl font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    href="/authentication"
+                    className="text-xl font-medium text-primary hover:text-primary/80 transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </nav>
           </motion.div>
         )}
