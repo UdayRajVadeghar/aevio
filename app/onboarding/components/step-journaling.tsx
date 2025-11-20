@@ -56,9 +56,14 @@ export function StepJournaling() {
   ];
 
   const timeOptions = [
-    { id: "morning", label: "Morning", icon: Sun },
-    { id: "evening", label: "Evening", icon: Moon },
-    { id: "anytime", label: "No Preference", icon: Book },
+    { id: "morning", label: "Morning", icon: Sun, color: "text-yellow-500" },
+    { id: "evening", label: "Evening", icon: Moon, color: "text-blue-500" },
+    {
+      id: "anytime",
+      label: "No Preference",
+      icon: Book,
+      color: "text-gray-500",
+    },
   ];
 
   return (
@@ -79,8 +84,8 @@ export function StepJournaling() {
 
       <div className="space-y-8">
         {/* Journaling Style */}
-        <div className="space-y-4">
-          <label className="text-sm font-medium">
+        <div className="space-y-3">
+          <label className="block text-sm font-medium">
             Preferred Journaling Style
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -119,8 +124,10 @@ export function StepJournaling() {
         </div>
 
         {/* Time of Day */}
-        <div className="space-y-4">
-          <label className="text-sm font-medium">Best Time to Journal</label>
+        <div className="space-y-3">
+          <label className="block text-sm font-medium">
+            Best Time to Journal
+          </label>
           <div className="flex flex-wrap gap-3">
             {timeOptions.map((time) => {
               const Icon = time.icon;
@@ -133,12 +140,20 @@ export function StepJournaling() {
                   className={cn(
                     "flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-200",
                     formData.timeOfDay === time.id
-                      ? "border-primary bg-primary text-primary-foreground"
+                      ? "border-primary bg-primary"
                       : "bg-card hover:bg-accent"
                   )}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-sm font-medium">{time.label}</span>
+                  <Icon className={cn("w-4 h-4", time.color)} />
+                  <span
+                    className={cn(
+                      "text-sm font-medium",
+                      formData.timeOfDay === time.id &&
+                        "text-primary-foreground"
+                    )}
+                  >
+                    {time.label}
+                  </span>
                 </button>
               );
             })}
