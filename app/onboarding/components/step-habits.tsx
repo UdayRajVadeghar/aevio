@@ -26,7 +26,9 @@ export function StepHabits() {
   const { data, updateData, setStep } = useOnboardingStore();
 
   // Initialize selectedHabits from data.habits (which stores objects)
-  const initialSelected = data.habits.map((h) => h.id);
+  const initialSelected = Array.isArray(data.habits)
+    ? data.habits.map((h) => h.id)
+    : [];
 
   const [trackHabits, setTrackHabits] = useState(initialSelected.length > 0);
   const [selectedHabits, setSelectedHabits] =
@@ -39,23 +41,50 @@ export function StepHabits() {
       label: "Water intake",
       icon: Droplets,
       desc: "8 glasses/day",
+      color: "text-blue-500",
     },
     {
       id: "walk",
       label: "Steps/Walking",
       icon: Footprints,
       desc: "10,000 steps",
+      color: "text-green-500",
     },
-    { id: "sleep", label: "Sleep", icon: Moon, desc: "8 hours" },
-    { id: "meditation", label: "Meditation", icon: Brain, desc: "10 min" },
-    { id: "exercise", label: "Exercise", icon: Dumbbell, desc: "30 min" },
+    {
+      id: "sleep",
+      label: "Sleep",
+      icon: Moon,
+      desc: "8 hours",
+      color: "text-purple-500",
+    },
+    {
+      id: "meditation",
+      label: "Meditation",
+      icon: Brain,
+      desc: "10 min",
+      color: "text-violet-500",
+    },
+    {
+      id: "exercise",
+      label: "Exercise",
+      icon: Dumbbell,
+      desc: "30 min",
+      color: "text-orange-500",
+    },
     {
       id: "no_sugar",
       label: "No sugar/junk",
       icon: Ban,
       desc: "Healthy eating",
+      color: "text-red-500",
     },
-    { id: "reading", label: "Reading", icon: BookOpen, desc: "30 min" },
+    {
+      id: "reading",
+      label: "Reading",
+      icon: BookOpen,
+      desc: "30 min",
+      color: "text-yellow-500",
+    },
   ];
 
   const handleContinue = () => {
@@ -142,20 +171,13 @@ export function StepHabits() {
             height: trackHabits ? "auto" : "auto",
             pointerEvents: trackHabits ? "auto" : "none",
           }}
-          className="space-y-4 transition-all duration-300"
+          className="space-y-3 transition-all duration-300"
         >
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">
+            <label className="block text-sm font-medium">
               Select Starter Habits (Max 3)
             </label>
-            <span
-              className={cn(
-                "text-sm font-medium",
-                selectedHabits.length === 3
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              )}
-            >
+            <span className="text-sm font-medium text-muted-foreground">
               {selectedHabits.length}/3 selected
             </span>
           </div>
@@ -174,21 +196,19 @@ export function StepHabits() {
                   className={cn(
                     "relative flex items-center gap-4 p-4 rounded-xl border text-left transition-all duration-200 group",
                     isSelected
-                      ? "border-primary bg-primary/5 ring-1 ring-primary"
+                      ? "border-foreground/20 bg-accent"
                       : isDisabled
                       ? "opacity-50 cursor-not-allowed bg-muted/50"
-                      : "bg-card hover:border-primary/50 hover:bg-accent/50"
+                      : "bg-card hover:border-foreground/20 hover:bg-accent/50"
                   )}
                 >
                   <div
                     className={cn(
                       "p-2 rounded-full transition-colors",
-                      isSelected
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
+                      isSelected ? "bg-foreground/10" : "bg-muted"
                     )}
                   >
-                    <Icon className="w-5 h-5" />
+                    <Icon className={cn("w-5 h-5", habit.color)} />
                   </div>
                   <div>
                     <div className="font-medium text-sm">{habit.label}</div>
@@ -197,7 +217,7 @@ export function StepHabits() {
                     </div>
                   </div>
                   {isSelected && (
-                    <div className="absolute top-4 right-4 text-primary">
+                    <div className="absolute top-4 right-4 text-foreground">
                       <Check className="w-4 h-4" />
                     </div>
                   )}

@@ -74,7 +74,7 @@ export function StepHealthConditions() {
       </div>
 
       <div className="space-y-8">
-        <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex gap-3 items-start text-yellow-700 dark:text-yellow-400">
+        <div className="p-5 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex gap-3 items-start text-yellow-700 dark:text-yellow-400">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <p className="text-sm leading-relaxed">
             <strong>Disclaimer:</strong> Aevio is not a medical device and does

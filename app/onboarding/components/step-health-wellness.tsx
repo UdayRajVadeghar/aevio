@@ -124,10 +124,10 @@ export function StepHealthWellness() {
       <div className="space-y-8">
         {/* Height & Weight Sliders */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4 p-6 rounded-2xl border bg-card/50">
+          <div className="space-y-3 p-6 rounded-2xl border bg-card/50">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium flex items-center gap-2">
-                <Ruler className="w-4 h-4 text-primary" /> Height
+                <Ruler className="w-4 h-4 text-blue-500" /> Height
               </label>
               <span className="text-2xl font-bold text-primary">
                 {formData.height}{" "}
@@ -155,10 +155,10 @@ export function StepHealthWellness() {
             )}
           </div>
 
-          <div className="space-y-4 p-6 rounded-2xl border bg-card/50">
+          <div className="space-y-3 p-6 rounded-2xl border bg-card/50">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium flex items-center gap-2">
-                <Weight className="w-4 h-4 text-primary" /> Weight
+                <Weight className="w-4 h-4 text-red-500" /> Weight
               </label>
               <span className="text-2xl font-bold text-primary">
                 {formData.weight}{" "}
@@ -188,9 +188,9 @@ export function StepHealthWellness() {
         </div>
 
         {/* Activity Level */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <label className="text-sm font-medium flex items-center gap-2">
-            <Activity className="w-4 h-4" /> Activity Level
+            <Activity className="w-4 h-4 text-green-500" /> Activity Level
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {activityLevels.map((level) => (
@@ -224,9 +224,9 @@ export function StepHealthWellness() {
         </div>
 
         {/* Primary Goal */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <label className="text-sm font-medium flex items-center gap-2">
-            <Target className="w-4 h-4" /> Primary Goal
+            <Target className="w-4 h-4 text-red-500" /> Primary Goal
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {goals.map((goal) => (
@@ -252,9 +252,10 @@ export function StepHealthWellness() {
         </div>
 
         {/* Dietary Preference */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <label className="text-sm font-medium flex items-center gap-2">
-            <Utensils className="w-4 h-4" /> Dietary Preference (Optional)
+            <Utensils className="w-4 h-4 text-slate-500" /> Dietary Preference
+            (Optional)
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
             {dietaryPreferences.map((diet) => (
