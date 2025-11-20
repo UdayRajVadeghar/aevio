@@ -61,8 +61,8 @@ export function StepFinal() {
       </div>
 
       <div className="space-y-6">
-        <div className="space-y-2">
-          <label htmlFor="goal" className="text-sm font-medium">
+        <div className="space-y-3">
+          <label htmlFor="goal" className="block text-sm font-medium">
             What is your main focus for the next 30 days?{" "}
             <span className="text-muted-foreground font-normal">
               (Optional)
