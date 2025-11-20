@@ -3,14 +3,15 @@
 import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
 import { cn } from "@/lib/utils";
 import {
-    AnimatePresence,
-    LayoutGroup,
-    motion,
-    useMotionValueEvent,
-    useScroll,
+  AnimatePresence,
+  LayoutGroup,
+  motion,
+  useMotionValueEvent,
+  useScroll,
 } from "framer-motion";
 import { ChevronRight, Menu, X, Zap } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 interface NavItem {
@@ -26,10 +27,15 @@ const navItems: NavItem[] = [
 ];
 
 export function Navbar() {
+  const pathname = usePathname();
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCompactMenuOpen, setIsCompactMenuOpen] = useState(false);
+
+  if (pathname?.startsWith("/onboarding")) {
+    return null;
+  }
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious();
@@ -88,8 +94,8 @@ export function Navbar() {
           </div>
 
           {/* Desktop Nav Items */}
-          <motion.div 
-            layout 
+          <motion.div
+            layout
             className="hidden md:flex items-center gap-1 relative h-10"
             transition={springTransition}
           >
@@ -116,14 +122,29 @@ export function Navbar() {
                       )}
                     />
                   </button>
-                  
+
                   {/* Compact Dropdown */}
                   <AnimatePresence>
                     {isCompactMenuOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95, filter: "blur(10px)" }}
-                        animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95, filter: "blur(10px)" }}
+                        initial={{
+                          opacity: 0,
+                          y: 10,
+                          scale: 0.95,
+                          filter: "blur(10px)",
+                        }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          scale: 1,
+                          filter: "blur(0px)",
+                        }}
+                        exit={{
+                          opacity: 0,
+                          y: 10,
+                          scale: 0.95,
+                          filter: "blur(10px)",
+                        }}
                         transition={{ duration: 0.2 }}
                         className="absolute top-full left-1/2 -translate-x-1/2 mt-4 w-48 p-2 bg-background/90 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl flex flex-col gap-1 overflow-hidden"
                       >
@@ -195,7 +216,7 @@ export function Navbar() {
             >
               Get Started
             </Link>
-            
+
             {/* Mobile Menu Toggle */}
             <button
               className="md:hidden p-2 text-muted-foreground hover:text-foreground"
