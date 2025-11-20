@@ -61,14 +61,14 @@ export function Navbar() {
           }}
           transition={springTransition}
           className={cn(
-            "relative flex items-center justify-between px-4 py-3 backdrop-blur-md border transition-colors duration-500 pointer-events-auto",
+            "relative flex items-center justify-between px-4 py-3 backdrop-blur-md border transition-colors duration-500 pointer-events-auto will-change-transform",
             isScrolled
               ? "bg-background/80 border-border/50 shadow-lg"
               : "bg-transparent border-transparent"
           )}
         >
           {/* Logo */}
-          <motion.div layout className="flex items-center gap-2 mr-4">
+          <div className="flex items-center gap-2 mr-4">
             <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
               <Zap size={18} fill="currentColor" />
             </div>
@@ -85,19 +85,23 @@ export function Navbar() {
                 </motion.span>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
 
           {/* Desktop Nav Items */}
-          <div className="hidden md:flex items-center gap-1 relative h-10">
-            <AnimatePresence>
+          <motion.div 
+            layout 
+            className="hidden md:flex items-center gap-1 relative h-10"
+            transition={springTransition}
+          >
+            <AnimatePresence mode="popLayout">
               {isScrolled ? (
                 // Compact Mode: Show "Menu" trigger
                 <motion.div
                   key="compact-menu"
-                  initial={{ opacity: 0, scale: 0.9, position: "absolute" }}
-                  animate={{ opacity: 1, scale: 1, position: "relative" }}
-                  exit={{ opacity: 0, scale: 0.9, position: "absolute" }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={springTransition}
                   className="relative flex items-center justify-center w-full h-full"
                 >
                   <button
@@ -141,10 +145,10 @@ export function Navbar() {
                 // Expanded Mode: Show full list
                 <motion.nav
                   key="expanded-nav"
-                  initial={{ opacity: 0, position: "absolute" }}
-                  animate={{ opacity: 1, position: "relative" }}
-                  exit={{ opacity: 0, position: "absolute" }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={springTransition}
                   className="flex items-center gap-1 h-full"
                 >
                   {navItems.map((item) => (
@@ -159,10 +163,10 @@ export function Navbar() {
                 </motion.nav>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
 
           {/* Right Actions */}
-          <motion.div layout className="flex items-center gap-2 ml-4">
+          <div className="flex items-center gap-2 ml-4">
             <ThemeToggle />
             <AnimatePresence>
               {!isScrolled && (
@@ -199,7 +203,7 @@ export function Navbar() {
             >
               <Menu size={20} />
             </button>
-          </motion.div>
+          </div>
         </motion.header>
       </div>
 

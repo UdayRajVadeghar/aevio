@@ -6,7 +6,7 @@ export const Dither = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "pointer-events-none absolute inset-0 z-[9999] mix-blend-overlay opacity-[0.15]",
+        "pointer-events-none fixed inset-0 z-[9999] mix-blend-overlay opacity-[0.15]",
         className
       )}
       style={{

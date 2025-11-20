@@ -1,7 +1,7 @@
 "use client";
 
 import { BentoCard, BentoGrid } from "@/components/ui/hero-section/bento-grid";
-import { Dither } from "@/components/ui/hero-section/dither";
+
 import { IntegrationDiagram } from "@/components/ui/integration-diagram";
 import { IntuitiveInteractions } from "@/components/ui/intuitive-interactions/intuitive-interactions";
 import { FeaturesOrbit } from "@/components/ui/landing/features-orbit";
@@ -37,7 +37,7 @@ export default function Home() {
         />
       </div>
 
-      <Dither />
+
 
 
 
