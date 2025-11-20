@@ -6,6 +6,7 @@ import {
   SocialAuthDivider,
   SocialButton,
 } from "@/components/ui/auth-components/social-buttons";
+import { authClient } from "@/lib/auth-client";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -18,6 +19,8 @@ function AuthenticationContent() {
 
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (viewParam === "signup") {
@@ -35,14 +38,75 @@ function AuthenticationContent() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    // Redirect or handle success
-    router.push("/dashboard");
+    setError(null);
+    setSuccess(null);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const name = formData.get("name") as string;
+
+    try {
+      if (isSignUp) {
+        // Sign up - will send verification email automatically
+        const result = await authClient.signUp.email({
+          email,
+          password,
+          name,
+        });
+
+        if (result.error) {
+          setError(result.error.message || "Failed to create account");
+        } else {
+          setSuccess(
+            "Account created! Please check your email to verify your account."
+          );
+          // Don't redirect, let user know to check email
+        }
+      } else {
+        // Sign in with email and password
+        const result = await authClient.signIn.email({
+          email,
+          password,
+        });
+
+        if (result.error) {
+          setError(result.error.message || "Failed to sign in");
+        } else {
+          router.push("/dashboard");
+        }
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+      console.error("Auth error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    const email = prompt("Enter your email address:");
+    if (!email) return;
+
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await authClient.forgetPassword({
+        email,
+        redirectTo: "/authentication/reset-password",
+      });
+      setSuccess("Password reset link sent! Please check your email.");
+    } catch (err) {
+      setError("Failed to send reset link. Please try again.");
+      console.error("Forgot password error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -63,6 +127,20 @@ function AuthenticationContent() {
         <SocialAuthDivider />
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          )}
+
+          {success && (
+            <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+              <p className="text-sm text-green-600 dark:text-green-400">
+                {success}
+              </p>
+            </div>
+          )}
+
           <AnimatePresence mode="wait" initial={false}>
             {isSignUp && (
               <motion.div
@@ -75,6 +153,7 @@ function AuthenticationContent() {
                 <AuthInput
                   label="Full Name"
                   type="text"
+                  name="name"
                   placeholder="John Doe"
                   required
                   className="mb-4"
@@ -86,6 +165,7 @@ function AuthenticationContent() {
           <AuthInput
             label="Email"
             type="email"
+            name="email"
             placeholder="name@example.com"
             required
           />
@@ -94,6 +174,7 @@ function AuthenticationContent() {
             <AuthInput
               label="Password"
               type="password"
+              name="password"
               placeholder="••••••••"
               required
             />
@@ -105,6 +186,7 @@ function AuthenticationContent() {
               >
                 <button
                   type="button"
+                  onClick={handleForgotPassword}
                   className="text-xs font-medium text-neutral-500 hover:text-black dark:hover:text-white transition-colors"
                 >
                   Forgot password?
