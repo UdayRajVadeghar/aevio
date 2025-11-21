@@ -2,10 +2,6 @@
 
 import { AuthInput } from "@/components/ui/auth-components/auth-input";
 import { AuthLayout } from "@/components/ui/auth-components/auth-layout";
-import {
-  SocialAuthDivider,
-  SocialButton,
-} from "@/components/ui/auth-components/social-buttons";
 import { authClient } from "@/lib/auth-client";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -119,12 +115,7 @@ function AuthenticationContent() {
       }
     >
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <SocialButton icon="github" label="GitHub" />
-          <SocialButton icon="google" label="Google" />
-        </div>
-
-        <SocialAuthDivider />
+        <div className="grid grid-cols-2 gap-3"></div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
