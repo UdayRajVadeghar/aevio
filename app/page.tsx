@@ -5,7 +5,6 @@ import { BentoCard, BentoGrid } from "@/components/ui/hero-section/bento-grid";
 import { IntegrationDiagram } from "@/components/ui/integration-diagram";
 import { IntuitiveInteractions } from "@/components/ui/intuitive-interactions/intuitive-interactions";
 import { FeaturesOrbit } from "@/components/ui/landing/features-orbit";
-
 import { PreFooterCTA } from "@/components/ui/pre-footer-cta";
 import { GymNeonShowcase } from "@/components/ui/showcase/gym-neon-showcase";
 import { motion } from "framer-motion";
@@ -22,8 +21,6 @@ import {
 import Link from "next/link";
 
 export default function Home() {
-  // console.log(authClient + " this is the auth client");
-
   return (
     <main className="relative min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-x-hidden font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
       {/* Light Mode "Vapor" Background */}
