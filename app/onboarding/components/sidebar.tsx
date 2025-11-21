@@ -1,11 +1,22 @@
 "use client";
 
 import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/shadcn/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/shadcn/dialog";
 import { useOnboardingStore } from "@/lib/store/onboarding-store";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { useState } from "react";
 
 const steps = [
   { number: 1, title: "Basic Profile" },
@@ -18,10 +29,11 @@ const steps = [
 ];
 
 export function Sidebar() {
-  const { currentStep } = useOnboardingStore();
+  const { currentStep, setStep } = useOnboardingStore();
   const userId = authClient.useSession().data?.user?.id;
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const { mutate: skipOnboarding } = useMutation({
+  const { mutate: skipOnboarding, isPending } = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/user/onboarding/skip`, {
         method: "POST",
@@ -32,6 +44,7 @@ export function Sidebar() {
     },
     onSuccess: (data) => {
       console.log(data.message);
+      setIsDialogOpen(false);
     },
     onError: (error) => {
       console.error("Failed to skip onboarding", error);
@@ -46,6 +59,13 @@ export function Sidebar() {
     skipOnboarding();
   };
 
+  const handleStepClick = (stepNumber: number) => {
+    // Only allow navigation to current step or previously visited steps
+    if (stepNumber <= currentStep) {
+      setStep(stepNumber);
+    }
+  };
+
   return (
     <div className="hidden md:flex flex-col w-80 h-screen bg-muted/30 border-r border-border/50 p-8 flex-shrink-0">
       <div className="mb-12">
@@ -57,62 +77,162 @@ export function Sidebar() {
         </div>
       </div>
 
-      <button
-        onClick={() => handleSkipOnboarding()}
-        className="p-3 mb-4 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-2 border-gray-300 dark:border-gray-600 rounded-lg"
-      >
-        Skip Onboarding
-      </button>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
+          <button className="p-3 mb-8 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-2 border-gray-300 dark:border-gray-600 rounded-lg">
+            Skip Onboarding
+          </button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Skip Onboarding?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to skip the onboarding process? You can
+              always complete it later from your profile settings.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsDialogOpen(false)}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleSkipOnboarding}
+              disabled={isPending}
+            >
+              {isPending ? "Skipping..." : "Yes, Skip"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      <div className="flex flex-col gap-8 relative">
-        {/* Vertical Line */}
-        <div className="absolute left-4 top-4 bottom-4 w-px bg-border/50 -z-10" />
+      <div className="flex-1 relative py-4">
+        {/* Progress Title */}
+        <div className="mb-6">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Your Progress
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Step {currentStep} of {steps.length}
+          </p>
+        </div>
 
-        {steps.map((step) => {
-          const isActive = currentStep === step.number;
-          const isCompleted = currentStep > step.number;
+        {/* Steps Container */}
+        <div className="flex flex-col relative">
+          {steps.map((step, index) => {
+            const isActive = currentStep === step.number;
+            const isCompleted = currentStep > step.number;
+            const isVisited = step.number <= currentStep;
+            const isClickable = isVisited;
 
-          return (
-            <div key={step.number} className="flex items-center gap-4">
-              <div
-                className={cn(
-                  "relative z-10 flex items-center justify-center size-8 rounded-full border-2 transition-all duration-300",
-                  isActive
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 ring-4 ring-blue-500/20"
-                    : isCompleted
-                    ? "border-green-500 bg-green-500 text-white"
-                    : "border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
-                )}
+            return (
+              <motion.div
+                key={step.number}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="relative"
               >
-                {isCompleted ? (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                <div className="flex items-start gap-4 pb-6 last:pb-0">
+                  {/* Step Indicator */}
+                  <button
+                    onClick={() => handleStepClick(step.number)}
+                    disabled={!isClickable}
+                    className={cn(
+                      "relative z-10 flex items-center justify-center size-8 rounded-full border-2 transition-all duration-300 flex-shrink-0",
+                      isActive &&
+                        "border-blue-500 bg-blue-500 text-white shadow-lg shadow-blue-500/30",
+                      isCompleted &&
+                        !isActive &&
+                        "border-green-500 bg-green-500 text-white hover:scale-110",
+                      !isActive &&
+                        !isCompleted &&
+                        "border-border bg-background text-muted-foreground",
+                      isClickable && !isActive && "cursor-pointer",
+                      !isClickable && "cursor-not-allowed opacity-60"
+                    )}
                   >
-                    <Check size={14} strokeWidth={3} />
-                  </motion.div>
-                ) : (
-                  <span className="text-sm font-semibold">{step.number}</span>
+                    {isCompleted ? (
+                      <motion.div
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 20,
+                        }}
+                      >
+                        <Check size={16} strokeWidth={3} />
+                      </motion.div>
+                    ) : (
+                      <span className="text-xs font-bold">{step.number}</span>
+                    )}
+                  </button>
+
+                  {/* Step Content */}
+                  <button
+                    onClick={() => handleStepClick(step.number)}
+                    disabled={!isClickable}
+                    className={cn(
+                      "flex flex-col items-start text-left flex-1 -mt-0.5",
+                      isClickable && "cursor-pointer",
+                      !isClickable && "cursor-not-allowed"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "text-sm font-medium transition-all duration-300",
+                        isActive && "text-foreground font-semibold text-base",
+                        isCompleted &&
+                          !isActive &&
+                          "text-foreground hover:text-primary",
+                        !isActive &&
+                          !isCompleted &&
+                          "text-muted-foreground/70"
+                      )}
+                    >
+                      {step.title}
+                    </span>
+                    {isActive && (
+                      <motion.span
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-0.5"
+                      >
+                        In Progress
+                      </motion.span>
+                    )}
+                    {isCompleted && !isActive && (
+                      <span className="text-xs text-green-600 dark:text-green-400 mt-0.5">
+                        Completed
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                {/* Connecting Line (filled for completed steps) */}
+                {index < steps.length - 1 && (
+                  <div
+                    className={cn(
+                      "absolute left-4 top-8 w-0.5 h-full transition-all duration-500",
+                      isCompleted
+                        ? "bg-green-500"
+                        : isActive
+                        ? "bg-gradient-to-b from-blue-500 to-border"
+                        : "bg-border"
+                    )}
+                  />
                 )}
-              </div>
-              <div className="flex flex-col">
-                <span
-                  className={cn(
-                    "text-sm font-medium transition-colors duration-300",
-                    isActive
-                      ? "text-foreground font-semibold"
-                      : isCompleted
-                      ? "text-foreground"
-                      : "text-muted-foreground"
-                  )}
-                >
-                  {step.title}
-                </span>
-              </div>
-            </div>
-          );
-        })}
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
