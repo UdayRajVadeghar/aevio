@@ -143,3 +143,4 @@ model onBoardingStatus{
   @@map("onBoardingStatus")
   @@unique([userId])
 } 
+
