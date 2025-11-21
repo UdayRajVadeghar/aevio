@@ -187,7 +187,7 @@ function AuthenticationContent() {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="text-xs font-medium text-neutral-500 hover:text-black dark:hover:text-white transition-colors"
+                  className="text-xs font-medium text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
                 >
                   Forgot password?
                 </button>
