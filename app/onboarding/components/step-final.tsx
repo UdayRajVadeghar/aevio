@@ -1,5 +1,6 @@
 "use client";
 
+import { authClient } from "@/lib/auth-client";
 import { useOnboardingStore } from "@/lib/store/onboarding-store";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -15,6 +16,7 @@ const goalSchema = z.object({
 export function StepFinal() {
   const { data, updateData, completeOnboarding } = useOnboardingStore();
   const router = useRouter();
+  const userId = authClient.useSession().data?.user?.id;
 
   const [goal, setGoal] = useState(data.goal || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,14 +30,22 @@ export function StepFinal() {
       return;
     }
 
+    if (!userId) {
+      setError("User not authenticated");
+      return;
+    }
+
     setIsSubmitting(true);
     updateData("goal", goal);
 
     try {
-      await completeOnboarding();
+      await completeOnboarding(userId);
       router.push("/dashboard"); // Redirect to dashboard after completion
     } catch (error) {
       console.error("Failed to complete onboarding", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to complete onboarding"
+      );
       setIsSubmitting(false);
     }
   };
