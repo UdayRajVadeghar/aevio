@@ -5,6 +5,7 @@ import { SmoothScroll } from "@/components/smooth-scroll";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Geist, Geist_Mono } from "next/font/google";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import "./globals.css";
 
@@ -23,7 +24,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
   const [queryClient] = useState(() => new QueryClient());
+
+  const isLandingPage = pathname === "/";
+  const isOnboarding = pathname?.startsWith("/onboarding");
+  const shouldAddTopSpacing = !isLandingPage && !isOnboarding;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -39,6 +45,7 @@ export default function RootLayout({
           >
             <SmoothScroll>
               <Navbar />
+              {shouldAddTopSpacing && <div className="h-24 sm:h-28" />}
               {children}
             </SmoothScroll>
           </ThemeProvider>
