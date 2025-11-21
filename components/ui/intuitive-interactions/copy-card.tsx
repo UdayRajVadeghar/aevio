@@ -58,7 +58,7 @@ export function CopyCard() {
                 opacity: 1,
                 scale: status === "generating" ? 0.95 : 1, // Click press effect
               }}
-              exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+              exit={{ opacity: 0, scale: 0.9 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               className="relative z-10 flex w-full h-full rounded-full bg-neutral-100 dark:bg-neutral-900 p-1.5 overflow-hidden cursor-default shadow-inner dark:shadow-none"
             >
@@ -87,7 +87,7 @@ export function CopyCard() {
               layoutId="copy-button"
               initial={{ opacity: 0, scale: 0.9, width: "100%" }}
               animate={{ opacity: 1, scale: 1, width: "100%" }}
-              exit={{ opacity: 0, scale: 0.95, filter: "blur(5px)" }}
+              exit={{ opacity: 0, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 500, damping: 25 }} // Snappier
               className="absolute inset-0 flex items-center justify-center gap-2 bg-black dark:bg-white text-white dark:text-black rounded-full text-sm font-bold shadow-lg shadow-indigo-500/20 dark:shadow-indigo-500/10"
             >
