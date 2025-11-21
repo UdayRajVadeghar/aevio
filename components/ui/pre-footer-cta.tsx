@@ -7,12 +7,28 @@ import React from "react";
 export function PreFooterCTA() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+  const rafRef = React.useRef<number>();
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { left, top } = e.currentTarget.getBoundingClientRect();
-    mouseX.set(e.clientX - left);
-    mouseY.set(e.clientY - top);
+    // Throttle with requestAnimationFrame for better performance
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
+    
+    rafRef.current = requestAnimationFrame(() => {
+      const { left, top } = e.currentTarget.getBoundingClientRect();
+      mouseX.set(e.clientX - left);
+      mouseY.set(e.clientY - top);
+    });
   };
+
+  React.useEffect(() => {
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
 
   // Mask for the glow effect
   const maskImage = useMotionTemplate`radial-gradient(circle 300px at ${mouseX}px ${mouseY}px, black, transparent)`;
@@ -70,6 +86,7 @@ export function PreFooterCTA() {
               WebkitMaskImage: maskImage,
               maskImage: maskImage,
               fontFamily: "var(--font-sans)",
+              willChange: "mask-image, -webkit-mask-image",
             }}
           >
             AEVIO

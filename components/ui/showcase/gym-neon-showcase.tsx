@@ -20,29 +20,36 @@ const NeonText = ({
 }) => {
   const [isFlickering, setIsFlickering] = useState(false);
 
-  // Random flickering effect
+  // Optimized random flickering effect
   useEffect(() => {
+    let flickerTimeout: NodeJS.Timeout;
+    let flickerInterval: NodeJS.Timeout;
+
     const triggerFlicker = () => {
-      const flickerCount = Math.floor(Math.random() * 6) + 2; // 2 to 8 flickers
+      const flickerCount = Math.floor(Math.random() * 4) + 2; // 2 to 6 flickers (reduced)
       let currentFlicker = 0;
 
-      const interval = setInterval(() => {
+      flickerInterval = setInterval(() => {
         setIsFlickering((prev) => !prev);
         currentFlicker++;
 
         if (currentFlicker >= flickerCount) {
-          clearInterval(interval);
-          setIsFlickering(false); // Ensure it ends on "on" state mostly, or add logic to stay off
+          clearInterval(flickerInterval);
+          setIsFlickering(false);
 
-          // Schedule next flicker storm
-          const nextDelay = Math.random() * 5000 + 2000; // 2s to 7s
-          setTimeout(triggerFlicker, nextDelay);
+          // Schedule next flicker storm with longer delays
+          const nextDelay = Math.random() * 8000 + 4000; // 4s to 12s (increased)
+          flickerTimeout = setTimeout(triggerFlicker, nextDelay);
         }
-      }, 50 + Math.random() * 100); // Fast flickering interval
+      }, 80 + Math.random() * 120); // Slightly slower flickering interval
     };
 
-    const initialTimeout = setTimeout(triggerFlicker, 2000);
-    return () => clearTimeout(initialTimeout);
+    const initialTimeout = setTimeout(triggerFlicker, 3000);
+    return () => {
+      clearTimeout(initialTimeout);
+      clearTimeout(flickerTimeout);
+      clearInterval(flickerInterval);
+    };
   }, []);
 
   // Color classes map

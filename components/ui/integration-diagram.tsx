@@ -37,46 +37,60 @@ const Connection = ({
   const [svgDimensions, setSvgDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
+    let rafId: number;
+    let isUpdating = false;
+
     const updatePath = () => {
-      if (containerRef.current && fromRef.current && toRef.current) {
-        const containerRect = containerRef.current.getBoundingClientRect();
-        const rectA = fromRef.current.getBoundingClientRect();
-        const rectB = toRef.current.getBoundingClientRect();
+      if (isUpdating || !containerRef.current || !fromRef.current || !toRef.current) return;
+      
+      isUpdating = true;
+      rafId = requestAnimationFrame(() => {
+        if (containerRef.current && fromRef.current && toRef.current) {
+          const containerRect = containerRef.current.getBoundingClientRect();
+          const rectA = fromRef.current.getBoundingClientRect();
+          const rectB = toRef.current.getBoundingClientRect();
 
-        const svgWidth = containerRect.width;
-        const svgHeight = containerRect.height;
-        setSvgDimensions({ width: svgWidth, height: svgHeight });
+          const svgWidth = containerRect.width;
+          const svgHeight = containerRect.height;
+          setSvgDimensions({ width: svgWidth, height: svgHeight });
 
-        const startX = rectA.right - containerRect.left;
-        const startY = rectA.top + rectA.height / 2 - containerRect.top;
-        const endX = rectB.left - containerRect.left;
-        const endY = rectB.top + rectB.height / 2 - containerRect.top;
+          const startX = rectA.right - containerRect.left;
+          const startY = rectA.top + rectA.height / 2 - containerRect.top;
+          const endX = rectB.left - containerRect.left;
+          const endY = rectB.top + rectB.height / 2 - containerRect.top;
 
-        // Logic for connecting Right edge of Input to Left edge of Hub
-        // OR Right edge of Hub to Left edge of Destinations.
-        // The standard logic above handles (Right -> Left) connections if we treat A as left and B as right.
+          // Logic for connecting Right edge of Input to Left edge of Hub
+          // OR Right edge of Hub to Left edge of Destinations.
+          // The standard logic above handles (Right -> Left) connections if we treat A as left and B as right.
 
-        const controlX1 = startX + (endX - startX) * curvature;
-        const controlY1 = startY;
-        const controlX2 = endX - (endX - startX) * curvature;
-        const controlY2 = endY;
+          const controlX1 = startX + (endX - startX) * curvature;
+          const controlY1 = startY;
+          const controlX2 = endX - (endX - startX) * curvature;
+          const controlY2 = endY;
 
-        const d = `M ${startX},${startY} C ${controlX1},${controlY1} ${controlX2},${controlY2} ${endX},${endY}`;
-        setPathD(d);
-      }
+          const d = `M ${startX},${startY} C ${controlX1},${controlY1} ${controlX2},${controlY2} ${endX},${endY}`;
+          setPathD(d);
+        }
+        isUpdating = false;
+      });
     };
 
-    const resizeObserver = new ResizeObserver(updatePath);
-    if (containerRef.current) resizeObserver.observe(containerRef.current);
+    // Debounced resize handler
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(updatePath, 100);
+    };
 
     // Initial delay to ensure layout calculation
     const timer = setTimeout(updatePath, 100);
-    window.addEventListener("resize", updatePath);
+    window.addEventListener("resize", handleResize, { passive: true });
 
     return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updatePath);
+      window.removeEventListener("resize", handleResize);
       clearTimeout(timer);
+      clearTimeout(resizeTimeout);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [containerRef, fromRef, toRef, curvature]);
 
@@ -85,6 +99,7 @@ const Connection = ({
       className="pointer-events-none absolute inset-0 overflow-visible z-0"
       width={svgDimensions.width}
       height={svgDimensions.height}
+      style={{ willChange: "auto" }}
     >
       <path
         d={pathD}
@@ -111,6 +126,7 @@ const Connection = ({
             style={{
               offsetPath: `path('${pathD}')`,
               offsetDistance: "var(--offset-distance)",
+              willChange: "opacity, offset-distance",
             } as React.CSSProperties}
             className="drop-shadow-[0_0_6px_rgba(249,115,22,0.8)] absolute" // Adjusted shadow
           />

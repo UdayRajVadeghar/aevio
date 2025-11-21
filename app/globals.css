@@ -171,6 +171,46 @@ body {
   }
 }
 
+/* Performance optimizations for smooth scrolling */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hardware acceleration for animations */
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Optimize animations with will-change */
+[data-animate] {
+  will-change: transform, opacity;
+}
+
+/* GPU acceleration for common animated elements */
+svg, 
+[class*="animate-"],
+[style*="animation"],
+motion-div,
+[data-framer-component-type] {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Smooth transforms */
+.smooth-transform {
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
 /* Lenis Smooth Scroll */
 html.lenis, html.lenis body {
   height: auto;
@@ -190,4 +230,21 @@ html.lenis, html.lenis body {
 
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
+}
+
+/* Additional scroll performance optimizations */
+html {
+  scroll-behavior: auto;
+  overflow-x: hidden;
+}
+
+body {
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimize rendering for sections */
+section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
 }

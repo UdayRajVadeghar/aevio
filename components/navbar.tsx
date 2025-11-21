@@ -31,16 +31,28 @@ export function Navbar() {
   const { data: session, isPending } = useSession();
 
   useEffect(() => {
+    let rafId: number;
+    let isThrottling = false;
+
     const handleScroll = () => {
-      if (window.scrollY > 50 && !isScrolled) {
-        setIsScrolled(true);
-      } else if (window.scrollY <= 50 && isScrolled) {
-        setIsScrolled(false);
-      }
+      if (isThrottling) return;
+      isThrottling = true;
+
+      rafId = requestAnimationFrame(() => {
+        if (window.scrollY > 50 && !isScrolled) {
+          setIsScrolled(true);
+        } else if (window.scrollY <= 50 && isScrolled) {
+          setIsScrolled(false);
+        }
+        isThrottling = false;
+      });
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [isScrolled]);
 
   // Early return after all hooks have been called

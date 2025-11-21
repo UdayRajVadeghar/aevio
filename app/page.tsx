@@ -1,7 +1,6 @@
 "use client";
 
 import { BentoCard, BentoGrid } from "@/components/ui/hero-section/bento-grid";
-
 import { IntegrationDiagram } from "@/components/ui/integration-diagram";
 import { IntuitiveInteractions } from "@/components/ui/intuitive-interactions/intuitive-interactions";
 import { FeaturesOrbit } from "@/components/ui/landing/features-orbit";
@@ -22,7 +21,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-x-hidden font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
+    <main className="relative min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-x-hidden font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black" style={{ willChange: "auto" }}>
       {/* Light Mode "Vapor" Background */}
       <div
         className="absolute inset-0 z-0 pointer-events-none dark:hidden overflow-hidden"
@@ -65,7 +64,7 @@ export default function Home() {
           </div>
 
           <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900 blur-lg opacity-50" />
+            <div className="" />
             <FeaturesOrbit />
             {/* Decorative elements */}
             <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-black dark:bg-white z-0 opacity-10 pattern-dots" />
@@ -84,8 +83,8 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+            viewport={{ once: true, amount: 0.3, margin: "0px 0px -100px 0px" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           >
             <h2 className="text-4xl font-bold tracking-tighter mb-6">
               THE AEVIO ENGINE
@@ -114,6 +113,7 @@ export default function Home() {
                       repeat: Infinity,
                       ease: "easeInOut",
                     }}
+                    style={{ willChange: "transform, opacity" }}
                   >
                     <Brain className="w-12 h-12 text-neutral-800 dark:text-neutral-200 opacity-80" />
                   </motion.div>
@@ -136,6 +136,7 @@ export default function Home() {
                       repeat: Infinity,
                       ease: "linear",
                     }}
+                    style={{ willChange: "transform" }}
                   >
                     <Network className="w-12 h-12 text-neutral-800 dark:text-neutral-200 opacity-80" />
                   </motion.div>
@@ -179,6 +180,7 @@ export default function Home() {
                         ease: "easeInOut",
                         delay: i * 0.2,
                       }}
+                      style={{ willChange: "height, background-color" }}
                     />
                   ))}
                 </div>
