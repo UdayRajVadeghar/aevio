@@ -1,6 +1,5 @@
 "use client";
 
-import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/shadcn/button";
 import {
   Dialog,
@@ -11,6 +10,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/shadcn/dialog";
+import {
+  Sidebar as ShadcnSidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarProvider
+} from "@/components/ui/shadcn/sidebar";
+import { authClient } from "@/lib/auth-client";
 import { useOnboardingStore } from "@/lib/store/onboarding-store";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
@@ -28,7 +34,7 @@ const steps = [
   { number: 7, title: "Finalize" },
 ];
 
-export function Sidebar() {
+function SidebarContentComponent() {
   const { currentStep, setStep } = useOnboardingStore();
   const userId = authClient.useSession().data?.user?.id;
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -67,173 +73,186 @@ export function Sidebar() {
   };
 
   return (
-    <div className="hidden md:flex flex-col w-80 h-screen bg-muted/30 border-r border-border/50 p-8 flex-shrink-0">
-      <div className="mb-12">
+    <>
+      <SidebarHeader className="p-6 pb-4">
         <div className="flex items-center gap-2">
           <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold">
             A
           </div>
           <span className="font-bold text-xl">Aevio</span>
         </div>
-      </div>
+      </SidebarHeader>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
-          <button className="p-3 mb-8 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-2 border-gray-300 dark:border-gray-600 rounded-lg">
-            Skip Onboarding
-          </button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Skip Onboarding?</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to skip the onboarding process? You can
-              always complete it later from your profile settings.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsDialogOpen(false)}
-              disabled={isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleSkipOnboarding}
-              disabled={isPending}
-            >
-              {isPending ? "Skipping..." : "Yes, Skip"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <div className="flex-1 relative py-4">
-        {/* Progress Title */}
-        <div className="mb-6">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Your Progress
-          </h3>
-          <p className="text-xs text-muted-foreground mt-1">
-            Step {currentStep} of {steps.length}
-          </p>
-        </div>
-
-        {/* Steps Container */}
-        <div className="flex flex-col relative">
-          {steps.map((step, index) => {
-            const isActive = currentStep === step.number;
-            const isCompleted = currentStep > step.number;
-            const isVisited = step.number <= currentStep;
-            const isClickable = isVisited;
-
-            return (
-              <motion.div
-                key={step.number}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="relative"
+      <SidebarContent className="px-6">
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <button className="p-3 mb-6 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-2 border-gray-300 dark:border-gray-600 rounded-lg w-full">
+              Skip Onboarding
+            </button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Skip Onboarding?</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to skip the onboarding process? You can
+                always complete it later from your profile settings.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                disabled={isPending}
               >
-                <div className="flex items-start gap-4 pb-6 last:pb-0">
-                  {/* Step Indicator */}
-                  <button
-                    onClick={() => handleStepClick(step.number)}
-                    disabled={!isClickable}
-                    className={cn(
-                      "relative z-10 flex items-center justify-center size-8 rounded-full border-2 transition-all duration-300 flex-shrink-0",
-                      isActive &&
-                        "border-blue-500 bg-blue-500 text-white shadow-lg shadow-blue-500/30",
-                      isCompleted &&
-                        !isActive &&
-                        "border-green-500 bg-green-500 text-white hover:scale-110",
-                      !isActive &&
-                        !isCompleted &&
-                        "border-border bg-background text-muted-foreground",
-                      isClickable && !isActive && "cursor-pointer",
-                      !isClickable && "cursor-not-allowed opacity-60"
-                    )}
-                  >
-                    {isCompleted ? (
-                      <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 20,
-                        }}
-                      >
-                        <Check size={16} strokeWidth={3} />
-                      </motion.div>
-                    ) : (
-                      <span className="text-xs font-bold">{step.number}</span>
-                    )}
-                  </button>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleSkipOnboarding}
+                disabled={isPending}
+              >
+                {isPending ? "Skipping..." : "Yes, Skip"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-                  {/* Step Content */}
-                  <button
-                    onClick={() => handleStepClick(step.number)}
-                    disabled={!isClickable}
-                    className={cn(
-                      "flex flex-col items-start text-left flex-1 -mt-0.5",
-                      isClickable && "cursor-pointer",
-                      !isClickable && "cursor-not-allowed"
-                    )}
-                  >
-                    <span
+        <div className="flex-1 relative py-4">
+          {/* Progress Title */}
+          <div className="mb-6">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Your Progress
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Step {currentStep} of {steps.length}
+            </p>
+          </div>
+
+          {/* Steps Container */}
+          <div className="flex flex-col relative">
+            {steps.map((step, index) => {
+              const isActive = currentStep === step.number;
+              const isCompleted = currentStep > step.number;
+              const isVisited = step.number <= currentStep;
+              const isClickable = isVisited;
+
+              return (
+                <motion.div
+                  key={step.number}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="relative"
+                >
+                  <div className="flex items-start gap-4 pb-6 last:pb-0">
+                    {/* Step Indicator */}
+                    <button
+                      onClick={() => handleStepClick(step.number)}
+                      disabled={!isClickable}
                       className={cn(
-                        "text-sm font-medium transition-all duration-300",
-                        isActive && "text-foreground font-semibold text-base",
+                        "relative z-10 flex items-center justify-center size-8 rounded-full border-2 transition-all duration-300 flex-shrink-0",
+                        isActive &&
+                          "border-blue-500 bg-blue-500 text-white shadow-lg shadow-blue-500/30",
                         isCompleted &&
                           !isActive &&
-                          "text-foreground hover:text-primary",
+                          "border-green-500 bg-green-500 text-white hover:scale-110",
                         !isActive &&
                           !isCompleted &&
-                          "text-muted-foreground/70"
+                          "border-border bg-background text-muted-foreground",
+                        isClickable && !isActive && "cursor-pointer",
+                        !isClickable && "cursor-not-allowed opacity-60"
                       )}
                     >
-                      {step.title}
-                    </span>
-                    {isActive && (
-                      <motion.span
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-0.5"
-                      >
-                        In Progress
-                      </motion.span>
-                    )}
-                    {isCompleted && !isActive && (
-                      <span className="text-xs text-green-600 dark:text-green-400 mt-0.5">
-                        Completed
-                      </span>
-                    )}
-                  </button>
-                </div>
+                      {isCompleted && !isActive ? (
+                        <motion.div
+                          initial={{ scale: 0, rotate: -180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 20,
+                          }}
+                        >
+                          <Check size={16} strokeWidth={3} />
+                        </motion.div>
+                      ) : (
+                        <span className="text-xs font-bold">{step.number}</span>
+                      )}
+                    </button>
 
-                {/* Connecting Line (filled for completed steps) */}
-                {index < steps.length - 1 && (
-                  <div
-                    className={cn(
-                      "absolute left-4 top-8 w-0.5 h-full transition-all duration-500",
-                      isCompleted
-                        ? "bg-green-500"
-                        : isActive
-                        ? "bg-gradient-to-b from-blue-500 to-border"
-                        : "bg-border"
-                    )}
-                  />
-                )}
-              </motion.div>
-            );
-          })}
+                    {/* Step Content */}
+                    <button
+                      onClick={() => handleStepClick(step.number)}
+                      disabled={!isClickable}
+                      className={cn(
+                        "flex flex-col items-start text-left flex-1 -mt-0.5",
+                        isClickable && "cursor-pointer",
+                        !isClickable && "cursor-not-allowed"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "text-sm font-medium transition-all duration-300",
+                          isActive && "text-foreground font-semibold text-base",
+                          isCompleted &&
+                            !isActive &&
+                            "text-foreground hover:text-primary",
+                          !isActive &&
+                            !isCompleted &&
+                            "text-muted-foreground/70"
+                        )}
+                      >
+                        {step.title}
+                      </span>
+                      {isActive && (
+                        <motion.span
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-0.5"
+                        >
+                          In Progress
+                        </motion.span>
+                      )}
+                      {isCompleted && !isActive && (
+                        <span className="text-xs text-green-600 dark:text-green-400 mt-0.5">
+                          Completed
+                        </span>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Connecting Line (filled for completed steps) */}
+                  {index < steps.length - 1 && (
+                    <div
+                      className={cn(
+                        "absolute left-4 top-8 w-0.5 h-full transition-all duration-500",
+                        isCompleted
+                          ? "bg-green-500"
+                          : isActive
+                          ? "bg-gradient-to-b from-blue-500 to-border"
+                          : "bg-border"
+                      )}
+                    />
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </div>
+      </SidebarContent>
+    </>
+  );
+}
+
+export function OnboardingSidebar({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider defaultOpen={true}>
+      <ShadcnSidebar collapsible="offcanvas" className="border-r border-border/50">
+        <SidebarContentComponent />
+      </ShadcnSidebar>
+      {children}
+    </SidebarProvider>
   );
 }
