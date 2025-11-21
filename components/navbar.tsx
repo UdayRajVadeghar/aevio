@@ -30,10 +30,6 @@ export function Navbar() {
 
   const { data: session, isPending } = useSession();
 
-  if (pathname?.startsWith("/onboarding")) {
-    return null;
-  }
-
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50 && !isScrolled) {
@@ -46,6 +42,11 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isScrolled]);
+
+  // Early return after all hooks have been called
+  if (pathname?.startsWith("/onboarding")) {
+    return null;
+  }
 
   const handleLogout = async () => {
     await signOut();
