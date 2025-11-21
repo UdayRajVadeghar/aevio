@@ -205,24 +205,10 @@ export function StepHealthWellness() {
                     : "bg-card"
                 )}
               >
-                <span
-                  className={cn(
-                    "font-medium text-sm",
-                    formData.activityLevel === level.id
-                      ? "text-green-700 dark:text-green-400"
-                      : ""
-                  )}
-                >
+                <span className="font-medium text-sm">
                   {level.label}
                 </span>
-                <span
-                  className={cn(
-                    "text-xs mt-1",
-                    formData.activityLevel === level.id
-                      ? "text-green-600 dark:text-green-500"
-                      : "text-muted-foreground"
-                  )}
-                >
+                <span className="text-xs mt-1 text-muted-foreground">
                   {level.description}
                 </span>
                 {formData.activityLevel === level.id && (
@@ -251,7 +237,7 @@ export function StepHealthWellness() {
                 className={cn(
                   "relative flex items-center justify-center p-3 rounded-xl border text-center transition-all duration-200 hover:border-green-400/50 hover:bg-green-50/50 dark:hover:bg-green-950/20",
                   formData.primaryGoal === goal.id
-                    ? "border-green-400 bg-green-50 dark:bg-green-950/20 ring-1 ring-green-400 text-green-700 dark:text-green-400"
+                    ? "border-green-400 bg-green-50 dark:bg-green-950/20 ring-1 ring-green-400"
                     : "bg-card"
                 )}
               >
@@ -280,7 +266,7 @@ export function StepHealthWellness() {
                 className={cn(
                   "px-3 py-2 rounded-full border text-xs transition-all duration-200 hover:border-green-400/50 hover:bg-green-50/50 dark:hover:bg-green-950/20",
                   formData.dietaryPreference === diet.id
-                    ? "border-green-400 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400"
+                    ? "border-green-400 bg-green-50 dark:bg-green-950/20"
                     : "bg-card"
                 )}
               >
@@ -300,7 +286,7 @@ export function StepHealthWellness() {
         </button>
         <button
           onClick={handleContinue}
-          className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-base font-medium text-white shadow-xl shadow-blue-600/25 transition-all hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
+          className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-base font-medium text-white shadow-xl shadow-blue-600/25 transition-all hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95 cursor-pointer"
         >
           Continue
           <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

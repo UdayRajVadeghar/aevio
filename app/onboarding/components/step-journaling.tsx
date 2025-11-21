@@ -101,14 +101,7 @@ export function StepJournaling() {
                 )}
               >
                 <div className="flex items-center justify-between w-full mb-2">
-                  <span
-                    className={cn(
-                      "font-semibold",
-                      formData.style === style.id
-                        ? "text-green-700 dark:text-green-400"
-                        : "text-foreground"
-                    )}
-                  >
+                  <span className="font-semibold text-foreground">
                     {style.label}
                   </span>
                 </div>
@@ -185,7 +178,7 @@ export function StepJournaling() {
         </button>
         <button
           onClick={handleContinue}
-          className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-base font-medium text-white shadow-xl shadow-blue-600/25 transition-all hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95"
+          className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-base font-medium text-white shadow-xl shadow-blue-600/25 transition-all hover:shadow-2xl hover:shadow-blue-600/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95 cursor-pointer"
         >
           Continue
           <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
