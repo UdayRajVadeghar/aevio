@@ -1,5 +1,5 @@
-import { onBoardingDataSchema } from "@/app/utils/onBoardingTypes/onBoardingSchema";
 import { db } from "@/lib/db";
+import { onBoardingDataSchema } from "@/utils/onBoardingTypes/onBoardingSchema";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       goal,
     } = result.data;
 
-    console.log(result.data);
+    // console.log(result.data);
 
     const onBoardingStatus = await db.onBoardingStatus.findUnique({
       where: {
