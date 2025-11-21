@@ -1,7 +1,9 @@
 "use client";
 
+import { authClient } from "@/lib/auth-client";
 import { useOnboardingStore } from "@/lib/store/onboarding-store";
 import { cn } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 
@@ -17,17 +19,50 @@ const steps = [
 
 export function Sidebar() {
   const { currentStep } = useOnboardingStore();
+  const userId = authClient.useSession().data?.user?.id;
+
+  const { mutate: skipOnboarding } = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/user/onboarding/skip`, {
+        method: "POST",
+        body: JSON.stringify({ userId }),
+      });
+      const data = await response.json();
+      return data;
+    },
+    onSuccess: (data) => {
+      console.log(data.message);
+    },
+    onError: (error) => {
+      console.error("Failed to skip onboarding", error);
+    },
+  });
+
+  const handleSkipOnboarding = async () => {
+    if (userId === undefined || userId === null) {
+      return;
+    }
+
+    skipOnboarding();
+  };
 
   return (
     <div className="hidden md:flex flex-col w-80 h-screen bg-muted/30 border-r border-border/50 p-8 flex-shrink-0">
       <div className="mb-12">
         <div className="flex items-center gap-2">
-           <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold">
-              A
-           </div>
-           <span className="font-bold text-xl">Aevio</span>
+          <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold">
+            A
+          </div>
+          <span className="font-bold text-xl">Aevio</span>
         </div>
       </div>
+
+      <button
+        onClick={() => handleSkipOnboarding()}
+        className="p-3 mb-4 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-2 border-gray-300 dark:border-gray-600 rounded-lg"
+      >
+        Skip Onboarding
+      </button>
 
       <div className="flex flex-col gap-8 relative">
         {/* Vertical Line */}
@@ -82,4 +117,3 @@ export function Sidebar() {
     </div>
   );
 }
-

@@ -25,7 +25,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   profile       UserProfile?
-
+  onBoardingStatus onBoardingStatus?
   @@unique([email])
   @@map("user")
 }
@@ -131,3 +131,15 @@ model Habit {
 
   @@index([profileId])
 }
+
+
+model onBoardingStatus{
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  onBoardingStatus String @default("incomplete")// incomplete, completed, skipped
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("onBoardingStatus")
+  @@unique([userId])
+} 
