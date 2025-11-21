@@ -154,7 +154,7 @@ export default function ProfilePage() {
 
               <div className="space-y-2">
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                  <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
                     {userData.basicProfile.name}
                   </h1>
                   <p className="text-muted-foreground flex items-center gap-2 text-sm md:text-base">
@@ -184,7 +184,8 @@ export default function ProfilePage() {
             </div>
 
             <Button
-              className="group shadow-lg hover:shadow-primary/25 transition-all duration-300"
+              variant="outline"
+              className="group transition-all duration-300"
               size="lg"
             >
               <Edit2 className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
@@ -201,16 +202,16 @@ export default function ProfilePage() {
               <div className="bg-gradient-to-br from-primary/10 via-background to-background rounded-2xl border border-primary/20 p-1 shadow-sm">
                 <div className="bg-card/50 backdrop-blur-sm rounded-xl p-6 md:p-8">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-500">
                       <Trophy className="h-5 w-5" />
                     </div>
-                    <h3 className="font-semibold text-lg">Current Focus</h3>
+                    <h3 className="font-medium text-lg">Current Focus</h3>
                   </div>
                   <div className="relative">
                     <span className="absolute -top-4 -left-2 text-6xl font-serif text-primary/5 select-none">
                       &ldquo;
                     </span>
-                    <p className="text-xl md:text-2xl font-medium text-foreground leading-relaxed relative z-10 pl-4">
+                    <p className="text-xl md:text-2xl font-normal text-foreground leading-relaxed relative z-10 pl-4">
                       {userData.goal}
                     </p>
                   </div>
@@ -229,7 +230,9 @@ export default function ProfilePage() {
             >
               {userData.healthWellness.height && (
                 <StatCard
-                  icon={<Ruler className="h-5 w-5" />}
+                  icon={
+                    <Ruler className="h-5 w-5 text-blue-600 dark:text-blue-500" />
+                  }
                   label="Height"
                   value={`${userData.healthWellness.height} cm`}
                   delay={0.1}
@@ -237,7 +240,9 @@ export default function ProfilePage() {
               )}
               {userData.healthWellness.weight && (
                 <StatCard
-                  icon={<Weight className="h-5 w-5" />}
+                  icon={
+                    <Weight className="h-5 w-5 text-purple-600 dark:text-purple-500" />
+                  }
                   label="Weight"
                   value={`${userData.healthWellness.weight} kg`}
                   delay={0.2}
@@ -245,7 +250,9 @@ export default function ProfilePage() {
               )}
               {userData.healthWellness.activityLevel && (
                 <StatCard
-                  icon={<Activity className="h-5 w-5" />}
+                  icon={
+                    <Activity className="h-5 w-5 text-green-600 dark:text-green-500" />
+                  }
                   label="Activity"
                   value={userData.healthWellness.activityLevel}
                   className="col-span-2 sm:col-span-1"
@@ -254,7 +261,9 @@ export default function ProfilePage() {
               )}
               {userData.healthWellness.primaryGoal && (
                 <StatCard
-                  icon={<Target className="h-5 w-5" />}
+                  icon={
+                    <Target className="h-5 w-5 text-orange-600 dark:text-orange-500" />
+                  }
                   label="Goal Type"
                   value={userData.healthWellness.primaryGoal}
                   className="col-span-2 sm:col-span-1"
@@ -264,7 +273,9 @@ export default function ProfilePage() {
               {userData.healthWellness.dietaryPreference && (
                 <div className="col-span-2">
                   <StatCard
-                    icon={<Utensils className="h-5 w-5" />}
+                    icon={
+                      <Utensils className="h-5 w-5 text-rose-600 dark:text-rose-500" />
+                    }
                     label="Dietary Preference"
                     value={userData.healthWellness.dietaryPreference}
                     delay={0.5}
@@ -297,7 +308,7 @@ export default function ProfilePage() {
                       )}
                     >
                       <div className="flex flex-col gap-1">
-                        <span className="font-semibold text-sm group-hover:text-primary transition-colors">
+                        <span className="font-medium text-sm group-hover:text-primary transition-colors">
                           {habit.name}
                         </span>
                         <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full w-fit">
@@ -305,10 +316,10 @@ export default function ProfilePage() {
                         </span>
                       </div>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-bold tracking-tight">
+                        <span className="text-lg font-semibold tracking-tight">
                           {habit.target}
                         </span>
-                        <span className="text-xs text-muted-foreground font-medium uppercase">
+                        <span className="text-xs text-muted-foreground font-normal uppercase">
                           {habit.unit}
                         </span>
                       </div>
@@ -327,26 +338,23 @@ export default function ProfilePage() {
             {/* Profile Completion */}
             <motion.div variants={itemVariants}>
               <div className="bg-card rounded-2xl border p-6 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-3 opacity-5">
-                  <Sparkles className="h-24 w-24" />
-                </div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wider">
                   Profile Strength
                 </h3>
                 <div className="flex items-end justify-between mb-2">
-                  <span className="text-4xl font-bold text-primary tracking-tight">
+                  <span className="text-4xl font-semibold text-primary tracking-tight">
                     85%
                   </span>
-                  <span className="text-sm font-medium text-muted-foreground bg-muted px-2 py-1 rounded-md mb-1">
+                  <span className="text-sm font-normal text-muted-foreground bg-muted px-2 py-1 rounded-md mb-1">
                     Almost there!
                   </span>
                 </div>
-                <div className="w-full bg-secondary h-3 rounded-full overflow-hidden">
+                <div className="w-full bg-muted/50 h-3 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: "85%" }}
                     transition={{ duration: 1, delay: 0.5 }}
-                    className="bg-gradient-to-r from-primary to-primary/80 h-full rounded-full"
+                    className="bg-gradient-to-r from-slate-600 to-slate-500 dark:from-slate-400 dark:to-slate-500 h-full rounded-full"
                   />
                 </div>
                 <Button
@@ -386,7 +394,7 @@ export default function ProfilePage() {
                     </span>
                     <div
                       className={cn(
-                        "px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-colors",
+                        "px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 transition-colors",
                         userData.journaling.moodTrackingEnabled
                           ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
                           : "bg-muted text-muted-foreground"
@@ -474,7 +482,7 @@ function CardHeader({
         <div className="p-2 rounded-lg bg-secondary/80 text-foreground">
           {icon}
         </div>
-        <h2 className="font-semibold text-lg tracking-tight">{title}</h2>
+        <h2 className="font-medium text-lg tracking-tight">{title}</h2>
       </div>
       {action}
     </div>
@@ -504,14 +512,14 @@ function StatCard({
         className
       )}
     >
-      <div className="h-12 w-12 rounded-xl bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+      <div className="h-12 w-12 rounded-xl bg-muted/50 flex items-center justify-center transition-all duration-300">
         {icon}
       </div>
       <div className="flex flex-col">
-        <p className="text-sm font-medium text-muted-foreground group-hover:text-primary/80 transition-colors">
+        <p className="text-sm font-normal text-muted-foreground transition-colors">
           {label}
         </p>
-        <p className="font-bold text-lg text-foreground tracking-tight">
+        <p className="font-medium text-lg text-foreground tracking-tight">
           {value}
         </p>
       </div>
