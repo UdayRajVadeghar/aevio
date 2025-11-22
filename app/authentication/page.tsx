@@ -92,9 +92,12 @@ function AuthenticationContent() {
     setSuccess(null);
 
     try {
-      await authClient.forgetPassword({
-        email,
-        redirectTo: "/authentication/reset-password",
+      await authClient.$fetch("/forget-password", {
+        method: "POST",
+        body: {
+          email,
+          redirectTo: "/authentication/reset-password",
+        },
       });
       setSuccess("Password reset link sent! Please check your email.");
     } catch (err) {
