@@ -7,7 +7,7 @@ import React from "react";
 export function PreFooterCTA() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  const rafRef = React.useRef<number>();
+  const rafRef = React.useRef<number | null>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     // Throttle with requestAnimationFrame for better performance
