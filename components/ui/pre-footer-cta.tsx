@@ -14,11 +14,15 @@ export function PreFooterCTA() {
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
     }
-    
+
+    // Capture values before requestAnimationFrame to avoid null reference
+    const { left, top } = e.currentTarget.getBoundingClientRect();
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+
     rafRef.current = requestAnimationFrame(() => {
-      const { left, top } = e.currentTarget.getBoundingClientRect();
-      mouseX.set(e.clientX - left);
-      mouseY.set(e.clientY - top);
+      mouseX.set(clientX - left);
+      mouseY.set(clientY - top);
     });
   };
 
