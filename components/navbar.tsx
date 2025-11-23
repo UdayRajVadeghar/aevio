@@ -56,7 +56,7 @@ export function Navbar() {
   }, [isScrolled]);
 
   // Early return after all hooks have been called
-  if (pathname?.startsWith("/onboarding")) {
+  if (pathname?.startsWith("/onboarding") || pathname?.startsWith("/authentication")) {
     return null;
   }
 
