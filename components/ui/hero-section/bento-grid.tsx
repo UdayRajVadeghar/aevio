@@ -42,7 +42,7 @@ export const BentoCard = ({
         "bg-white dark:bg-zinc-900/30 dark:backdrop-blur-xl",
         "border border-black/10 dark:border-white/10",
         "justify-between flex flex-col space-y-4 overflow-hidden relative",
-        "dark:hover:bg-zinc-900/50 dark:hover:border-white/20",
+        "dark:hover:bg-zinc-800/50 dark:hover:border-white/20 dark:hover:shadow-[2px_2px_20px_0px_rgba(255,255,255,0.05)]",
         "rounded-xl",
         className
       )}
