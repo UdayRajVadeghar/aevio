@@ -90,11 +90,11 @@ export default function JournalPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors text-sm font-medium">
+            <button className="cursor-pointer flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors text-sm font-medium">
               <Filter size={16} />
               <span>Filter</span>
             </button>
-            <button className="group flex items-center gap-2 px-5 py-2.5 rounded-full bg-black dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity text-sm font-medium">
+            <button className="cursor-pointer group flex items-center gap-2 px-5 py-2.5 rounded-full bg-black dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity text-sm font-medium">
               <Plus size={16} className="transition-transform group-hover:rotate-90" />
               <span>New Entry</span>
             </button>
@@ -167,7 +167,7 @@ export default function JournalPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 + idx * 0.1 }}
-                className="group relative p-6 rounded-3xl bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 transition-all hover:shadow-sm"
+                className="cursor-pointer group relative p-6 rounded-3xl bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 transition-all hover:shadow-sm"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="space-y-1">
