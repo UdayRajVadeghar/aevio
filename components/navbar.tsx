@@ -106,16 +106,16 @@ export function Navbar() {
           )}
         >
           {/* Logo */}
-          <div className="flex items-center gap-2 mr-4">
+          <Link href="/" className="flex items-center gap-2 mr-4">
             <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
               <Zap size={18} fill="currentColor" />
             </div>
             {!isScrolled && (
-              <span className="font-bold text-lg tracking-tight whitespace-nowrap">
-                Aevio
+              <span className="font-bold text-lg tracking-tight whitespace-nowrap text-black dark:text-white">
+                aevio
               </span>
             )}
-          </div>
+          </Link>
 
           {/* Desktop Nav Items */}
           <div className="hidden md:flex items-center gap-1 relative h-10">
@@ -246,12 +246,12 @@ export function Navbar() {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-xl p-6 flex flex-col">
           <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
               <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
                 <Zap size={18} fill="currentColor" />
               </div>
-              <span className="font-bold text-lg">Aevio</span>
-            </div>
+              <span className="font-bold text-lg text-black dark:text-white">aevio</span>
+            </Link>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
               className="p-2 bg-muted rounded-full text-muted-foreground hover:text-foreground"
