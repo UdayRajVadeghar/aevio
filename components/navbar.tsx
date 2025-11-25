@@ -60,7 +60,8 @@ export function Navbar() {
   if (
     pathname?.startsWith("/onboarding") ||
     pathname?.startsWith("/authentication") ||
-    pathname?.startsWith("/planner/workout")
+    pathname?.startsWith("/planner/workout") ||
+    pathname?.startsWith("/journal/new")
   ) {
     return null;
   }

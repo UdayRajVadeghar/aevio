@@ -14,6 +14,18 @@ import {
   Tag,
 } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/shadcn/dialog";
+import { Button } from "@/components/ui/shadcn/button";
 
 const journalEntries = [
   {
@@ -56,6 +68,7 @@ const journalEntries = [
 
 export default function JournalPage() {
   const [activeTab, setActiveTab] = useState("all");
+  const router = useRouter();
 
   return (
     <main className="relative min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-hidden font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
@@ -94,10 +107,36 @@ export default function JournalPage() {
               <Filter size={16} />
               <span>Filter</span>
             </button>
-            <button className="cursor-pointer group flex items-center gap-2 px-5 py-2.5 rounded-full bg-black dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity text-sm font-medium">
-              <Plus size={16} className="transition-transform group-hover:rotate-90" />
-              <span>New Entry</span>
-            </button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="cursor-pointer group flex items-center gap-2 px-5 py-2.5 rounded-full bg-black dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity text-sm font-medium">
+                  <Plus size={16} className="transition-transform group-hover:rotate-90" />
+                  <span>New Entry</span>
+                </button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Create New Entry?</DialogTitle>
+                  <DialogDescription>
+                    Ready to capture your thoughts and reflections in a new journal entry?
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="flex-col sm:justify-start gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => router.push("/journal/new")}
+                    className="w-full sm:w-auto"
+                  >
+                    Yes, Create Entry
+                  </Button>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline" className="w-full sm:w-auto">
+                      Cancel
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </motion.div>
 
@@ -215,4 +254,3 @@ export default function JournalPage() {
     </main>
   );
 }
-
