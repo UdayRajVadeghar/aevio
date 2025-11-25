@@ -12,6 +12,7 @@ import {
   Settings,
   Utensils,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function PlannerPage() {
   return (
@@ -54,30 +55,32 @@ export default function PlannerPage() {
         {/* Feature Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Workout Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="group relative p-8 rounded-3xl bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors overflow-hidden cursor-pointer"
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-neutral-100/50 dark:to-neutral-800/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Link href="/planner/workout" className="contents">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="group relative p-8 rounded-3xl bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors overflow-hidden cursor-pointer"
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-neutral-100/50 dark:to-neutral-800/20 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-            <Dumbbell className="absolute -bottom-4 -right-4 w-32 h-32 text-neutral-200 dark:text-neutral-800 opacity-20 -rotate-12 transition-transform duration-500 group-hover:scale-110" />
+              <Dumbbell className="absolute -bottom-4 -right-4 w-32 h-32 text-neutral-200 dark:text-neutral-800 opacity-20 -rotate-12 transition-transform duration-500 group-hover:scale-110" />
 
-            <div className="relative z-10">
-              <div className="w-12 h-12 rounded-2xl bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 flex items-center justify-center mb-6 text-blue-500">
-                <Dumbbell className="w-6 h-6" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-2xl bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 flex items-center justify-center mb-6 text-blue-500">
+                  <Dumbbell className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Workout Protocol</h3>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
+                  Hypertrophy, strength, or endurance. Tailored split routines
+                  and progressive overload tracking.
+                </p>
+                <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 group-hover:text-black dark:group-hover:text-white transition-colors">
+                  Create Plan →
+                </span>
               </div>
-              <h3 className="text-xl font-bold mb-2">Workout Protocol</h3>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4">
-                Hypertrophy, strength, or endurance. Tailored split routines and
-                progressive overload tracking.
-              </p>
-              <span className="text-xs font-medium uppercase tracking-wider text-neutral-400 group-hover:text-black dark:group-hover:text-white transition-colors">
-                Create Plan →
-              </span>
-            </div>
-          </motion.div>
+            </motion.div>
+          </Link>
 
           {/* Yoga/Mindfulness Card */}
           <motion.div
