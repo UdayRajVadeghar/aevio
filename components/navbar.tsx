@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { ChevronRight, LogOut, Menu, User, X, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface NavItem {
   label: string;
@@ -28,6 +28,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCompactMenuOpen, setIsCompactMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const compactMenuRef = useRef<HTMLDivElement>(null);
 
   const { data: session, isPending } = useSession();
 
@@ -55,6 +56,27 @@ export function Navbar() {
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [isScrolled]);
+
+  useEffect(() => {
+    if (!isCompactMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (
+        compactMenuRef.current &&
+        !compactMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsCompactMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isCompactMenuOpen]);
 
   // Early return after all hooks have been called
   if (
@@ -99,7 +121,10 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-1 relative h-10">
             {isScrolled ? (
               // Compact Mode: Show "Menu" trigger
-              <div className="relative flex items-center justify-center w-full h-full">
+              <div
+                ref={compactMenuRef}
+                className="relative flex items-center justify-center w-full h-full"
+              >
                 <button
                   onClick={() => setIsCompactMenuOpen(!isCompactMenuOpen)}
                   className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full hover:bg-muted/50 transition-colors"
