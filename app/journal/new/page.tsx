@@ -1,13 +1,30 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowLeft, Save, X, Tag, Zap, MapPin, Cloud, Smile, Meh, Frown, Activity, Moon, Sun, CloudRain, Type } from "lucide-react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
 import { Button } from "@/components/ui/shadcn/button";
 import { Input } from "@/components/ui/shadcn/input";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import {
+  Activity,
+  ArrowLeft,
+  Cloud,
+  Eye,
+  EyeOff,
+  Frown,
+  MapPin,
+  Meh,
+  Save,
+  Smile,
+  Sun,
+  Tag,
+  Type,
+  X,
+  Zap,
+} from "lucide-react";
 import { Caveat } from "next/font/google";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 const caveat = Caveat({
   subsets: ["latin"],
@@ -22,6 +39,89 @@ export default function NewEntryPage() {
   const [currentTag, setCurrentTag] = useState("");
   const [environment, setEnvironment] = useState<string | null>(null);
   const [isCursive, setIsCursive] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const updateCursorPosition = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const { selectionStart, value } = textarea;
+
+    // Create a mirror element to calculate cursor position
+    const div = document.createElement("div");
+    const style = window.getComputedStyle(textarea);
+
+    // Copy relevant styles
+    Array.from(style).forEach((prop) => {
+      div.style.setProperty(prop, style.getPropertyValue(prop));
+    });
+
+    div.style.position = "absolute";
+    div.style.visibility = "hidden";
+    div.style.whiteSpace = "pre-wrap";
+    div.style.top = "0";
+    div.style.left = "0";
+
+    // Text content up to the cursor
+    const textContent = value.substring(0, selectionStart);
+    div.textContent = textContent;
+
+    // Add a marker span
+    const span = document.createElement("span");
+    span.textContent = "|";
+    div.appendChild(span);
+
+    document.body.appendChild(div);
+
+    // Calculate position relative to the textarea
+    // We need to account for scrolling
+    const { offsetLeft, offsetTop } = span;
+    // For y, we subtract scrollTop to keep the "spotlight" aligned with the visible text
+    // However, since the overlay is absolutely positioned inside the relative container,
+    // and the textarea scrolls internally, we actually want the position relative to the SCROLLED content
+    // if the overlay SCROLLS with it?
+    // Wait, if the textarea scrolls, the text moves up.
+    // The caret position (offsetTop) increases as we type down.
+    // scrollTop increases.
+    // Visual Y = offsetTop - scrollTop.
+    const relativeX = offsetLeft;
+    const relativeY = offsetTop - textarea.scrollTop;
+
+    setCursorPos({ x: relativeX, y: relativeY });
+
+    document.body.removeChild(div);
+  };
+
+  const handleTyping = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (!isPrivate) return;
+
+    updateCursorPosition();
+    setIsTyping(true);
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+    }, 1000);
+  };
+
+  // Update cursor position on click or arrow keys too
+  const handleSelect = () => {
+    if (isPrivate) updateCursorPosition();
+  };
+
+  useEffect(() => {
+    if (!isPrivate) {
+      setIsTyping(false);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    }
+  }, [isPrivate]);
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && currentTag.trim()) {
@@ -42,7 +142,12 @@ export default function NewEntryPage() {
     { value: "happy", icon: Smile, label: "Happy", color: "text-green-500" },
     { value: "neutral", icon: Meh, label: "Neutral", color: "text-blue-500" },
     { value: "down", icon: Frown, label: "Low", color: "text-neutral-500" },
-    { value: "drained", icon: Activity, label: "Drained", color: "text-red-500" },
+    {
+      value: "drained",
+      icon: Activity,
+      label: "Drained",
+      color: "text-red-500",
+    },
   ];
 
   const environments = [
@@ -53,12 +158,14 @@ export default function NewEntryPage() {
   ];
 
   return (
-    <main className={cn(
-      "min-h-screen bg-white dark:bg-black text-black dark:text-white font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black",
-      isCursive && caveat.className
-    )}>
+    <main
+      className={cn(
+        "min-h-screen bg-white dark:bg-black text-black dark:text-white font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black",
+        isCursive && caveat.className
+      )}
+    >
       {/* Main Content */}
-      <div className="pt-24 pb-8 px-8 lg:px-16 max-w-[1600px] mx-auto">
+      <div className="pt-6 pb-8 px-8 lg:px-16 max-w-[1600px] mx-auto">
         {/* Top Bar - Back Button and Cursive Toggle */}
         <div className="flex items-center justify-between mb-6">
           <button
@@ -68,18 +175,21 @@ export default function NewEntryPage() {
             <ArrowLeft size={20} />
           </button>
 
-          <button
-            onClick={() => setIsCursive(!isCursive)}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all",
-              isCursive
-                ? "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
-                : "bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900"
-            )}
-          >
-            <Type size={16} />
-            {isCursive ? "Cursive On" : "Cursive Off"}
-          </button>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <button
+              onClick={() => setIsCursive(!isCursive)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all",
+                isCursive
+                  ? "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
+                  : "bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900"
+              )}
+            >
+              <Type size={16} />
+              {isCursive ? "Cursive On" : "Cursive Off"}
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
@@ -102,14 +212,87 @@ export default function NewEntryPage() {
             </div>
 
             {/* Main Content */}
-            <div className="space-y-3">
-              <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest">
-                Stream of Consciousness
-              </label>
-              <textarea
-                className="w-full min-h-[500px] resize-none bg-transparent text-2xl leading-relaxed border-none focus:ring-0 p-0 placeholder:text-neutral-300 dark:placeholder:text-neutral-700 focus:outline-none"
-                placeholder="Start writing..."
-              />
+            <div className="space-y-3 relative">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest">
+                  Stream of Consciousness
+                </label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsPrivate(!isPrivate)}
+                  className={cn(
+                    "h-8 px-3 rounded-full text-xs font-medium transition-all duration-500",
+                    isPrivate
+                      ? "bg-black text-white dark:bg-white dark:text-neutral-900 shadow-lg shadow-black/20"
+                      : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  )}
+                >
+                  {isPrivate ? (
+                    <>
+                      <EyeOff className="w-3.5 h-3.5 mr-2" />
+                      Hidden Mode
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="w-3.5 h-3.5 mr-2" />
+                      Visible
+                    </>
+                  )}
+                </Button>
+              </div>
+              <div className="relative group">
+                <textarea
+                  ref={textareaRef}
+                  onChange={handleTyping}
+                  onSelect={handleSelect}
+                  onScroll={handleSelect}
+                  className={cn(
+                    "w-full min-h-[500px] resize-none bg-transparent leading-relaxed border-none focus:ring-0 p-0 placeholder:text-neutral-300 dark:placeholder:text-neutral-700 focus:outline-none transition-all ease-in-out relative z-0",
+                    isPrivate ? "text-neutral-800 dark:text-neutral-200" : "",
+                    isCursive ? "text-4xl" : "text-2xl"
+                  )}
+                  placeholder="Start writing..."
+                />
+
+                {/* Blur Overlay with Spotlight Mask */}
+                {isPrivate && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 pointer-events-none z-10 backdrop-blur-[6px] bg-white/40 dark:bg-black/40 transition-all duration-[1500ms]"
+                    style={{
+                      maskImage: isTyping
+                        ? `radial-gradient(circle at ${cursorPos.x}px ${
+                            cursorPos.y + 16
+                          }px, transparent 0px, transparent 40px, black 120px)`
+                        : `radial-gradient(circle at ${cursorPos.x}px ${
+                            cursorPos.y + 16
+                          }px, transparent 0px, transparent 0px, black 60px)`,
+                      WebkitMaskImage: isTyping
+                        ? `radial-gradient(circle at ${cursorPos.x}px ${
+                            cursorPos.y + 16
+                          }px, transparent 0px, transparent 40px, black 120px)`
+                        : `radial-gradient(circle at ${cursorPos.x}px ${
+                            cursorPos.y + 16
+                          }px, transparent 0px, transparent 0px, black 60px)`,
+                    }}
+                  />
+                )}
+
+                {isPrivate && !isTyping && (
+                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-1000 z-20">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="text-neutral-400 dark:text-neutral-600 font-medium text-sm flex items-center gap-2 bg-white/50 dark:bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full border border-neutral-200/50 dark:border-neutral-800/50"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      Flow Mode Active - Keep Typing
+                    </motion.div>
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
 
@@ -138,7 +321,10 @@ export default function NewEntryPage() {
                           : "bg-neutral-50 dark:bg-neutral-900/50 border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 text-neutral-600 dark:text-neutral-400"
                       )}
                     >
-                      <m.icon size={20} className={mood === m.value ? "text-current" : m.color} />
+                      <m.icon
+                        size={20}
+                        className={mood === m.value ? "text-current" : m.color}
+                      />
                       <span className="text-xs font-medium">{m.label}</span>
                     </button>
                   ))}
@@ -149,7 +335,9 @@ export default function NewEntryPage() {
               <div className="space-y-4">
                 <label className="block text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-widest flex justify-between items-center">
                   <span>Energy Level</span>
-                  <span className="text-black dark:text-white font-mono text-sm">{energy}%</span>
+                  <span className="text-black dark:text-white font-mono text-sm">
+                    {energy}%
+                  </span>
                 </label>
                 <div className="relative flex items-center">
                   <input
@@ -176,7 +364,7 @@ export default function NewEntryPage() {
                       className={cn(
                         "flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all justify-center",
                         environment === env.value
-                          ? "bg-neutral-900 dark:bg-white text-white dark:text-black border-neutral-900 dark:border-white"
+                          ? "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
                           : "bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900"
                       )}
                     >
@@ -234,11 +422,11 @@ export default function NewEntryPage() {
           <Button
             variant="ghost"
             onClick={() => router.back()}
-            className="px-8 h-11 text-base"
+            className="px-8 h-11 text-base hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors rounded-full"
           >
             Discard
           </Button>
-          <Button className="rounded-full px-8 h-11 text-base font-semibold">
+          <Button className="rounded-full px-8 h-11 text-base font-semibold bg-black dark:bg-white text-white dark:text-black shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 border border-transparent dark:border-neutral-200">
             <Save className="w-4 h-4 mr-2" />
             Save Entry
           </Button>
