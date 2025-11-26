@@ -1,12 +1,22 @@
 "use client";
 
+import { Button } from "@/components/ui/shadcn/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/shadcn/dialog";
 import { motion } from "framer-motion";
 import {
   Book,
   Brain,
   Calendar,
   ChevronRight,
-  Edit3,
   Filter,
   MoreHorizontal,
   Plus,
@@ -14,19 +24,8 @@ import {
   Sparkles,
   Tag,
 } from "lucide-react";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/shadcn/dialog";
-import { Button } from "@/components/ui/shadcn/button";
+import { useState } from "react";
 
 const journalEntries = [
   {
@@ -111,7 +110,10 @@ export default function JournalPage() {
             <Dialog>
               <DialogTrigger asChild>
                 <button className="cursor-pointer group flex items-center gap-2 px-5 py-2.5 rounded-full bg-black dark:bg-white text-white dark:text-black hover:opacity-90 transition-opacity text-sm font-medium">
-                  <Plus size={16} className="transition-transform group-hover:rotate-90" />
+                  <Plus
+                    size={16}
+                    className="transition-transform group-hover:rotate-90"
+                  />
                   <span>New Entry</span>
                 </button>
               </DialogTrigger>
@@ -119,7 +121,8 @@ export default function JournalPage() {
                 <DialogHeader>
                   <DialogTitle>Create New Entry?</DialogTitle>
                   <DialogDescription>
-                    Ready to capture your thoughts and reflections in a new journal entry?
+                    Ready to capture your thoughts and reflections in a new
+                    journal entry?
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="flex-col sm:justify-start gap-2">
@@ -131,7 +134,11 @@ export default function JournalPage() {
                     Yes, Create Entry
                   </Button>
                   <DialogClose asChild>
-                    <Button type="button" variant="outline" className="w-full sm:w-auto">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full sm:w-auto"
+                    >
                       Cancel
                     </Button>
                   </DialogClose>
@@ -175,14 +182,17 @@ export default function JournalPage() {
               className="group relative overflow-hidden p-6 rounded-3xl bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              
+
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-neutral-900 dark:text-white">Memory Lane</h3>
+                  <h3 className="font-bold text-neutral-900 dark:text-white">
+                    Memory Lane
+                  </h3>
                   <Brain className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
                 </div>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6 leading-relaxed">
-                  Revisit your memories with AI. Discover patterns and insights from your past entries.
+                  Revisit your memories with AI. Discover patterns and insights
+                  from your past entries.
                 </p>
                 <button className="cursor-pointer w-full py-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors text-neutral-900 dark:text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2">
                   <Sparkles size={14} />
@@ -248,7 +258,7 @@ export default function JournalPage() {
                     <MoreHorizontal size={16} />
                   </button>
                 </div>
-                
+
                 <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6 line-clamp-2">
                   {entry.preview}
                 </p>
