@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import {
   Book,
+  Brain,
   Calendar,
   ChevronRight,
   Edit3,
@@ -165,6 +166,29 @@ export default function JournalPage() {
               <p className="mt-4 text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
                 You're on a roll. Consistency is the key to clarity.
               </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.25 }}
+              className="group relative overflow-hidden p-6 rounded-3xl bg-white dark:bg-neutral-900/30 border border-neutral-200 dark:border-neutral-800"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-neutral-900 dark:text-white">Memory Lane</h3>
+                  <Brain className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+                </div>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6 leading-relaxed">
+                  Revisit your memories with AI. Discover patterns and insights from your past entries.
+                </p>
+                <button className="cursor-pointer w-full py-2.5 rounded-xl bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors text-neutral-900 dark:text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+                  <Sparkles size={14} />
+                  <span>Start Recap</span>
+                </button>
+              </div>
             </motion.div>
 
             <motion.div

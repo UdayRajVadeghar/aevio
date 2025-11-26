@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { ChevronRight, LogOut, Menu, User, X, Zap } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface NavItem {
   label: string;
@@ -28,7 +28,6 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCompactMenuOpen, setIsCompactMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const compactMenuRef = useRef<HTMLDivElement>(null);
 
   const { data: session, isPending } = useSession();
 
@@ -56,27 +55,6 @@ export function Navbar() {
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [isScrolled]);
-
-  useEffect(() => {
-    if (!isCompactMenuOpen) return;
-
-    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      if (
-        compactMenuRef.current &&
-        !compactMenuRef.current.contains(event.target as Node)
-      ) {
-        setIsCompactMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, [isCompactMenuOpen]);
 
   // Early return after all hooks have been called
   if (
@@ -106,25 +84,22 @@ export function Navbar() {
           )}
         >
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 mr-4">
+          <div className="flex items-center gap-2 mr-4">
             <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
               <Zap size={18} fill="currentColor" />
             </div>
             {!isScrolled && (
-              <span className="font-bold text-lg tracking-tight whitespace-nowrap text-black dark:text-white">
-                aevio
+              <span className="font-bold text-lg tracking-tight whitespace-nowrap">
+                Aevio
               </span>
             )}
-          </Link>
+          </div>
 
           {/* Desktop Nav Items */}
           <div className="hidden md:flex items-center gap-1 relative h-10">
             {isScrolled ? (
               // Compact Mode: Show "Menu" trigger
-              <div
-                ref={compactMenuRef}
-                className="relative flex items-center justify-center w-full h-full"
-              >
+              <div className="relative flex items-center justify-center w-full h-full">
                 <button
                   onClick={() => setIsCompactMenuOpen(!isCompactMenuOpen)}
                   className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full hover:bg-muted/50 transition-colors"
@@ -246,12 +221,12 @@ export function Navbar() {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-xl p-6 flex flex-col">
           <div className="flex items-center justify-between mb-8">
-            <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
+            <div className="flex items-center gap-2">
               <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
                 <Zap size={18} fill="currentColor" />
               </div>
-              <span className="font-bold text-lg text-black dark:text-white">aevio</span>
-            </Link>
+              <span className="font-bold text-lg">Aevio</span>
+            </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
               className="p-2 bg-muted rounded-full text-muted-foreground hover:text-foreground"
