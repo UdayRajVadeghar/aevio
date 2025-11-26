@@ -14,11 +14,8 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Features", href: "#features" },
   { label: "Planner", href: "/planner" },
   { label: "Journal", href: "/journal" },
-  { label: "About", href: "#about" },
-  { label: "Blog", href: "#blog" },
 ];
 
 export function Navbar() {
@@ -186,22 +183,11 @@ export function Navbar() {
             ) : (
               // Not logged in: Show login/signup buttons
               <>
-                {!isScrolled && (
-                  <Link
-                    href="/authentication"
-                    className="hidden sm:block px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-                  >
-                    Log in
-                  </Link>
-                )}
                 <Link
                   href="/authentication"
-                  className={cn(
-                    "px-4 py-2 text-sm font-medium rounded-full bg-foreground text-background hover:bg-foreground/90 transition-colors whitespace-nowrap",
-                    isScrolled ? "px-5" : "px-4"
-                  )}
+                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
                 >
-                  Get Started
+                  Log in
                 </Link>
               </>
             )}
@@ -279,13 +265,6 @@ export function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Log in
-                </Link>
-                <Link
-                  href="/authentication"
-                  className="text-xl font-medium text-primary hover:text-primary/80 transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Get Started
                 </Link>
               </>
             )}
