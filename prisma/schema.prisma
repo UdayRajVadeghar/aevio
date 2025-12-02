@@ -26,6 +26,7 @@ model User {
   accounts      Account[]
   profile       UserProfile?
   onBoardingStatus onBoardingStatus?
+  workouts Workout[]
   @@unique([email])
   @@map("user")
 }
@@ -181,3 +182,13 @@ model onBoardingStatus{
   @@unique([userId])
 } 
 
+
+
+model Workout {
+  id          String   @id @default(cuid())
+  userId      String
+  rawWorkout  Json
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
