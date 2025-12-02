@@ -25,7 +25,7 @@ import {
   User,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 // --- Types ---
 
@@ -49,7 +49,6 @@ type FormData = {
   // Schedule
   workoutDays: number;
   workoutDuration: number;
-  preferredTrainingDays: string[];
 
   // Preferences
   trainingStyle: string[];
@@ -74,7 +73,6 @@ const initialData: FormData = {
   stepCount: "",
   workoutDays: 3,
   workoutDuration: 45,
-  preferredTrainingDays: [],
   trainingStyle: [],
   targetBodyParts: [],
   equipmentAvailable: [],
@@ -152,11 +150,11 @@ export default function PlannerSetupWizard() {
     // Handle skip completion here
   };
 
-  const updateField = (field: keyof FormData, value: any) => {
+  const updateField = useCallback((field: keyof FormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
-  const toggleArrayItem = (field: keyof FormData, item: string) => {
+  const toggleArrayItem = useCallback((field: keyof FormData, item: string) => {
     setFormData((prev) => {
       const current = prev[field] as string[];
       if (current.includes(item)) {
@@ -165,9 +163,9 @@ export default function PlannerSetupWizard() {
         return { ...prev, [field]: [...current, item] };
       }
     });
-  };
+  }, []);
 
-  const StepContent = () => {
+  const stepContent = useMemo(() => {
     switch (currentStep) {
       case 0:
         return (
@@ -288,6 +286,8 @@ export default function PlannerSetupWizard() {
               <Input
                 type="number"
                 placeholder="e.g. 5000"
+                min={100}
+                max={50000}
                 value={formData.stepCount}
                 onChange={(e) => updateField("stepCount", e.target.value)}
               />
@@ -298,6 +298,9 @@ export default function PlannerSetupWizard() {
               <Input
                 type="number"
                 placeholder="e.g. 7.5"
+                min={1}
+                max={24}
+                step={0.5}
                 value={formData.sleepHours}
                 onChange={(e) => updateField("sleepHours", e.target.value)}
               />
@@ -346,6 +349,9 @@ export default function PlannerSetupWizard() {
                 <Input
                   type="number"
                   placeholder="%"
+                  min={3}
+                  max={60}
+                  step={0.1}
                   value={formData.bodyFatPercentage}
                   onChange={(e) =>
                     updateField("bodyFatPercentage", e.target.value)
@@ -357,6 +363,8 @@ export default function PlannerSetupWizard() {
                 <Input
                   type="number"
                   placeholder="bpm"
+                  min={30}
+                  max={200}
                   value={formData.restingHeartRate}
                   onChange={(e) =>
                     updateField("restingHeartRate", e.target.value)
@@ -368,6 +376,8 @@ export default function PlannerSetupWizard() {
                 <Input
                   type="number"
                   placeholder="cm"
+                  min={40}
+                  max={200}
                   value={formData.waistCircumference}
                   onChange={(e) =>
                     updateField("waistCircumference", e.target.value)
@@ -379,6 +389,8 @@ export default function PlannerSetupWizard() {
                 <Input
                   type="number"
                   placeholder="cm"
+                  min={50}
+                  max={200}
                   value={formData.hipCircumference}
                   onChange={(e) =>
                     updateField("hipCircumference", e.target.value)
@@ -419,66 +431,13 @@ export default function PlannerSetupWizard() {
                     onClick={() => updateField("workoutDuration", mins)}
                     className={`px-3 py-2 rounded-lg border text-sm transition-all cursor-pointer ${
                       formData.workoutDuration === mins
-                        ? "bg-black dark:bg-white text-white dark:text-black border-transparent shadow-md"
-                        : "bg-transparent border-neutral-200 dark:border-neutral-800 hover:border-neutral-400"
+                        ? "bg-blue-600 dark:bg-blue-500 text-white border-transparent shadow-md"
+                        : "bg-transparent border-neutral-200 dark:border-neutral-800 hover:border-blue-400 dark:hover:border-blue-600"
                     }`}
                   >
                     {mins}m
                   </button>
                 ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Preferred Days</label>
-              <div className="flex flex-wrap gap-2">
-                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
-                  (day) => {
-                    const fullDay =
-                      day.toLowerCase() +
-                      (day === "Wed"
-                        ? "nesday"
-                        : day === "Thu"
-                        ? "rsday"
-                        : day === "Sat"
-                        ? "urday"
-                        : day === "Sun"
-                        ? "day"
-                        : "day");
-                    // Simple mapping for demo, usually would use a library or proper map
-                    const value =
-                      day === "Mon"
-                        ? "monday"
-                        : day === "Tue"
-                        ? "tuesday"
-                        : day === "Wed"
-                        ? "wednesday"
-                        : day === "Thu"
-                        ? "thursday"
-                        : day === "Fri"
-                        ? "friday"
-                        : day === "Sat"
-                        ? "saturday"
-                        : "sunday";
-                    const isSelected =
-                      formData.preferredTrainingDays.includes(value);
-                    return (
-                      <button
-                        key={day}
-                        onClick={() =>
-                          toggleArrayItem("preferredTrainingDays", value)
-                        }
-                        className={`px-3 py-1 rounded-full text-xs border transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-emerald-500 text-white border-transparent shadow-sm"
-                            : "bg-transparent border-neutral-200 dark:border-neutral-800 hover:border-emerald-300 dark:hover:border-emerald-700"
-                        }`}
-                      >
-                        {day}
-                      </button>
-                    );
-                  }
-                )}
               </div>
             </div>
           </div>
@@ -664,7 +623,7 @@ export default function PlannerSetupWizard() {
       default:
         return null;
     }
-  };
+  }, [currentStep, formData, updateField, toggleArrayItem]);
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -686,7 +645,7 @@ export default function PlannerSetupWizard() {
         </div>
       </div>
 
-      <div className="relative min-h-[400px] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-8 shadow-xl shadow-neutral-200/50 dark:shadow-neutral-900/50 overflow-hidden">
+      <div className="relative min-h-[400px] bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border border-neutral-200 dark:border-neutral-800 rounded-3xl p-8 shadow-xl shadow-neutral-200/50 dark:shadow-neutral-900/50 overflow-hidden">
         <div className="relative z-10">
           <div className="mb-8">
             <h2 className="text-2xl font-bold tracking-tight mb-1">
@@ -705,7 +664,7 @@ export default function PlannerSetupWizard() {
               exit={{ x: direction > 0 ? -20 : 20, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <StepContent />
+              {stepContent}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -730,7 +689,7 @@ export default function PlannerSetupWizard() {
 
           <Button
             onClick={handleNext}
-            className="bg-black hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-black px-8 cursor-pointer"
+            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-8 cursor-pointer"
           >
             {currentStep === steps.length - 1 ? "Finish" : "Next"}{" "}
             <ArrowRight className="w-4 h-4 ml-2" />
