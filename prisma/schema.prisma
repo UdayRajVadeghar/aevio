@@ -93,6 +93,41 @@ model UserProfile {
   primaryGoal           String?   // "lose_weight", "build_muscle", "improve_sleep", etc.
   dietaryPreference     String?   // "veg", "non_veg", "vegan", "keto"
 
+  // Body Composition (optional but powerful for scientific plans)
+  bodyFatPercentage     Float?    // percentage
+  waistCircumference    Float?    // cm
+  hipCircumference      Float?    // cm
+  restingHeartRate      Int?      // bpm
+
+  // Experience & Skill Level
+  trainingExperience    String?   // "beginner", "intermediate", "advanced"
+  exerciseFamiliarity   Json?     // { squat: true, deadlift: false, pullup: true, pushup: true }
+  
+  // Equipment Availability
+  equipmentAvailable    Json?     // { gym: true, dumbbells: { available: true, weightRange: "5-50" }, resistanceBands: true, pullupBar: false, bench: true, barbellPlates: true, machines: true, cardioEquipment: true }
+
+  // Workout Schedule & Preferences
+  workoutDays           Int?      // number of days per week (1-7)
+  workoutDuration       Int?      // preferred duration in minutes (20, 30, 45, 60, 90)
+  preferredTrainingDays String[]  // ["monday", "wednesday", "friday"]
+  
+  // Training Style & Preferences
+  trainingStyle         String[]  // ["hiit", "strength", "calisthenics", "yoga", "functional", "crossfit", "pilates"]
+  targetBodyParts       String[]  // ["chest", "shoulders", "arms", "abs", "legs", "back"]
+  exerciseDislikes      String[]  // ["running", "burpees", "jumping jacks"]
+  
+  // Lifestyle Factors
+  stepCount             Int?      // daily step count target
+  sleepHours            Float?    // hours per day
+  stressLevel           Int?      // 1-5 scale
+  workType              String?   // "desk_job", "on_feet", "heavy_labor"
+
+  // Restrictions & Safety
+  injuries              Json?     // [{ area: "knee", severity: "mild", notes: "avoid deep squats" }]
+
+  // Accountability & Motivation
+  motivationStyle       String?   // "strict", "chill", "encouraging"
+
   // Journaling
   journalingStyle       String?   // "daily_reflections", "gratitude", "mood_logs", "freeform"
   journalingTimeOfDay   String?   // "morning", "evening", "no_preference"
