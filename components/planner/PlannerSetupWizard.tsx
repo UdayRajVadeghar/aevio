@@ -10,6 +10,8 @@ import {
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
 import { Input } from "@/components/ui/shadcn/input";
+import { authClient } from "@/lib/auth-client";
+import { useWorkoutPlannerStore } from "@/lib/store/workout-planner-store";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
@@ -20,16 +22,18 @@ import {
   Dumbbell,
   Flame,
   Footprints,
+  Loader2,
   SkipForward,
   Sparkles,
   User,
   Zap,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
-// --- Types ---
+// --- Types for UI form (strings for inputs) ---
 
-type FormData = {
+type FormDataUI = {
   // Experience
   trainingExperience: string;
   motivationStyle: string;
@@ -61,13 +65,19 @@ type FormData = {
 };
 
 /**
- * Transforms form data to match the Prisma schema types before database save.
- * - Converts exerciseDislikes from comma-separated string to string[]
- * - Converts injuries from string to JSON format
+ * Transforms form data to match the store/API types before saving.
  */
-function prepareFormDataForDatabase(data: FormData) {
+function prepareFormDataForStore(data: FormDataUI) {
   return {
-    ...data,
+    trainingExperience: data.trainingExperience,
+    motivationStyle: data.motivationStyle,
+    workType: data.workType,
+    stressLevel: data.stressLevel,
+    workoutDays: data.workoutDays,
+    workoutDuration: data.workoutDuration,
+    trainingStyle: data.trainingStyle,
+    targetBodyParts: data.targetBodyParts,
+    equipmentAvailable: data.equipmentAvailable,
     // Convert comma-separated string to array, filtering out empty strings
     exerciseDislikes: data.exerciseDislikes
       .split(",")
@@ -95,7 +105,7 @@ function prepareFormDataForDatabase(data: FormData) {
   };
 }
 
-const initialData: FormData = {
+const initialData: FormDataUI = {
   trainingExperience: "",
   motivationStyle: "",
   bodyFatPercentage: "",
@@ -153,19 +163,66 @@ const steps = [
 
 export default function PlannerSetupWizard() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<FormData>(initialData);
+  const [formData, setFormData] = useState<FormDataUI>(initialData);
   const [direction, setDirection] = useState(0);
   const [showSkipDialog, setShowSkipDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter();
+  const userId = authClient.useSession().data?.user?.id;
+  const { completeWorkoutPlanner } = useWorkoutPlannerStore();
+
+  const handleSubmit = async (skipSetup: boolean = false) => {
+    if (!userId) {
+      setError("User not authenticated");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Prepare form data for the store/API
+      const storeReadyData = skipSetup
+        ? prepareFormDataForStore(initialData)
+        : prepareFormDataForStore(formData);
+
+      // Save to backend through the store
+      const response = await fetch("/api/user/workout-planner/complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          workoutPlannerData: storeReadyData,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save workout planner");
+      }
+
+      // Redirect to workout generate page after completion
+      router.push("/planner/workout/generate");
+    } catch (err) {
+      console.error("Failed to complete workout planner:", err);
+      setError(
+        err instanceof Error ? err.message : "Failed to save workout planner"
+      );
+      setIsSubmitting(false);
+    }
+  };
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setDirection(1);
       setCurrentStep(currentStep + 1);
     } else {
-      // Transform form data to match Prisma schema types before submission
-      const dbReadyData = prepareFormDataForDatabase(formData);
-      console.log("Submit:", dbReadyData);
-      // Handle completion - data is now ready for database save
+      // Final step - submit the form
+      handleSubmit(false);
     }
   };
 
@@ -181,26 +238,28 @@ export default function PlannerSetupWizard() {
   };
 
   const handleConfirmSkip = () => {
-    // Logic to skip remaining steps
-    console.log("Skipped setup - using defaults");
     setShowSkipDialog(false);
-    // Handle skip completion here
+    // Submit with default/empty values
+    handleSubmit(true);
   };
 
-  const updateField = useCallback((field: keyof FormData, value: any) => {
+  const updateField = useCallback((field: keyof FormDataUI, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
-  const toggleArrayItem = useCallback((field: keyof FormData, item: string) => {
-    setFormData((prev) => {
-      const current = prev[field] as string[];
-      if (current.includes(item)) {
-        return { ...prev, [field]: current.filter((i) => i !== item) };
-      } else {
-        return { ...prev, [field]: [...current, item] };
-      }
-    });
-  }, []);
+  const toggleArrayItem = useCallback(
+    (field: keyof FormDataUI, item: string) => {
+      setFormData((prev) => {
+        const current = prev[field] as string[];
+        if (current.includes(item)) {
+          return { ...prev, [field]: current.filter((i) => i !== item) };
+        } else {
+          return { ...prev, [field]: [...current, item] };
+        }
+      });
+    },
+    []
+  );
 
   const stepContent = useMemo(() => {
     switch (currentStep) {
@@ -706,11 +765,24 @@ export default function PlannerSetupWizard() {
           </AnimatePresence>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-red-600 dark:text-red-400 text-sm"
+          >
+            <AlertCircle className="w-4 h-4" />
+            {error}
+          </motion.div>
+        )}
+
         {/* Navigation */}
         <div className="flex items-center justify-between mt-12 pt-6 border-t border-neutral-100 dark:border-neutral-800">
           <Button
             variant="ghost"
             onClick={currentStep === 0 ? handleSkipClick : handleBack}
+            disabled={isSubmitting}
             className="text-neutral-500 hover:text-black dark:hover:text-white cursor-pointer"
           >
             {currentStep === 0 ? (
@@ -726,10 +798,20 @@ export default function PlannerSetupWizard() {
 
           <Button
             onClick={handleNext}
-            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-8 cursor-pointer"
+            disabled={isSubmitting}
+            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-8 cursor-pointer disabled:opacity-50"
           >
-            {currentStep === steps.length - 1 ? "Finish" : "Next"}{" "}
-            <ArrowRight className="w-4 h-4 ml-2" />
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Saving...
+              </span>
+            ) : (
+              <>
+                {currentStep === steps.length - 1 ? "Finish" : "Next"}{" "}
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -756,6 +838,7 @@ export default function PlannerSetupWizard() {
             <Button
               variant="outline"
               onClick={() => setShowSkipDialog(false)}
+              disabled={isSubmitting}
               className="flex-1 cursor-pointer"
             >
               Continue Setup
@@ -763,9 +846,17 @@ export default function PlannerSetupWizard() {
             <Button
               variant="ghost"
               onClick={handleConfirmSkip}
+              disabled={isSubmitting}
               className="flex-1 text-neutral-500 hover:text-neutral-700 cursor-pointer"
             >
-              Skip Anyway
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </span>
+              ) : (
+                "Skip Anyway"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

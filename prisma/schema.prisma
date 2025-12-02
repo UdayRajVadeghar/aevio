@@ -143,6 +143,9 @@ model UserProfile {
   onboardingCompleted   Boolean   @default(false)
   onboardingStep        Int       @default(0)
 
+  // Workout Planner Status
+  workoutPlannerCompleted Boolean @default(false)
+
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
