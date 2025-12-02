@@ -292,7 +292,7 @@ export default function PlannerPage() {
                               initial={{ opacity: 0 }}
                               whileInView={{ opacity: 1 }}
                               transition={{ delay: 0.5 + i * 0.1 }}
-                              className="absolute inset-0 bg-black dark:bg-white opacity-80 group-hover:opacity-100 transition-opacity"
+                              className="absolute inset-0 bg-neutral-600 dark:bg-neutral-200 opacity-80 group-hover:opacity-100 transition-opacity"
                             />
                           </motion.div>
                           <span className="text-[10px] font-mono text-neutral-500 dark:text-neutral-600 group-hover:text-black dark:group-hover:text-white transition-colors">
