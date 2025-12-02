@@ -109,7 +109,6 @@ model UserProfile {
   // Workout Schedule & Preferences
   workoutDays           Int?      // number of days per week (1-7)
   workoutDuration       Int?      // preferred duration in minutes (20, 30, 45, 60, 90)
-  preferredTrainingDays String[]  // ["monday", "wednesday", "friday"]
   
   // Training Style & Preferences
   trainingStyle         String[]  // ["hiit", "strength", "calisthenics", "yoga", "functional", "crossfit", "pilates"]
