@@ -54,11 +54,46 @@ type FormData = {
   trainingStyle: string[];
   targetBodyParts: string[];
   equipmentAvailable: string[];
-  exerciseDislikes: string; // Comma separated for UI
+  exerciseDislikes: string; // Comma separated for UI, converted to array before DB save
 
   // Safety
-  injuries: string; // Simplified for UI
+  injuries: string; // Simplified for UI, converted to JSON before DB save
 };
+
+/**
+ * Transforms form data to match the Prisma schema types before database save.
+ * - Converts exerciseDislikes from comma-separated string to string[]
+ * - Converts injuries from string to JSON format
+ */
+function prepareFormDataForDatabase(data: FormData) {
+  return {
+    ...data,
+    // Convert comma-separated string to array, filtering out empty strings
+    exerciseDislikes: data.exerciseDislikes
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter((s) => s.length > 0),
+    // Convert injuries string to JSON format for Prisma
+    injuries: data.injuries.trim()
+      ? [{ description: data.injuries.trim() }]
+      : null,
+    // Convert string numbers to proper types
+    bodyFatPercentage: data.bodyFatPercentage
+      ? parseFloat(data.bodyFatPercentage)
+      : null,
+    waistCircumference: data.waistCircumference
+      ? parseFloat(data.waistCircumference)
+      : null,
+    hipCircumference: data.hipCircumference
+      ? parseFloat(data.hipCircumference)
+      : null,
+    restingHeartRate: data.restingHeartRate
+      ? parseInt(data.restingHeartRate, 10)
+      : null,
+    stepCount: data.stepCount ? parseInt(data.stepCount, 10) : null,
+    sleepHours: data.sleepHours ? parseFloat(data.sleepHours) : null,
+  };
+}
 
 const initialData: FormData = {
   trainingExperience: "",
@@ -127,8 +162,10 @@ export default function PlannerSetupWizard() {
       setDirection(1);
       setCurrentStep(currentStep + 1);
     } else {
-      console.log("Submit:", formData);
-      // Handle completion
+      // Transform form data to match Prisma schema types before submission
+      const dbReadyData = prepareFormDataForDatabase(formData);
+      console.log("Submit:", dbReadyData);
+      // Handle completion - data is now ready for database save
     }
   };
 
