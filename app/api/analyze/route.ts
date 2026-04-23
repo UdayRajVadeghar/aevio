@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { uploadImage } from "@/lib/gcs";
 import { analyzeMealFromGcs } from "@/lib/gemini";
+import { getCurrentIstTime } from "@/lib/ist-time";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -106,17 +107,48 @@ export async function POST(req: NextRequest) {
       mealHint || undefined,
     );
     const detectedItems = result.plateContents.items;
-    await db.mealAnalysis.update({
-      where: { id: row.id },
-      data: {
-        status: "COMPLETE",
-        calories: result.calories,
-        protein: result.protein,
-        carbs: result.carbs,
-        fat: result.fat,
-        foodItems: result.plateContents,
-      },
-    });
+    const istNow = await getCurrentIstTime();
+    const [, dailyCalories] = await db.$transaction([
+      db.mealAnalysis.update({
+        where: { id: row.id },
+        data: {
+          status: "COMPLETE",
+          calories: result.calories,
+          protein: result.protein,
+          carbs: result.carbs,
+          fat: result.fat,
+          foodItems: result.plateContents,
+          loggedAtIst: istNow.loggedAtIst,
+          loggedDateIst: istNow.loggedDateIst,
+          loggedTimezone: istNow.loggedTimezone,
+        },
+      }),
+      db.dailyCalorieTotal.upsert({
+        where: {
+          userId_dateKey: {
+            userId,
+            dateKey: istNow.loggedDateIst,
+          },
+        },
+        update: {
+          totalCalories: {
+            increment: result.calories,
+          },
+          timezone: istNow.loggedTimezone,
+        },
+        create: {
+          userId,
+          dateKey: istNow.loggedDateIst,
+          timezone: istNow.loggedTimezone,
+          totalCalories: result.calories,
+        },
+        select: {
+          totalCalories: true,
+          dateKey: true,
+          timezone: true,
+        },
+      }),
+    ]);
 
     return NextResponse.json({
       id: row.id,
@@ -129,6 +161,10 @@ export async function POST(req: NextRequest) {
       plateContents: result.plateContents,
       confidence: result.confidence,
       llmResponse: rawText,
+      loggedAtIst: istNow.loggedAtIst,
+      loggedDateIst: dailyCalories.dateKey,
+      loggedTimezone: dailyCalories.timezone,
+      todayCaloriesTotal: dailyCalories.totalCalories,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

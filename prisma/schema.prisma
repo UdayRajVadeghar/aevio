@@ -28,6 +28,7 @@ model User {
   onBoardingStatus onBoardingStatus?
   workouts Workout[]
   mealAnalyses MealAnalysis[]
+  dailyCalorieTotals DailyCalorieTotal[]
   @@unique([email])
   @@map("user")
 }
@@ -195,21 +196,39 @@ model Workout {
 }
 
 model MealAnalysis {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  imageUrl   String
-  gcsUri     String
-  status     String   @default("PENDING") // PENDING | COMPLETE | FAILED
-  calories   Float?
-  protein    Float?
-  carbs      Float?
-  fat        Float?
-  foodItems  Json?
-  errorMsg   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  imageUrl       String
+  gcsUri         String
+  status         String   @default("PENDING") // PENDING | COMPLETE | FAILED
+  calories       Float?
+  protein        Float?
+  carbs          Float?
+  fat            Float?
+  foodItems      Json?
+  errorMsg       String?
+  loggedAtIst    DateTime?
+  loggedDateIst  String?
+  loggedTimezone String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([userId, createdAt])
+  @@index([userId, loggedDateIst])
   @@map("meal_analysis")
+}
+
+model DailyCalorieTotal {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dateKey       String
+  timezone      String
+  totalCalories Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, dateKey])
+  @@map("user_daily_calories")
 }
