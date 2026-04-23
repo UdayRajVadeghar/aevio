@@ -50,6 +50,8 @@ type AnalyzeResult = {
   llmResponse: string;
 };
 
+const MAX_MEAL_HINT_LENGTH = 180;
+
 function formatLlmResponse(text: string): string {
   try {
     return JSON.stringify(JSON.parse(text), null, 2);
@@ -63,12 +65,14 @@ export default function CalculatePage() {
   const [stage, setStage] = useState<Stage>("idle");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [mealHint, setMealHint] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [subStatus, setSubStatus] = useState<"Uploading…" | "Analyzing…">(
     "Uploading…",
   );
   const [result, setResult] = useState<AnalyzeResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const trimmedMealHint = mealHint.trim();
 
   const handleCapture = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,6 +103,7 @@ export default function CalculatePage() {
     if (imageUrl) URL.revokeObjectURL(imageUrl);
     setImageUrl(null);
     setFile(null);
+    setMealHint("");
     setResult(null);
     setErrorMessage("");
     setStage("idle");
@@ -114,6 +119,9 @@ export default function CalculatePage() {
 
     const fd = new FormData();
     fd.append("image", file);
+    if (trimmedMealHint) {
+      fd.append("mealHint", trimmedMealHint);
+    }
 
     try {
       const res = await fetch("/api/analyze", {
@@ -133,7 +141,7 @@ export default function CalculatePage() {
     } finally {
       window.clearTimeout(flipTimer);
     }
-  }, [file]);
+  }, [file, trimmedMealHint]);
 
   return (
     <main className="relative min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-hidden selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black font-sans">
@@ -371,6 +379,43 @@ export default function CalculatePage() {
                 <p className="text-xs text-neutral-500 font-mono">
                   Neural engine standing by for analysis.
                 </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="mt-4 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-bold tracking-tight uppercase">
+                      Known Meal Details
+                    </p>
+                    <p className="text-xs text-neutral-500 font-mono mt-1">
+                      Optional. Add the item name, brand, or amount if you already know it.
+                    </p>
+                  </div>
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 shrink-0">
+                    Optional
+                  </p>
+                </div>
+
+                <textarea
+                  value={mealHint}
+                  onChange={(e) => setMealHint(e.target.value)}
+                  rows={2}
+                  maxLength={MAX_MEAL_HINT_LENGTH}
+                  placeholder="McDonald's Double Cheeseburger, 1 burger"
+                  className="mt-4 w-full resize-none border border-black/10 dark:border-white/10 bg-white dark:bg-black px-4 py-3 text-sm text-black dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white"
+                />
+
+                <div className="mt-2 flex items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                  <p>Used only to improve estimate accuracy</p>
+                  <p>
+                    {mealHint.length}/{MAX_MEAL_HINT_LENGTH}
+                  </p>
+                </div>
               </motion.div>
 
               {/* Actions */}

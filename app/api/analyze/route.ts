@@ -17,6 +17,7 @@ const ALLOWED_MIME = new Set([
   "image/webp",
 ]);
 const MAX_BYTES = 10 * 1024 * 1024;
+const MAX_MEAL_HINT_LENGTH = 180;
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -39,6 +40,24 @@ export async function POST(req: NextRequest) {
   if (!(fileEntry instanceof File)) {
     return NextResponse.json(
       { error: "Missing 'image' field in FormData" },
+      { status: 400 },
+    );
+  }
+
+  const mealHintEntry = form.get("mealHint");
+  if (mealHintEntry instanceof File) {
+    return NextResponse.json(
+      { error: "Invalid 'mealHint' field in FormData" },
+      { status: 400 },
+    );
+  }
+
+  const mealHint = mealHintEntry?.trim() ?? "";
+  if (mealHint.length > MAX_MEAL_HINT_LENGTH) {
+    return NextResponse.json(
+      {
+        error: `Meal details must be ${MAX_MEAL_HINT_LENGTH} characters or fewer`,
+      },
       { status: 400 },
     );
   }
@@ -84,6 +103,7 @@ export async function POST(req: NextRequest) {
     const { result, rawText } = await analyzeMealFromGcs(
       uploaded.gcsUri,
       mimeType,
+      mealHint || undefined,
     );
     const detectedItems = result.plateContents.items;
     await db.mealAnalysis.update({
