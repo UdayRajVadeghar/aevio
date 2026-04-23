@@ -14,7 +14,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Planner", href: "/planner" },
+  { label: "Analyze", href: "/analyze" },
   { label: "Journal", href: "/journal" },
 ];
 
@@ -125,7 +125,7 @@ export function Navbar() {
               >
                 <button
                   onClick={() => setIsCompactMenuOpen(!isCompactMenuOpen)}
-                  className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full hover:bg-muted/50 transition-colors"
+                  className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full hover:bg-muted/50 transition-colors cursor-pointer"
                 >
                   Menu
                   <ChevronRight
@@ -143,7 +143,7 @@ export function Navbar() {
                       <Link
                         key={item.label}
                         href={item.href}
-                        className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                        className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer"
                         onClick={() => setIsCompactMenuOpen(false)}
                       >
                         {item.label}
@@ -159,7 +159,7 @@ export function Navbar() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-colors cursor-pointer"
                   >
                     {item.label}
                   </Link>
@@ -178,7 +178,7 @@ export function Navbar() {
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className={cn(
-                    "flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors",
+                    "flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer",
                     isScrolled ? "size-9" : "size-10"
                   )}
                 >
@@ -198,7 +198,7 @@ export function Navbar() {
                     </div>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2 mt-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                      className="w-full flex items-center gap-2 px-4 py-2 mt-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer"
                     >
                       <LogOut size={16} />
                       Log out
@@ -211,7 +211,7 @@ export function Navbar() {
               <>
                 <Link
                   href="/authentication"
-                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap cursor-pointer"
                 >
                   Log in
                 </Link>
@@ -220,7 +220,7 @@ export function Navbar() {
 
             {/* Mobile Menu Toggle */}
             <button
-              className="md:hidden p-2 text-muted-foreground hover:text-foreground"
+              className="md:hidden p-2 text-muted-foreground hover:text-foreground cursor-pointer"
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <Menu size={20} />
@@ -241,7 +241,7 @@ export function Navbar() {
             </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="p-2 bg-muted rounded-full text-muted-foreground hover:text-foreground"
+              className="p-2 bg-muted rounded-full text-muted-foreground hover:text-foreground cursor-pointer"
             >
               <X size={20} />
             </button>
@@ -252,7 +252,7 @@ export function Navbar() {
               <Link
                 key={item.label}
                 href={item.href}
-                className="text-2xl font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="text-2xl font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.label}
@@ -276,7 +276,7 @@ export function Navbar() {
                     setIsMobileMenuOpen(false);
                     handleLogout();
                   }}
-                  className="flex items-center gap-2 text-xl font-medium text-destructive hover:text-destructive/80 transition-colors"
+                  className="flex items-center gap-2 text-xl font-medium text-destructive hover:text-destructive/80 transition-colors cursor-pointer"
                 >
                   <LogOut size={20} />
                   Log out
@@ -287,7 +287,7 @@ export function Navbar() {
               <>
                 <Link
                   href="/authentication"
-                  className="text-xl font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-xl font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Log in

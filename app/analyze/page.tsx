@@ -53,14 +53,6 @@ type AnalyzeResult = {
 
 const MAX_MEAL_HINT_LENGTH = 180;
 
-function formatLlmResponse(text: string): string {
-  try {
-    return JSON.stringify(JSON.parse(text), null, 2);
-  } catch {
-    return text;
-  }
-}
-
 export default function CalculatePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [stage, setStage] = useState<Stage>("idle");
@@ -75,6 +67,16 @@ export default function CalculatePage() {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
   const trimmedMealHint = mealHint.trim();
+  const isActiveStage = stage !== "idle";
+  const captureStageClass = "w-full max-w-5xl";
+  const captureStageGridClass =
+    "grid grid-cols-1 items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(300px,360px)] lg:gap-8";
+  const captureMediaFrameClass =
+    "relative overflow-hidden border border-black bg-neutral-100/80 p-4 dark:border-white dark:bg-neutral-950/80 sm:p-6";
+  const captureMediaInnerClass =
+    "relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-[28px] border border-black/10 bg-white px-4 py-6 shadow-[0_20px_60px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-black/40";
+  const captureImageClass =
+    "block h-auto max-h-[min(62vh,540px)] w-auto max-w-full object-contain";
 
   const handleCapture = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,7 +148,7 @@ export default function CalculatePage() {
   }, [file, trimmedMealHint]);
 
   return (
-    <main className="relative min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-hidden selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black font-sans">
+    <main className="relative min-h-screen overflow-x-hidden bg-white font-sans text-black selection:bg-black selection:text-white dark:bg-black dark:text-white dark:selection:bg-white dark:selection:text-black">
       {/* Ambient glassmorphism background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
         <div className="absolute top-[20%] left-[-10%] w-[600px] h-[600px] bg-neutral-200/50 dark:bg-neutral-800/20 rounded-full blur-[120px]" />
@@ -163,19 +165,36 @@ export default function CalculatePage() {
         onChange={handleCapture}
       />
 
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 py-24">
+      <div
+        className={cn(
+          "relative z-10 flex min-h-screen flex-col items-center px-6",
+          isActiveStage
+            ? "justify-start pt-20 pb-10 sm:pt-24 sm:pb-12"
+            : "justify-center pt-20 pb-12 sm:pt-24 sm:pb-16",
+        )}
+      >
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-12 flex flex-col items-center"
+          className={cn(
+            "flex flex-col items-center text-center",
+            isActiveStage ? "mb-6 sm:mb-8" : "mb-8",
+          )}
         >
          
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-none mb-4">
+          <h1
+            className={cn(
+              "mb-3 sm:mb-4 font-bold tracking-tighter leading-tight",
+              isActiveStage
+                ? "text-3xl sm:text-4xl md:text-5xl"
+                : "text-4xl sm:text-5xl md:text-6xl",
+            )}
+          >
             CAPTURE & <br className="sm:hidden" /> CALCULATE
           </h1>
-          <p className="text-neutral-600 dark:text-neutral-400 text-base md:text-lg max-w-md mx-auto leading-relaxed">
+          <p className="text-neutral-600 dark:text-neutral-400 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
             Snap a photo and let the Aevio Engine decode your meal&apos;s metrics instantly.
           </p>
         </motion.div>
@@ -271,21 +290,23 @@ export default function CalculatePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="w-full max-w-4xl"
+              className={captureStageClass}
             >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+              <div className={captureStageGridClass}>
                 {/* Left Column */}
-                <div className="flex flex-col h-full">
-                  <div className="relative overflow-hidden border border-black dark:border-white bg-black flex-1 min-h-[300px]">
+                <div className="flex flex-col">
+                  <div className={captureMediaFrameClass}>
+                    <div className={captureMediaInnerClass}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={imageUrl}
-                      alt="Captured"
-                      className="absolute inset-0 w-full h-full object-contain"
-                      style={{ filter: "grayscale(20%)" }}
-                    />
+                      <img
+                        src={imageUrl}
+                        alt="Captured"
+                        className={captureImageClass}
+                        style={{ filter: "grayscale(12%) contrast(1.03)" }}
+                      />
+                    </div>
                     {/* Overlay badge */}
-                    <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 bg-black text-white text-[10px] font-mono uppercase tracking-widest border border-white/20">
+                    <div className="absolute top-6 left-6 flex items-center gap-2 border border-white/20 bg-black px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-white">
                       <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
                       Signal Acquired
                     </div>
@@ -293,7 +314,7 @@ export default function CalculatePage() {
                 </div>
 
                 {/* Right Column */}
-                <div className="flex flex-col justify-center h-full">
+                <div className="flex h-full flex-col justify-center">
                   <div className="flex flex-col gap-6">
                     {/* Confirmation prompt */}
                     <motion.div
@@ -345,39 +366,41 @@ export default function CalculatePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="w-full max-w-4xl"
+              className={captureStageClass}
             >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+              <div className={captureStageGridClass}>
                 {/* Left Column */}
-                <div className="flex flex-col h-full">
-                  <div className="relative overflow-hidden border border-black dark:border-white bg-black flex-1 min-h-[300px]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={imageUrl}
-                      alt="Confirmed"
-                      className="absolute inset-0 w-full h-full object-contain opacity-60 grayscale"
-                    />
-                    {/* Success overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <motion.div
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 20,
-                          delay: 0.1,
-                        }}
-                        className="w-16 h-16 bg-white dark:bg-black text-black dark:text-white flex items-center justify-center border border-black dark:border-white"
-                      >
-                        <CheckCircle2 className="w-8 h-8" />
-                      </motion.div>
+                <div className="flex flex-col">
+                  <div className={captureMediaFrameClass}>
+                    <div className={captureMediaInnerClass}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={imageUrl}
+                        alt="Confirmed"
+                        className={cn(captureImageClass, "opacity-60 grayscale")}
+                      />
+                      {/* Success overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 20,
+                            delay: 0.1,
+                          }}
+                          className="flex h-16 w-16 items-center justify-center border border-black bg-white text-black dark:border-white dark:bg-black dark:text-white"
+                        >
+                          <CheckCircle2 className="w-8 h-8" />
+                        </motion.div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Right Column */}
-                <div className="flex flex-col justify-center h-full">
+                <div className="flex h-full flex-col justify-center">
                   <div className="flex flex-col gap-6">
                     {/* Ready state */}
                     <motion.div
@@ -467,45 +490,47 @@ export default function CalculatePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="w-full max-w-4xl"
+              className={captureStageClass}
             >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+              <div className={captureStageGridClass}>
                 {/* Left Column */}
-                <div className="flex flex-col h-full">
-                  <div className="relative overflow-hidden border border-black dark:border-white bg-black flex-1 min-h-[300px]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={imageUrl}
-                      alt="Analyzing"
-                      className="absolute inset-0 w-full h-full object-contain opacity-40 grayscale"
-                    />
-                    {/* Scanning overlay */}
-                    <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        className="w-16 h-16 border border-white/20 border-t-white rounded-full"
+                <div className="flex flex-col">
+                  <div className={captureMediaFrameClass}>
+                    <div className={captureMediaInnerClass}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={imageUrl}
+                        alt="Analyzing"
+                        className={cn(captureImageClass, "opacity-40 grayscale")}
                       />
-                      <Loader2 className="absolute w-6 h-6 text-white animate-spin" />
-                    </div>
-                    {/* Data stream effect */}
-                    <div className="absolute bottom-4 left-4 right-4 h-12 overflow-hidden flex flex-col justify-end text-[8px] font-mono text-white/50 uppercase">
-                      <motion.div
-                        animate={{ y: [0, -20] }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      >
-                        <div>101010111000101010</div>
-                        <div>EXTRACTING_FEATURES...</div>
-                        <div>QUANTIZING_VECTORS...</div>
-                        <div>NEURAL_SYNC_ACTIVE</div>
-                      </motion.div>
+                      {/* Scanning overlay */}
+                      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                          className="h-16 w-16 rounded-full border border-white/20 border-t-white"
+                        />
+                        <Loader2 className="absolute h-6 w-6 animate-spin text-white" />
+                      </div>
+                      {/* Data stream effect */}
+                      <div className="absolute bottom-4 left-4 right-4 flex h-12 flex-col justify-end overflow-hidden text-[8px] font-mono uppercase text-white/50">
+                        <motion.div
+                          animate={{ y: [0, -20] }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        >
+                          <div>101010111000101010</div>
+                          <div>EXTRACTING_FEATURES...</div>
+                          <div>QUANTIZING_VECTORS...</div>
+                          <div>NEURAL_SYNC_ACTIVE</div>
+                        </motion.div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Right Column */}
-                <div className="flex flex-col justify-center h-full">
+                <div className="flex h-full flex-col justify-center">
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -679,9 +704,16 @@ export default function CalculatePage() {
                           <div className="px-5 py-4 text-[10px] font-mono uppercase tracking-widest">
                             {(() => {
                               try {
-                                const parsed = JSON.parse(result.llmResponse);
-                                
-                                const renderNode = (label: string, value: any, depth = 0) => {
+                                const parsed = JSON.parse(result.llmResponse) as Record<
+                                  string,
+                                  unknown
+                                >;
+
+                                const renderNode = (
+                                  label: string,
+                                  value: unknown,
+                                  depth = 0,
+                                ): React.ReactNode => {
                                   if (typeof value === "object" && value !== null) {
                                     return (
                                       <div key={label} className={depth > 0 ? "mt-2" : ""}>
@@ -691,7 +723,9 @@ export default function CalculatePage() {
                                         <div className="pl-3 border-l border-black/10 dark:border-white/10 space-y-2">
                                           {Array.isArray(value)
                                             ? value.map((v, i) => renderNode(`Item ${i + 1}`, v, depth + 1))
-                                            : Object.entries(value).map(([k, v]) => renderNode(k, v, depth + 1))}
+                                            : Object.entries(value as Record<string, unknown>).map(([k, v]) =>
+                                                renderNode(k, v, depth + 1),
+                                              )}
                                         </div>
                                       </div>
                                     );
