@@ -24,7 +24,18 @@ type Stage =
   | "result"
   | "error";
 
-type FoodItem = { name: string; portion: string; calories: number };
+type FoodItem = {
+  name: string;
+  quantity: number;
+  portion: string;
+  caloriesPerUnit: number;
+  calories: number;
+};
+
+type PlateContents = {
+  referenceObject: "credit_card";
+  items: FoodItem[];
+};
 
 type AnalyzeResult = {
   id: string;
@@ -34,6 +45,7 @@ type AnalyzeResult = {
   carbs: number;
   fat: number;
   foodItems: FoodItem[];
+  plateContents: PlateContents;
   confidence: "low" | "medium" | "high";
   llmResponse: string;
 };
@@ -561,10 +573,15 @@ export default function CalculatePage() {
 
               {result.foodItems.length > 0 && (
                 <div className="mt-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden">
-                  <div className="px-5 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-2">
-                    <Utensils className="w-3.5 h-3.5 text-neutral-500" />
-                    <p className="text-xs font-mono uppercase tracking-widest text-neutral-500">
-                      Items detected
+                  <div className="px-5 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Utensils className="w-3.5 h-3.5 text-neutral-500" />
+                      <p className="text-xs font-mono uppercase tracking-widest text-neutral-500">
+                        Items detected
+                      </p>
+                    </div>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                      Ref: {result.plateContents.referenceObject.replace("_", " ")}
                     </p>
                   </div>
                   <ul className="divide-y divide-neutral-200 dark:divide-neutral-800">
@@ -578,7 +595,7 @@ export default function CalculatePage() {
                             {item.name}
                           </p>
                           <p className="text-xs text-neutral-500 truncate">
-                            {item.portion}
+                            Qty {item.quantity} • {Math.round(item.caloriesPerUnit)} kcal each • {item.portion}
                           </p>
                         </div>
                         <p className="text-sm font-mono tabular-nums text-neutral-700 dark:text-neutral-300 shrink-0">

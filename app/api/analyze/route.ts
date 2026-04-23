@@ -85,6 +85,7 @@ export async function POST(req: NextRequest) {
       uploaded.gcsUri,
       mimeType,
     );
+    const detectedItems = result.plateContents.items;
     await db.mealAnalysis.update({
       where: { id: row.id },
       data: {
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
         protein: result.protein,
         carbs: result.carbs,
         fat: result.fat,
-        foodItems: result.foodItems,
+        foodItems: result.plateContents,
       },
     });
 
@@ -104,7 +105,8 @@ export async function POST(req: NextRequest) {
       protein: result.protein,
       carbs: result.carbs,
       fat: result.fat,
-      foodItems: result.foodItems,
+      foodItems: detectedItems,
+      plateContents: result.plateContents,
       confidence: result.confidence,
       llmResponse: rawText,
     });
