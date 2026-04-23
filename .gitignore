@@ -47,3 +47,7 @@ next-env.d.ts
 /ONBOARDING_PLAN.md
 AI_FITNESS_COACH_IMPLEMENTATION_PLAN.md'
 gcpJSON.json
+
+.claude
+.cursor
+.turbo
