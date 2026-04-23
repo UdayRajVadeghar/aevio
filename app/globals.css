@@ -194,15 +194,15 @@ body {
   will-change: transform, opacity;
 }
 
-/* GPU acceleration for common animated elements */
-svg, 
+/* Compositing hints for animated UIs. Do not set `transform` on nodes that
+   also use CSS `animation` on `transform` (e.g. Tailwind `animate-spin` on
+   Lucide `svg` icons) — a static `translateZ(0)` can prevent the spin keyframes
+   from visibly rotating. */
+svg,
 [class*="animate-"],
 [style*="animation"],
-motion-div,
 [data-framer-component-type] {
-  transform: translateZ(0);
   backface-visibility: hidden;
-  perspective: 1000px;
 }
 
 /* Smooth transforms */

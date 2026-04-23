@@ -1,12 +1,13 @@
 "use client";
 
+import { NeuralDiagnosticsDialog } from "@/components/analyze/neural-diagnostics-dialog";
 import { cn } from "@/lib/utils";
 import {
   ArrowRight,
   Brain,
   Camera,
   CheckCircle2,
-  ChevronDown,
+  ChevronRight,
   Loader2,
   RefreshCw,
   Scan,
@@ -110,6 +111,7 @@ export default function CalculatePage() {
     setMealHint("");
     setResult(null);
     setErrorMessage("");
+    setIsDiagnosticsOpen(false);
     setStage("idle");
   };
 
@@ -505,13 +507,18 @@ export default function CalculatePage() {
                       />
                       {/* Scanning overlay */}
                       <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
-                      <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <motion.div
                           animate={{ rotate: 360 }}
                           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                           className="h-16 w-16 rounded-full border border-white/20 border-t-white"
                         />
-                        <Loader2 className="absolute h-6 w-6 animate-spin text-white" />
+                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                          <Loader2
+                            className="h-6 w-6 animate-spin text-white"
+                            aria-hidden
+                          />
+                        </div>
                       </div>
                       {/* Data stream effect */}
                       <div className="absolute bottom-4 left-4 right-4 flex h-12 flex-col justify-end overflow-hidden text-[8px] font-mono uppercase text-white/50">
@@ -681,81 +688,33 @@ export default function CalculatePage() {
 
                   <div className="border border-black/10 dark:border-white/10 bg-white dark:bg-black">
                     <button
-                      onClick={() => setIsDiagnosticsOpen(!isDiagnosticsOpen)}
-                      className="w-full px-5 py-3 flex items-center justify-between border-b border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors"
+                      type="button"
+                      onClick={() => setIsDiagnosticsOpen(true)}
+                      className="w-full px-5 py-3 flex items-center justify-between border-b border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors cursor-pointer text-left"
                     >
-                      <div className="flex items-center gap-2">
-                        <Brain className="w-3 h-3" />
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">Neural Diagnostics</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Brain className="w-3 h-3 shrink-0" />
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-[#A8906D]">
+                          How we calculated this
+                        </span>
                       </div>
-                      <motion.div animate={{ rotate: isDiagnosticsOpen ? 180 : 0 }}>
-                        <ChevronDown className="w-4 h-4 text-neutral-500" />
-                      </motion.div>
+                      <ChevronRight className="w-4 h-4 text-neutral-500 shrink-0" aria-hidden />
                     </button>
-                    
-                    <AnimatePresence>
-                      {isDiagnosticsOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="px-5 py-4 text-[10px] font-mono uppercase tracking-widest">
-                            {(() => {
-                              try {
-                                const parsed = JSON.parse(result.llmResponse) as Record<
-                                  string,
-                                  unknown
-                                >;
-
-                                const renderNode = (
-                                  label: string,
-                                  value: unknown,
-                                  depth = 0,
-                                ): React.ReactNode => {
-                                  if (typeof value === "object" && value !== null) {
-                                    return (
-                                      <div key={label} className={depth > 0 ? "mt-2" : ""}>
-                                        <p className="text-neutral-500 border-b border-black/5 dark:border-white/5 pb-1 mb-2">
-                                          {label}
-                                        </p>
-                                        <div className="pl-3 border-l border-black/10 dark:border-white/10 space-y-2">
-                                          {Array.isArray(value)
-                                            ? value.map((v, i) => renderNode(`Item ${i + 1}`, v, depth + 1))
-                                            : Object.entries(value as Record<string, unknown>).map(([k, v]) =>
-                                                renderNode(k, v, depth + 1),
-                                              )}
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                  return (
-                                    <div key={label} className="flex justify-between items-baseline gap-4 border-b border-black/5 dark:border-white/5 pb-1 last:border-0 mt-1">
-                                      <span className="text-neutral-500 shrink-0">{label}</span>
-                                      <span className="text-black dark:text-white text-right truncate">
-                                        {String(value)}
-                                      </span>
-                                    </div>
-                                  );
-                                };
-
-                                return Object.entries(parsed).map(([k, v]) => renderNode(k, v));
-                              } catch {
-                                return (
-                                  <div className="text-neutral-500 break-words normal-case">
-                                    {result.llmResponse}
-                                  </div>
-                                );
-                              }
-                            })()}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </div>
                 </div>
               </div>
+              <NeuralDiagnosticsDialog
+                open={isDiagnosticsOpen}
+                onOpenChange={setIsDiagnosticsOpen}
+                llmResponse={result.llmResponse}
+                snapshot={{
+                  confidence: result.confidence,
+                  calories: result.calories,
+                  protein: result.protein,
+                  carbs: result.carbs,
+                  fat: result.fat,
+                }}
+              />
             </motion.div>
           )}
 

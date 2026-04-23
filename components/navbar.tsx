@@ -103,8 +103,11 @@ export function Navbar() {
               : "bg-transparent border-transparent rounded-2xl w-full max-w-[1200px]"
           )}
         >
-          {/* Logo */}
-          <div className="flex items-center gap-2 mr-4">
+          {/* Logo — home */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 mr-4 cursor-pointer rounded-lg outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+          >
             <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
               <Zap size={18} fill="currentColor" />
             </div>
@@ -113,7 +116,7 @@ export function Navbar() {
                 Aevio
               </span>
             )}
-          </div>
+          </Link>
 
           {/* Desktop Nav Items */}
           <div className="hidden md:flex items-center gap-1 relative h-10">
@@ -233,12 +236,16 @@ export function Navbar() {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-xl p-6 flex flex-col">
           <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="flex items-center gap-2 cursor-pointer rounded-lg outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
                 <Zap size={18} fill="currentColor" />
               </div>
               <span className="font-bold text-lg">Aevio</span>
-            </div>
+            </Link>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
               className="p-2 bg-muted rounded-full text-muted-foreground hover:text-foreground cursor-pointer"
