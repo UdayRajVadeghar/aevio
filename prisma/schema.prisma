@@ -27,6 +27,7 @@ model User {
   profile       UserProfile?
   onBoardingStatus onBoardingStatus?
   workouts Workout[]
+  mealAnalyses MealAnalysis[]
   @@unique([email])
   @@map("user")
 }
@@ -191,4 +192,24 @@ model Workout {
   createdAt   DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model MealAnalysis {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  imageUrl   String
+  gcsUri     String
+  status     String   @default("PENDING") // PENDING | COMPLETE | FAILED
+  calories   Float?
+  protein    Float?
+  carbs      Float?
+  fat        Float?
+  foodItems  Json?
+  errorMsg   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@map("meal_analysis")
 }
