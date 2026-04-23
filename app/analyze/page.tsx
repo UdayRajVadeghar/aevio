@@ -6,6 +6,7 @@ import {
   Brain,
   Camera,
   CheckCircle2,
+  ChevronDown,
   Loader2,
   RefreshCw,
   Scan,
@@ -72,6 +73,7 @@ export default function CalculatePage() {
   );
   const [result, setResult] = useState<AnalyzeResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
   const trimmedMealHint = mealHint.trim();
 
   const handleCapture = useCallback(
@@ -169,10 +171,7 @@ export default function CalculatePage() {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="text-center mb-12 flex flex-col items-center"
         >
-          <div className="inline-flex items-center gap-2 border border-black dark:border-white px-3 py-1 text-xs font-mono uppercase tracking-widest mb-6 bg-white dark:bg-black">
-            <Scan className="w-3 h-3" />
-            AI Analysis
-          </div>
+         
           <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-none mb-4">
             CAPTURE & <br className="sm:hidden" /> CALCULATE
           </h1>
@@ -272,61 +271,70 @@ export default function CalculatePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="w-full max-w-md"
+              className="w-full max-w-4xl"
             >
-              {/* Image preview */}
-              <div className="relative overflow-hidden border border-black dark:border-white bg-black">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imageUrl}
-                  alt="Captured"
-                  className="w-full object-cover"
-                  style={{ maxHeight: "400px", filter: "grayscale(20%)" }}
-                />
-                {/* Overlay badge */}
-                <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 bg-black text-white text-[10px] font-mono uppercase tracking-widest border border-white/20">
-                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                  Signal Acquired
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                {/* Left Column */}
+                <div className="flex flex-col h-full">
+                  <div className="relative overflow-hidden border border-black dark:border-white bg-black flex-1 min-h-[300px]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imageUrl}
+                      alt="Captured"
+                      className="absolute inset-0 w-full h-full object-contain"
+                      style={{ filter: "grayscale(20%)" }}
+                    />
+                    {/* Overlay badge */}
+                    <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 bg-black text-white text-[10px] font-mono uppercase tracking-widest border border-white/20">
+                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                      Signal Acquired
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="flex flex-col justify-center h-full">
+                  <div className="flex flex-col gap-6">
+                    {/* Confirmation prompt */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center"
+                    >
+                      <p className="text-sm font-bold tracking-tight mb-1 uppercase">
+                        Verify Capture
+                      </p>
+                      <p className="text-xs text-neutral-500 font-mono">
+                        Ensure subject clarity before proceeding.
+                      </p>
+                    </motion.div>
+
+                    {/* Actions */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="flex gap-4"
+                    >
+                      <button
+                        onClick={retake}
+                        className="flex-1 px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        Discard
+                      </button>
+                      <button
+                        onClick={confirm}
+                        className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                      >
+                        Confirm
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      </button>
+                    </motion.div>
+                  </div>
                 </div>
               </div>
-
-              {/* Confirmation prompt */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="mt-6 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center"
-              >
-                <p className="text-sm font-bold tracking-tight mb-1 uppercase">
-                  Verify Capture
-                </p>
-                <p className="text-xs text-neutral-500 font-mono">
-                  Ensure subject clarity before proceeding.
-                </p>
-              </motion.div>
-
-              {/* Actions */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="mt-4 flex gap-4"
-              >
-                <button
-                  onClick={retake}
-                  className="flex-1 px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Discard
-                </button>
-                <button
-                  onClick={confirm}
-                  className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
-                >
-                  Confirm
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                </button>
-              </motion.div>
             </motion.div>
           )}
 
@@ -337,110 +345,118 @@ export default function CalculatePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="w-full max-w-md"
+              className="w-full max-w-4xl"
             >
-              {/* Confirmed image */}
-              <div className="relative overflow-hidden border border-black dark:border-white bg-black">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imageUrl}
-                  alt="Confirmed"
-                  className="w-full object-cover opacity-60 grayscale"
-                  style={{ maxHeight: "400px" }}
-                />
-                {/* Success overlay */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.div
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 20,
-                      delay: 0.1,
-                    }}
-                    className="w-16 h-16 bg-white dark:bg-black text-black dark:text-white flex items-center justify-center border border-black dark:border-white"
-                  >
-                    <CheckCircle2 className="w-8 h-8" />
-                  </motion.div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                {/* Left Column */}
+                <div className="flex flex-col h-full">
+                  <div className="relative overflow-hidden border border-black dark:border-white bg-black flex-1 min-h-[300px]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imageUrl}
+                      alt="Confirmed"
+                      className="absolute inset-0 w-full h-full object-contain opacity-60 grayscale"
+                    />
+                    {/* Success overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 20,
+                          delay: 0.1,
+                        }}
+                        className="w-16 h-16 bg-white dark:bg-black text-black dark:text-white flex items-center justify-center border border-black dark:border-white"
+                      >
+                        <CheckCircle2 className="w-8 h-8" />
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="flex flex-col justify-center h-full">
+                  <div className="flex flex-col gap-6">
+                    {/* Ready state */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center"
+                    >
+                      <p className="text-sm font-bold tracking-tight mb-1 uppercase">
+                        Data Locked
+                      </p>
+                      <p className="text-xs text-neutral-500 font-mono">
+                        Neural engine standing by for analysis.
+                      </p>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.25 }}
+                      className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-bold tracking-tight uppercase">
+                            Known Meal Details
+                          </p>
+                          <p className="text-xs text-neutral-500 font-mono mt-1">
+                            Optional. Add the item name, brand, or amount if you already know it.
+                          </p>
+                        </div>
+                        <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 shrink-0">
+                          Optional
+                        </p>
+                      </div>
+
+                      <textarea
+                        value={mealHint}
+                        onChange={(e) => setMealHint(e.target.value)}
+                        rows={2}
+                        maxLength={MAX_MEAL_HINT_LENGTH}
+                        placeholder="McDonald's Double Cheeseburger, 1 burger"
+                        className="mt-4 w-full resize-none border border-black/10 dark:border-white/10 bg-white dark:bg-black px-4 py-3 text-sm text-black dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white"
+                      />
+
+                      <div className="mt-2 flex items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                        <p>Used only to improve estimate accuracy</p>
+                        <p>
+                          {mealHint.length}/{MAX_MEAL_HINT_LENGTH}
+                        </p>
+                      </div>
+                    </motion.div>
+
+                    {/* Actions */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="flex gap-4"
+                    >
+                      <button
+                        onClick={reset}
+                        className="px-4 py-3 text-neutral-500 hover:text-black dark:hover:text-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        Abort
+                      </button>
+                      <button
+                        onClick={analyze}
+                        disabled={!file}
+                        className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                      >
+                        Execute Analysis
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </motion.div>
+                  </div>
                 </div>
               </div>
-
-              {/* Ready state */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="mt-6 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center"
-              >
-                <p className="text-sm font-bold tracking-tight mb-1 uppercase">
-                  Data Locked
-                </p>
-                <p className="text-xs text-neutral-500 font-mono">
-                  Neural engine standing by for analysis.
-                </p>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-                className="mt-4 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-bold tracking-tight uppercase">
-                      Known Meal Details
-                    </p>
-                    <p className="text-xs text-neutral-500 font-mono mt-1">
-                      Optional. Add the item name, brand, or amount if you already know it.
-                    </p>
-                  </div>
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 shrink-0">
-                    Optional
-                  </p>
-                </div>
-
-                <textarea
-                  value={mealHint}
-                  onChange={(e) => setMealHint(e.target.value)}
-                  rows={2}
-                  maxLength={MAX_MEAL_HINT_LENGTH}
-                  placeholder="McDonald's Double Cheeseburger, 1 burger"
-                  className="mt-4 w-full resize-none border border-black/10 dark:border-white/10 bg-white dark:bg-black px-4 py-3 text-sm text-black dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white"
-                />
-
-                <div className="mt-2 flex items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
-                  <p>Used only to improve estimate accuracy</p>
-                  <p>
-                    {mealHint.length}/{MAX_MEAL_HINT_LENGTH}
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* Actions */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="mt-4 flex gap-4"
-              >
-                <button
-                  onClick={reset}
-                  className="px-4 py-3 text-neutral-500 hover:text-black dark:hover:text-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
-                >
-                  <XCircle className="w-3.5 h-3.5" />
-                  Abort
-                </button>
-                <button
-                  onClick={analyze}
-                  disabled={!file}
-                  className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
-                >
-                  Execute Analysis
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </motion.div>
             </motion.div>
           )}
 
@@ -451,65 +467,72 @@ export default function CalculatePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="w-full max-w-md"
+              className="w-full max-w-4xl"
             >
-              <div className="relative overflow-hidden border border-black dark:border-white bg-black">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imageUrl}
-                  alt="Analyzing"
-                  className="w-full object-cover opacity-40 grayscale"
-                  style={{ maxHeight: "400px" }}
-                />
-                {/* Scanning overlay */}
-                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    className="w-16 h-16 border border-white/20 border-t-white rounded-full"
-                  />
-                  <Loader2 className="absolute w-6 h-6 text-white animate-spin" />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                {/* Left Column */}
+                <div className="flex flex-col h-full">
+                  <div className="relative overflow-hidden border border-black dark:border-white bg-black flex-1 min-h-[300px]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imageUrl}
+                      alt="Analyzing"
+                      className="absolute inset-0 w-full h-full object-contain opacity-40 grayscale"
+                    />
+                    {/* Scanning overlay */}
+                    <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        className="w-16 h-16 border border-white/20 border-t-white rounded-full"
+                      />
+                      <Loader2 className="absolute w-6 h-6 text-white animate-spin" />
+                    </div>
+                    {/* Data stream effect */}
+                    <div className="absolute bottom-4 left-4 right-4 h-12 overflow-hidden flex flex-col justify-end text-[8px] font-mono text-white/50 uppercase">
+                      <motion.div
+                        animate={{ y: [0, -20] }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      >
+                        <div>101010111000101010</div>
+                        <div>EXTRACTING_FEATURES...</div>
+                        <div>QUANTIZING_VECTORS...</div>
+                        <div>NEURAL_SYNC_ACTIVE</div>
+                      </motion.div>
+                    </div>
+                  </div>
                 </div>
-                {/* Data stream effect */}
-                <div className="absolute bottom-4 left-4 right-4 h-12 overflow-hidden flex flex-col justify-end text-[8px] font-mono text-white/50 uppercase">
+
+                {/* Right Column */}
+                <div className="flex flex-col justify-center h-full">
                   <motion.div
-                    animate={{ y: [0, -20] }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center flex flex-col items-center justify-center min-h-[120px] gap-2"
                   >
-                    <div>101010111000101010</div>
-                    <div>EXTRACTING_FEATURES...</div>
-                    <div>QUANTIZING_VECTORS...</div>
-                    <div>NEURAL_SYNC_ACTIVE</div>
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={subStatus}
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <p className="text-sm font-bold tracking-tight uppercase">
+                          {subStatus.toUpperCase()}
+                        </p>
+                        <p className="text-[10px] text-neutral-500 font-mono mt-1 uppercase tracking-widest">
+                          {subStatus === "Uploading…"
+                            ? "Establishing secure uplink"
+                            : "Processing biological data"}
+                        </p>
+                      </motion.div>
+                    </AnimatePresence>
                   </motion.div>
                 </div>
               </div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                className="mt-6 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center flex flex-col items-center gap-2"
-              >
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={subStatus}
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <p className="text-sm font-bold tracking-tight uppercase">
-                      {subStatus.toUpperCase()}
-                    </p>
-                    <p className="text-[10px] text-neutral-500 font-mono mt-1 uppercase tracking-widest">
-                      {subStatus === "Uploading…"
-                        ? "Establishing secure uplink"
-                        : "Processing biological data"}
-                    </p>
-                  </motion.div>
-                </AnimatePresence>
-              </motion.div>
             </motion.div>
           )}
 
@@ -520,123 +543,185 @@ export default function CalculatePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="w-full max-w-md"
+              className="w-full max-w-4xl"
             >
-              <div className="relative overflow-hidden border border-black dark:border-white">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={result.imageUrl}
-                  alt="Analyzed meal"
-                  className="w-full object-cover"
-                  style={{ maxHeight: "320px", filter: "contrast(1.1) saturate(0.8)" }}
-                />
-                <div className="absolute top-4 left-4 px-3 py-1 bg-black text-white text-[10px] font-mono uppercase tracking-widest border border-white/20">
-                  Analysis Complete
-                </div>
-                <div className="absolute top-4 right-4 px-2 py-1 bg-white text-black text-[10px] font-mono uppercase tracking-widest border border-black/20">
-                  Conf: {result.confidence.toUpperCase()}
-                </div>
-              </div>
-
-              <div className="mt-6 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-6 text-center">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 mb-2">
-                  Total Energy Output
-                </p>
-                <div className="flex items-baseline justify-center gap-1">
-                  <p className="text-6xl font-bold tracking-tighter">
-                    {Math.round(result.calories)}
-                  </p>
-                  <span className="text-sm font-mono text-neutral-500 uppercase tracking-widest">
-                    kcal
-                  </span>
-                </div>
-
-                <div className="mt-8 grid grid-cols-3 gap-px bg-black/10 dark:bg-white/10">
-                  {(
-                    [
-                      { label: "Protein", value: result.protein },
-                      { label: "Carbs", value: result.carbs },
-                      { label: "Fat", value: result.fat },
-                    ] as const
-                  ).map((m) => (
-                    <div
-                      key={m.label}
-                      className="bg-white dark:bg-black p-4 flex flex-col items-center justify-center"
-                    >
-                      <p className="text-[9px] font-mono uppercase tracking-widest text-neutral-500 mb-1">
-                        {m.label}
-                      </p>
-                      <p className="text-xl font-bold">
-                        {Math.round(m.value)}
-                        <span className="text-[10px] font-mono text-neutral-500 ml-0.5">
-                          g
-                        </span>
-                      </p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                {/* Left Column */}
+                <div className="flex flex-col gap-6 h-full">
+                  <div className="relative overflow-hidden border border-black dark:border-white flex-1 min-h-[300px]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={result.imageUrl}
+                      alt="Analyzed meal"
+                      className="absolute inset-0 w-full h-full object-contain"
+                      style={{ filter: "contrast(1.1) saturate(0.8)" }}
+                    />
+                    <div className="absolute top-4 left-4 px-3 py-1 bg-black text-white text-[10px] font-mono uppercase tracking-widest border border-white/20">
+                      Analysis Complete
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {result.foodItems.length > 0 && (
-                <div className="mt-6 border border-black/10 dark:border-white/10">
-                  <div className="px-5 py-3 border-b border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 flex items-center justify-between gap-3">
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 flex items-center gap-2">
-                      <Utensils className="w-3 h-3" />
-                      Detected Elements
-                    </p>
-                    <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">
-                      Ref: {result.plateContents.referenceObject.replace("_", " ")}
-                    </p>
+                    <div className="absolute top-4 right-4 px-2 py-1 bg-white text-black text-[10px] font-mono uppercase tracking-widest border border-black/20">
+                      Conf: {result.confidence.toUpperCase()}
+                    </div>
                   </div>
-                  <ul className="divide-y divide-black/10 dark:divide-white/10 bg-white dark:bg-black">
-                    {result.foodItems.map((item, i) => (
-                      <li
-                        key={i}
-                        className="px-5 py-4 flex items-center justify-between gap-4"
-                      >
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold uppercase tracking-tight truncate">
-                            {item.name}
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <button
+                      onClick={reset}
+                      className="w-full px-6 py-4 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
+                    >
+                      <Scan className="w-4 h-4" />
+                      New Analysis
+                    </button>
+                  </motion.div>
+                </div>
+
+                {/* Right Column */}
+                <div className="flex flex-col gap-6 h-full">
+                  <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-6 text-center">
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 mb-2">
+                      Total Energy Output
+                    </p>
+                    <div className="flex items-baseline justify-center gap-1">
+                      <p className="text-6xl font-bold tracking-tighter">
+                        {Math.round(result.calories)}
+                      </p>
+                      <span className="text-sm font-mono text-neutral-500 uppercase tracking-widest">
+                        kcal
+                      </span>
+                    </div>
+
+                    <div className="mt-8 grid grid-cols-3 gap-px bg-black/10 dark:bg-white/10">
+                      {(
+                        [
+                          { label: "Protein", value: result.protein },
+                          { label: "Carbs", value: result.carbs },
+                          { label: "Fat", value: result.fat },
+                        ] as const
+                      ).map((m) => (
+                        <div
+                          key={m.label}
+                          className="bg-white dark:bg-black p-4 flex flex-col items-center justify-center"
+                        >
+                          <p className="text-[9px] font-mono uppercase tracking-widest text-neutral-500 mb-1">
+                            {m.label}
                           </p>
-                          <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mt-0.5 truncate">
-                            Qty {item.quantity} • {Math.round(item.caloriesPerUnit)} kcal each • {item.portion}
+                          <p className="text-xl font-bold">
+                            {Math.round(m.value)}
+                            <span className="text-[10px] font-mono text-neutral-500 ml-0.5">
+                              g
+                        </span>
                           </p>
                         </div>
-                        <p className="text-xs font-mono uppercase tracking-widest text-neutral-500 shrink-0">
-                          {Math.round(item.calories)} kcal
+                      ))}
+                    </div>
+                  </div>
+
+                  {result.foodItems.length > 0 && (
+                    <div className="border border-black/10 dark:border-white/10">
+                      <div className="px-5 py-3 border-b border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 flex items-center justify-between gap-3">
+                        <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 flex items-center gap-2">
+                          <Utensils className="w-3 h-3" />
+                          Detected Elements
                         </p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                        <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                          Ref: {result.plateContents.referenceObject.replace("_", " ")}
+                        </p>
+                      </div>
+                      <ul className="divide-y divide-black/10 dark:divide-white/10 bg-white dark:bg-black">
+                        {result.foodItems.map((item, i) => (
+                          <li
+                            key={i}
+                            className="px-5 py-4 flex items-center justify-between gap-4"
+                          >
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold uppercase tracking-tight truncate">
+                                {item.name}
+                              </p>
+                              <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mt-0.5 truncate">
+                                Qty {item.quantity} • {Math.round(item.caloriesPerUnit)} kcal each • {item.portion}
+                              </p>
+                            </div>
+                            <p className="text-xs font-mono uppercase tracking-widest text-neutral-500 shrink-0">
+                              {Math.round(item.calories)} kcal
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-              <div className="mt-6 border border-black/10 dark:border-white/10 bg-white dark:bg-black">
-                <div className="px-5 py-3 border-b border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5">
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 flex items-center gap-2">
-                    <Brain className="w-3 h-3" />
-                    Neural Log
-                  </p>
+                  <div className="border border-black/10 dark:border-white/10 bg-white dark:bg-black">
+                    <button
+                      onClick={() => setIsDiagnosticsOpen(!isDiagnosticsOpen)}
+                      className="w-full px-5 py-3 flex items-center justify-between border-b border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Brain className="w-3 h-3" />
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">Neural Diagnostics</span>
+                      </div>
+                      <motion.div animate={{ rotate: isDiagnosticsOpen ? 180 : 0 }}>
+                        <ChevronDown className="w-4 h-4 text-neutral-500" />
+                      </motion.div>
+                    </button>
+                    
+                    <AnimatePresence>
+                      {isDiagnosticsOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="px-5 py-4 text-[10px] font-mono uppercase tracking-widest">
+                            {(() => {
+                              try {
+                                const parsed = JSON.parse(result.llmResponse);
+                                
+                                const renderNode = (label: string, value: any, depth = 0) => {
+                                  if (typeof value === "object" && value !== null) {
+                                    return (
+                                      <div key={label} className={depth > 0 ? "mt-2" : ""}>
+                                        <p className="text-neutral-500 border-b border-black/5 dark:border-white/5 pb-1 mb-2">
+                                          {label}
+                                        </p>
+                                        <div className="pl-3 border-l border-black/10 dark:border-white/10 space-y-2">
+                                          {Array.isArray(value)
+                                            ? value.map((v, i) => renderNode(`Item ${i + 1}`, v, depth + 1))
+                                            : Object.entries(value).map(([k, v]) => renderNode(k, v, depth + 1))}
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return (
+                                    <div key={label} className="flex justify-between items-baseline gap-4 border-b border-black/5 dark:border-white/5 pb-1 last:border-0 mt-1">
+                                      <span className="text-neutral-500 shrink-0">{label}</span>
+                                      <span className="text-black dark:text-white text-right truncate">
+                                        {String(value)}
+                                      </span>
+                                    </div>
+                                  );
+                                };
+
+                                return Object.entries(parsed).map(([k, v]) => renderNode(k, v));
+                              } catch {
+                                return (
+                                  <div className="text-neutral-500 break-words normal-case">
+                                    {result.llmResponse}
+                                  </div>
+                                );
+                              }
+                            })()}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
-                <pre className="max-h-64 overflow-auto px-5 py-4 text-[10px] font-mono leading-relaxed text-neutral-600 dark:text-neutral-400 whitespace-pre-wrap break-words">
-                  {formatLlmResponse(result.llmResponse)}
-                </pre>
               </div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="mt-8"
-              >
-                <button
-                  onClick={reset}
-                  className="w-full px-6 py-4 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
-                >
-                  <Scan className="w-4 h-4" />
-                  New Analysis
-                </button>
-              </motion.div>
             </motion.div>
           )}
 
