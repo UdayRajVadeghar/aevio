@@ -24,7 +24,18 @@ type Stage =
   | "result"
   | "error";
 
-type FoodItem = { name: string; portion: string; calories: number };
+type FoodItem = {
+  name: string;
+  quantity: number;
+  portion: string;
+  caloriesPerUnit: number;
+  calories: number;
+};
+
+type PlateContents = {
+  referenceObject: "credit_card";
+  items: FoodItem[];
+};
 
 type AnalyzeResult = {
   id: string;
@@ -34,6 +45,7 @@ type AnalyzeResult = {
   carbs: number;
   fat: number;
   foodItems: FoodItem[];
+  plateContents: PlateContents;
   confidence: "low" | "medium" | "high";
   llmResponse: string;
 };
@@ -157,7 +169,7 @@ export default function CalculatePage() {
             CAPTURE & <br className="sm:hidden" /> CALCULATE
           </h1>
           <p className="text-neutral-600 dark:text-neutral-400 text-base md:text-lg max-w-md mx-auto leading-relaxed">
-            Snap a photo and let the Aevio Engine decode your meal's metrics instantly.
+            Snap a photo and let the Aevio Engine decode your meal&apos;s metrics instantly.
           </p>
         </motion.div>
 
@@ -522,10 +534,13 @@ export default function CalculatePage() {
 
               {result.foodItems.length > 0 && (
                 <div className="mt-6 border border-black/10 dark:border-white/10">
-                  <div className="px-5 py-3 border-b border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5">
+                  <div className="px-5 py-3 border-b border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 flex items-center justify-between gap-3">
                     <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 flex items-center gap-2">
                       <Utensils className="w-3 h-3" />
                       Detected Elements
+                    </p>
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                      Ref: {result.plateContents.referenceObject.replace("_", " ")}
                     </p>
                   </div>
                   <ul className="divide-y divide-black/10 dark:divide-white/10 bg-white dark:bg-black">
@@ -539,7 +554,7 @@ export default function CalculatePage() {
                             {item.name}
                           </p>
                           <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mt-0.5 truncate">
-                            {item.portion}
+                            Qty {item.quantity} • {Math.round(item.caloriesPerUnit)} kcal each • {item.portion}
                           </p>
                         </div>
                         <p className="text-xs font-mono uppercase tracking-widest text-neutral-500 shrink-0">
