@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/shadcn/button";
 import { cn } from "@/lib/utils";
 import {
   ArrowRight,
+  Brain,
   Camera,
   CheckCircle2,
   Loader2,
@@ -98,8 +98,6 @@ export default function CalculatePage() {
     setSubStatus("Uploading…");
     setErrorMessage("");
 
-    // Flip to "Analyzing…" after a short delay so the user sees progress
-    // even though the backend response is a single round-trip.
     const flipTimer = window.setTimeout(() => setSubStatus("Analyzing…"), 1500);
 
     const fd = new FormData();
@@ -126,24 +124,12 @@ export default function CalculatePage() {
   }, [file]);
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-black overflow-hidden selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
-      {/* Ambient gradient orbs */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full opacity-20 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(ellipse, oklch(0.7 0.15 285), transparent 70%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 right-0 w-[500px] h-[400px] rounded-full opacity-10 blur-3xl"
-        style={{
-          background:
-            "radial-gradient(ellipse, oklch(0.65 0.18 260), transparent 70%)",
-        }}
-      />
+    <main className="relative min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-hidden selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black font-sans">
+      {/* Ambient glassmorphism background */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
+        <div className="absolute top-[20%] left-[-10%] w-[600px] h-[600px] bg-neutral-200/50 dark:bg-neutral-800/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[10%] right-[-10%] w-[500px] h-[500px] bg-neutral-200/50 dark:bg-neutral-800/20 rounded-full blur-[100px]" />
+      </div>
 
       {/* Hidden camera input */}
       <input
@@ -155,32 +141,23 @@ export default function CalculatePage() {
         onChange={handleCapture}
       />
 
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-24">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 py-24">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-12"
+          className="text-center mb-12 flex flex-col items-center"
         >
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 text-xs font-mono uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-6">
+          <div className="inline-flex items-center gap-2 border border-black dark:border-white px-3 py-1 text-xs font-mono uppercase tracking-widest mb-6 bg-white dark:bg-black">
             <Scan className="w-3 h-3" />
             AI Analysis
-          </span>
-          <h1 className="text-5xl sm:text-6xl font-bold tracking-tighter text-neutral-950 dark:text-neutral-50 leading-none mb-4">
-            Capture &amp;{" "}
-            <span
-              className="bg-clip-text text-transparent"
-              style={{
-                backgroundImage:
-                  "linear-gradient(135deg, oklch(0.55 0.2 285), oklch(0.7 0.15 260))",
-              }}
-            >
-              Calculate
-            </span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-none mb-4">
+            CAPTURE & <br className="sm:hidden" /> CALCULATE
           </h1>
-          <p className="text-neutral-500 dark:text-neutral-400 text-base sm:text-lg max-w-sm mx-auto">
-            Snap a photo and let our AI do the heavy lifting instantly.
+          <p className="text-neutral-600 dark:text-neutral-400 text-base md:text-lg max-w-md mx-auto leading-relaxed">
+            Snap a photo and let the Aevio Engine decode your meal's metrics instantly.
           </p>
         </motion.div>
 
@@ -189,10 +166,10 @@ export default function CalculatePage() {
           {stage === "idle" && (
             <motion.div
               key="idle"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className="w-full max-w-md"
             >
               <button
@@ -214,62 +191,42 @@ export default function CalculatePage() {
                   }
                 }}
                 className={cn(
-                  "group relative w-full aspect-[4/3] rounded-3xl border-2 border-dashed transition-all duration-300 overflow-hidden",
+                  "group relative w-full aspect-[4/3] border border-black dark:border-white transition-all duration-300 overflow-hidden",
                   "flex flex-col items-center justify-center gap-5",
-                  "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400",
+                  "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white",
                   isDragging
-                    ? "border-neutral-400 dark:border-neutral-500 bg-neutral-50 dark:bg-neutral-900/80 scale-[1.02]"
-                    : "border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-950/50 hover:border-neutral-400 dark:hover:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-900/60",
+                    ? "bg-neutral-100 dark:bg-neutral-900 scale-[1.02]"
+                    : "bg-neutral-50/50 dark:bg-white/5 hover:bg-neutral-100 dark:hover:bg-neutral-900",
                 )}
               >
                 {/* Subtle grid overlay */}
                 <div
                   aria-hidden
-                  className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]"
+                  className="absolute inset-0 opacity-[0.1] dark:opacity-[0.2]"
                   style={{
                     backgroundImage:
                       "linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)",
-                    backgroundSize: "32px 32px",
+                    backgroundSize: "24px 24px",
                   }}
                 />
 
                 {/* Scanning line animation */}
                 <div
                   aria-hidden
-                  className="absolute inset-x-4 h-px bg-gradient-to-r from-transparent via-neutral-400/50 dark:via-neutral-500/50 to-transparent animate-[slideIn_2.5s_ease-in-out_infinite]"
+                  className="absolute inset-x-0 h-[2px] bg-black/20 dark:bg-white/20 animate-[slideIn_2.5s_ease-in-out_infinite]"
                 />
 
-                {/* Corner brackets */}
-                {[
-                  "top-4 left-4 border-t-2 border-l-2 rounded-tl-xl",
-                  "top-4 right-4 border-t-2 border-r-2 rounded-tr-xl",
-                  "bottom-4 left-4 border-b-2 border-l-2 rounded-bl-xl",
-                  "bottom-4 right-4 border-b-2 border-r-2 rounded-br-xl",
-                ].map((cls, i) => (
-                  <span
-                    key={i}
-                    aria-hidden
-                    className={cn(
-                      "absolute w-6 h-6 border-neutral-300 dark:border-neutral-700 transition-colors duration-300 group-hover:border-neutral-500 dark:group-hover:border-neutral-400",
-                      cls,
-                    )}
-                  />
-                ))}
-
                 {/* Icon */}
-                <div className="relative z-10 flex flex-col items-center gap-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 rounded-full blur-lg bg-neutral-200 dark:bg-neutral-700 opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="relative w-16 h-16 rounded-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow duration-300">
-                      <Camera className="w-7 h-7 text-neutral-700 dark:text-neutral-300 group-hover:scale-110 transition-transform duration-200" />
-                    </div>
+                <div className="relative z-10 flex flex-col items-center gap-4 bg-white/80 dark:bg-black/80 backdrop-blur-sm p-6 border border-black/10 dark:border-white/10">
+                  <div className="relative w-12 h-12 flex items-center justify-center">
+                    <Camera className="w-6 h-6 text-black dark:text-white group-hover:scale-110 transition-transform duration-200" />
                   </div>
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
-                      Tap to open camera
+                  <div className="text-center font-mono uppercase tracking-widest">
+                    <p className="text-xs font-bold text-black dark:text-white">
+                      Initialize Camera
                     </p>
-                    <p className="text-xs text-neutral-400 dark:text-neutral-600 mt-1">
-                      or drop an image here
+                    <p className="text-[10px] text-neutral-500 mt-1">
+                      or drop image
                     </p>
                   </div>
                 </div>
@@ -279,11 +236,11 @@ export default function CalculatePage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="mt-4 flex items-center justify-center gap-2 text-xs text-neutral-400 dark:text-neutral-600"
+                transition={{ delay: 0.3 }}
+                className="mt-6 flex items-center justify-center gap-2 text-[10px] font-mono uppercase tracking-widest text-neutral-500"
               >
                 <Zap className="w-3 h-3" />
-                <span>Results in under 3 seconds</span>
+                <span>Processing latency &lt; 3s</span>
               </motion.div>
             </motion.div>
           )}
@@ -291,25 +248,25 @@ export default function CalculatePage() {
           {stage === "preview" && imageUrl && (
             <motion.div
               key="preview"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className="w-full max-w-md"
             >
               {/* Image preview */}
-              <div className="relative rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xl shadow-black/5 dark:shadow-black/40">
+              <div className="relative overflow-hidden border border-black dark:border-white bg-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imageUrl}
                   alt="Captured"
                   className="w-full object-cover"
-                  style={{ maxHeight: "400px" }}
+                  style={{ maxHeight: "400px", filter: "grayscale(20%)" }}
                 />
                 {/* Overlay badge */}
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-xs font-medium">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  Image captured
+                <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 bg-black text-white text-[10px] font-mono uppercase tracking-widest border border-white/20">
+                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                  Signal Acquired
                 </div>
               </div>
 
@@ -318,14 +275,13 @@ export default function CalculatePage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="mt-5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950 p-4"
+                className="mt-6 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center"
               >
-                <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-200 mb-1">
-                  Does this look good?
+                <p className="text-sm font-bold tracking-tight mb-1 uppercase">
+                  Verify Capture
                 </p>
-                <p className="text-xs text-neutral-500 dark:text-neutral-500">
-                  Make sure the subject is clearly visible, well-lit, and in
-                  frame before proceeding.
+                <p className="text-xs text-neutral-500 font-mono">
+                  Ensure subject clarity before proceeding.
                 </p>
               </motion.div>
 
@@ -334,23 +290,22 @@ export default function CalculatePage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="mt-4 flex gap-3"
+                className="mt-4 flex gap-4"
               >
-                <Button
-                  variant="outline"
+                <button
                   onClick={retake}
-                  className="flex-1 rounded-xl h-12 gap-2 border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-900"
+                  className="flex-1 px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
                 >
-                  <RefreshCw className="w-4 h-4" />
-                  Retake
-                </Button>
-                <Button
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Discard
+                </button>
+                <button
                   onClick={confirm}
-                  className="flex-1 rounded-xl h-12 gap-2 bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-neutral-100"
+                  className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
                 >
-                  Looks good
-                  <CheckCircle2 className="w-4 h-4" />
-                </Button>
+                  Confirm
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                </button>
               </motion.div>
             </motion.div>
           )}
@@ -358,23 +313,23 @@ export default function CalculatePage() {
           {stage === "confirmed" && imageUrl && (
             <motion.div
               key="confirmed"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className="w-full max-w-md"
             >
               {/* Confirmed image */}
-              <div className="relative rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xl shadow-black/5 dark:shadow-black/40">
+              <div className="relative overflow-hidden border border-black dark:border-white bg-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imageUrl}
                   alt="Confirmed"
-                  className="w-full object-cover opacity-80"
+                  className="w-full object-cover opacity-60 grayscale"
                   style={{ maxHeight: "400px" }}
                 />
                 {/* Success overlay */}
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center">
                   <motion.div
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -384,9 +339,9 @@ export default function CalculatePage() {
                       damping: 20,
                       delay: 0.1,
                     }}
-                    className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg"
+                    className="w-16 h-16 bg-white dark:bg-black text-black dark:text-white flex items-center justify-center border border-black dark:border-white"
                   >
-                    <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                    <CheckCircle2 className="w-8 h-8" />
                   </motion.div>
                 </div>
               </div>
@@ -395,45 +350,39 @@ export default function CalculatePage() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
-                className="mt-5 rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/30 p-4 flex items-center gap-3"
+                transition={{ delay: 0.2 }}
+                className="mt-6 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center"
               >
-                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
-                    Image confirmed
-                  </p>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-500">
-                    Ready to analyze — proceed when you are.
-                  </p>
-                </div>
+                <p className="text-sm font-bold tracking-tight mb-1 uppercase">
+                  Data Locked
+                </p>
+                <p className="text-xs text-neutral-500 font-mono">
+                  Neural engine standing by for analysis.
+                </p>
               </motion.div>
 
               {/* Actions */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 }}
-                className="mt-4 flex gap-3"
+                transition={{ delay: 0.3 }}
+                className="mt-4 flex gap-4"
               >
-                <Button
-                  variant="ghost"
+                <button
                   onClick={reset}
-                  className="gap-2 rounded-xl h-12 text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 px-4"
+                  className="px-4 py-3 text-neutral-500 hover:text-black dark:hover:text-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
                 >
-                  <XCircle className="w-4 h-4" />
-                  Start over
-                </Button>
-                <Button
+                  <XCircle className="w-3.5 h-3.5" />
+                  Abort
+                </button>
+                <button
                   onClick={analyze}
                   disabled={!file}
-                  className="flex-1 rounded-xl h-12 gap-2 bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-neutral-100 font-semibold shadow-md"
+                  className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
                 >
-                  Proceed
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
+                  Execute Analysis
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </motion.div>
             </motion.div>
           )}
@@ -441,28 +390,40 @@ export default function CalculatePage() {
           {stage === "analyzing" && imageUrl && (
             <motion.div
               key="analyzing"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className="w-full max-w-md"
             >
-              <div className="relative rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xl shadow-black/5 dark:shadow-black/40">
+              <div className="relative overflow-hidden border border-black dark:border-white bg-black">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imageUrl}
                   alt="Analyzing"
-                  className="w-full object-cover opacity-60"
+                  className="w-full object-cover opacity-40 grayscale"
                   style={{ maxHeight: "400px" }}
                 />
-                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                {/* Scanning overlay */}
+                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
+                <div className="absolute inset-0 flex items-center justify-center">
                   <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                    className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    className="w-16 h-16 border border-white/20 border-t-white rounded-full"
+                  />
+                  <Loader2 className="absolute w-6 h-6 text-white animate-spin" />
+                </div>
+                {/* Data stream effect */}
+                <div className="absolute bottom-4 left-4 right-4 h-12 overflow-hidden flex flex-col justify-end text-[8px] font-mono text-white/50 uppercase">
+                  <motion.div
+                    animate={{ y: [0, -20] }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   >
-                    <Loader2 className="w-7 h-7 text-neutral-800 animate-spin" />
+                    <div>101010111000101010</div>
+                    <div>EXTRACTING_FEATURES...</div>
+                    <div>QUANTIZING_VECTORS...</div>
+                    <div>NEURAL_SYNC_ACTIVE</div>
                   </motion.div>
                 </div>
               </div>
@@ -471,9 +432,8 @@ export default function CalculatePage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="mt-5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950 p-4 flex items-center gap-3"
+                className="mt-6 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center flex flex-col items-center gap-2"
               >
-                <Loader2 className="w-4 h-4 text-neutral-500 animate-spin shrink-0" />
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={subStatus}
@@ -482,13 +442,13 @@ export default function CalculatePage() {
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
-                      {subStatus}
+                    <p className="text-sm font-bold tracking-tight uppercase">
+                      {subStatus.toUpperCase()}
                     </p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                    <p className="text-[10px] text-neutral-500 font-mono mt-1 uppercase tracking-widest">
                       {subStatus === "Uploading…"
-                        ? "Sending your photo securely to the server."
-                        : "Gemini is identifying food items and estimating macros."}
+                        ? "Establishing secure uplink"
+                        : "Processing biological data"}
                     </p>
                   </motion.div>
                 </AnimatePresence>
@@ -499,41 +459,42 @@ export default function CalculatePage() {
           {stage === "result" && result && (
             <motion.div
               key="result"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className="w-full max-w-md"
             >
-              <div className="relative rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xl shadow-black/5 dark:shadow-black/40">
+              <div className="relative overflow-hidden border border-black dark:border-white">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={result.imageUrl}
                   alt="Analyzed meal"
                   className="w-full object-cover"
-                  style={{ maxHeight: "320px" }}
+                  style={{ maxHeight: "320px", filter: "contrast(1.1) saturate(0.8)" }}
                 />
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-xs font-medium">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  Analysis complete
+                <div className="absolute top-4 left-4 px-3 py-1 bg-black text-white text-[10px] font-mono uppercase tracking-widest border border-white/20">
+                  Analysis Complete
                 </div>
-                <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-neutral-800 text-xs font-mono uppercase tracking-wider">
-                  {result.confidence}
+                <div className="absolute top-4 right-4 px-2 py-1 bg-white text-black text-[10px] font-mono uppercase tracking-widest border border-black/20">
+                  Conf: {result.confidence.toUpperCase()}
                 </div>
               </div>
 
-              <div className="mt-5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950 p-5">
-                <p className="text-xs font-mono uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
-                  Total calories
+              <div className="mt-6 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-6 text-center">
+                <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 mb-2">
+                  Total Energy Output
                 </p>
-                <p className="text-4xl font-bold tracking-tighter text-neutral-950 dark:text-neutral-50 mt-1">
-                  {Math.round(result.calories)}
-                  <span className="text-base font-normal text-neutral-500 ml-1.5">
+                <div className="flex items-baseline justify-center gap-1">
+                  <p className="text-6xl font-bold tracking-tighter">
+                    {Math.round(result.calories)}
+                  </p>
+                  <span className="text-sm font-mono text-neutral-500 uppercase tracking-widest">
                     kcal
                   </span>
-                </p>
+                </div>
 
-                <div className="mt-5 grid grid-cols-3 gap-3">
+                <div className="mt-8 grid grid-cols-3 gap-px bg-black/10 dark:bg-white/10">
                   {(
                     [
                       { label: "Protein", value: result.protein },
@@ -543,14 +504,14 @@ export default function CalculatePage() {
                   ).map((m) => (
                     <div
                       key={m.label}
-                      className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-3 text-center"
+                      className="bg-white dark:bg-black p-4 flex flex-col items-center justify-center"
                     >
-                      <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                      <p className="text-[9px] font-mono uppercase tracking-widest text-neutral-500 mb-1">
                         {m.label}
                       </p>
-                      <p className="text-lg font-semibold text-neutral-950 dark:text-neutral-50 mt-0.5">
+                      <p className="text-xl font-bold">
                         {Math.round(m.value)}
-                        <span className="text-xs font-normal text-neutral-500 ml-0.5">
+                        <span className="text-[10px] font-mono text-neutral-500 ml-0.5">
                           g
                         </span>
                       </p>
@@ -560,28 +521,28 @@ export default function CalculatePage() {
               </div>
 
               {result.foodItems.length > 0 && (
-                <div className="mt-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden">
-                  <div className="px-5 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-2">
-                    <Utensils className="w-3.5 h-3.5 text-neutral-500" />
-                    <p className="text-xs font-mono uppercase tracking-widest text-neutral-500">
-                      Items detected
+                <div className="mt-6 border border-black/10 dark:border-white/10">
+                  <div className="px-5 py-3 border-b border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5">
+                    <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 flex items-center gap-2">
+                      <Utensils className="w-3 h-3" />
+                      Detected Elements
                     </p>
                   </div>
-                  <ul className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                  <ul className="divide-y divide-black/10 dark:divide-white/10 bg-white dark:bg-black">
                     {result.foodItems.map((item, i) => (
                       <li
                         key={i}
-                        className="px-5 py-3 flex items-center justify-between gap-3"
+                        className="px-5 py-4 flex items-center justify-between gap-4"
                       >
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 truncate">
+                          <p className="text-sm font-bold uppercase tracking-tight truncate">
                             {item.name}
                           </p>
-                          <p className="text-xs text-neutral-500 truncate">
+                          <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mt-0.5 truncate">
                             {item.portion}
                           </p>
                         </div>
-                        <p className="text-sm font-mono tabular-nums text-neutral-700 dark:text-neutral-300 shrink-0">
+                        <p className="text-xs font-mono uppercase tracking-widest text-neutral-500 shrink-0">
                           {Math.round(item.calories)} kcal
                         </p>
                       </li>
@@ -590,14 +551,14 @@ export default function CalculatePage() {
                 </div>
               )}
 
-              <div className="mt-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden">
-                <div className="px-5 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-2">
-                  <Scan className="w-3.5 h-3.5 text-neutral-500" />
-                  <p className="text-xs font-mono uppercase tracking-widest text-neutral-500">
-                    LLM response
+              <div className="mt-6 border border-black/10 dark:border-white/10 bg-white dark:bg-black">
+                <div className="px-5 py-3 border-b border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5">
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 flex items-center gap-2">
+                    <Brain className="w-3 h-3" />
+                    Neural Log
                   </p>
                 </div>
-                <pre className="max-h-80 overflow-auto px-5 py-4 text-[11px] leading-5 text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap break-words">
+                <pre className="max-h-64 overflow-auto px-5 py-4 text-[10px] font-mono leading-relaxed text-neutral-600 dark:text-neutral-400 whitespace-pre-wrap break-words">
                   {formatLlmResponse(result.llmResponse)}
                 </pre>
               </div>
@@ -606,15 +567,15 @@ export default function CalculatePage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="mt-4"
+                className="mt-8"
               >
-                <Button
+                <button
                   onClick={reset}
-                  className="w-full rounded-xl h-12 gap-2 bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-neutral-100 font-semibold shadow-md"
+                  className="w-full px-6 py-4 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
                 >
-                  Analyze another
-                  <Camera className="w-4 h-4" />
-                </Button>
+                  <Scan className="w-4 h-4" />
+                  New Analysis
+                </button>
               </motion.div>
             </motion.div>
           )}
@@ -622,52 +583,49 @@ export default function CalculatePage() {
           {stage === "error" && (
             <motion.div
               key="error"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
               className="w-full max-w-md"
             >
-              <div className="rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 p-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center shrink-0">
-                    <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+              <div className="border border-black dark:border-white bg-black text-white p-6 text-center">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-12 h-12 flex items-center justify-center border border-white/20">
+                    <XCircle className="w-6 h-6" />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-red-800 dark:text-red-300">
-                      Analysis failed
+                  <div>
+                    <p className="text-sm font-bold uppercase tracking-widest mb-2">
+                      System Failure
                     </p>
-                    <p className="text-xs text-red-600 dark:text-red-400 break-words">
-                      {errorMessage || "Something went wrong. Please retry."}
+                    <p className="text-xs font-mono text-white/70">
+                      {errorMessage || "Connection severed. Re-initialize sequence."}
                     </p>
                   </div>
                 </div>
               </div>
-              <div className="mt-4 flex gap-3">
-                <Button
-                  variant="outline"
+              <div className="mt-6 flex gap-4">
+                <button
                   onClick={reset}
-                  className="flex-1 rounded-xl h-12 gap-2 border-neutral-200 dark:border-neutral-800"
+                  className="flex-1 px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
                 >
-                  <XCircle className="w-4 h-4" />
-                  Start over
-                </Button>
-                <Button
+                  Abort
+                </button>
+                <button
                   onClick={() => {
                     setStage("confirmed");
                     setErrorMessage("");
                   }}
                   disabled={!file}
-                  className="flex-1 rounded-xl h-12 gap-2 bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-neutral-100"
+                  className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
                 >
-                  <RefreshCw className="w-4 h-4" />
-                  Retry
-                </Button>
+                  Retry Uplink
+                </button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </main>
   );
 }
