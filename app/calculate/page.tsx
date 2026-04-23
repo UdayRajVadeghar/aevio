@@ -6,30 +6,66 @@ import {
   ArrowRight,
   Camera,
   CheckCircle2,
+  Loader2,
   RefreshCw,
   Scan,
+  Utensils,
   XCircle,
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useCallback, useRef, useState } from "react";
 
-type Stage = "idle" | "preview" | "confirmed";
+type Stage =
+  | "idle"
+  | "preview"
+  | "confirmed"
+  | "analyzing"
+  | "result"
+  | "error";
+
+type FoodItem = { name: string; portion: string; calories: number };
+
+type AnalyzeResult = {
+  id: string;
+  imageUrl: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  foodItems: FoodItem[];
+  confidence: "low" | "medium" | "high";
+  llmResponse: string;
+};
+
+function formatLlmResponse(text: string): string {
+  try {
+    return JSON.stringify(JSON.parse(text), null, 2);
+  } catch {
+    return text;
+  }
+}
 
 export default function CalculatePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [stage, setStage] = useState<Stage>("idle");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [subStatus, setSubStatus] = useState<"Uploading…" | "Analyzing…">(
+    "Uploading…",
+  );
+  const [result, setResult] = useState<AnalyzeResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleCapture = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const url = URL.createObjectURL(file);
+      const f = e.target.files?.[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
       setImageUrl(url);
+      setFile(f);
       setStage("preview");
-      // reset input so same file can be re-selected
       e.target.value = "";
     },
     [],
@@ -40,8 +76,8 @@ export default function CalculatePage() {
   const retake = () => {
     if (imageUrl) URL.revokeObjectURL(imageUrl);
     setImageUrl(null);
+    setFile(null);
     setStage("idle");
-    // small delay so the input is ready
     setTimeout(() => fileInputRef.current?.click(), 100);
   };
 
@@ -50,8 +86,44 @@ export default function CalculatePage() {
   const reset = () => {
     if (imageUrl) URL.revokeObjectURL(imageUrl);
     setImageUrl(null);
+    setFile(null);
+    setResult(null);
+    setErrorMessage("");
     setStage("idle");
   };
+
+  const analyze = useCallback(async () => {
+    if (!file) return;
+    setStage("analyzing");
+    setSubStatus("Uploading…");
+    setErrorMessage("");
+
+    // Flip to "Analyzing…" after a short delay so the user sees progress
+    // even though the backend response is a single round-trip.
+    const flipTimer = window.setTimeout(() => setSubStatus("Analyzing…"), 1500);
+
+    const fd = new FormData();
+    fd.append("image", file);
+
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        body: fd,
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error ?? `Request failed (${res.status})`);
+      }
+      const data = (await res.json()) as AnalyzeResult;
+      setResult(data);
+      setStage("result");
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : String(err));
+      setStage("error");
+    } finally {
+      window.clearTimeout(flipTimer);
+    }
+  }, [file]);
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-black overflow-hidden selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black">
@@ -133,10 +205,11 @@ export default function CalculatePage() {
                 onDrop={(e) => {
                   e.preventDefault();
                   setIsDragging(false);
-                  const file = e.dataTransfer.files?.[0];
-                  if (file && file.type.startsWith("image/")) {
-                    const url = URL.createObjectURL(file);
+                  const f = e.dataTransfer.files?.[0];
+                  if (f && f.type.startsWith("image/")) {
+                    const url = URL.createObjectURL(f);
                     setImageUrl(url);
+                    setFile(f);
                     setStage("preview");
                   }
                 }}
@@ -353,11 +426,244 @@ export default function CalculatePage() {
                   <XCircle className="w-4 h-4" />
                   Start over
                 </Button>
-                <Button className="flex-1 rounded-xl h-12 gap-2 bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-neutral-100 font-semibold shadow-md">
+                <Button
+                  onClick={analyze}
+                  disabled={!file}
+                  className="flex-1 rounded-xl h-12 gap-2 bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-neutral-100 font-semibold shadow-md"
+                >
                   Proceed
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </motion.div>
+            </motion.div>
+          )}
+
+          {stage === "analyzing" && imageUrl && (
+            <motion.div
+              key="analyzing"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full max-w-md"
+            >
+              <div className="relative rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xl shadow-black/5 dark:shadow-black/40">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imageUrl}
+                  alt="Analyzing"
+                  className="w-full object-cover opacity-60"
+                  style={{ maxHeight: "400px" }}
+                />
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className="w-16 h-16 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg"
+                  >
+                    <Loader2 className="w-7 h-7 text-neutral-800 animate-spin" />
+                  </motion.div>
+                </div>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="mt-5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950 p-4 flex items-center gap-3"
+              >
+                <Loader2 className="w-4 h-4 text-neutral-500 animate-spin shrink-0" />
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={subStatus}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
+                      {subStatus}
+                    </p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-500">
+                      {subStatus === "Uploading…"
+                        ? "Sending your photo securely to the server."
+                        : "Gemini is identifying food items and estimating macros."}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {stage === "result" && result && (
+            <motion.div
+              key="result"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full max-w-md"
+            >
+              <div className="relative rounded-3xl overflow-hidden border border-neutral-200 dark:border-neutral-800 shadow-xl shadow-black/5 dark:shadow-black/40">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={result.imageUrl}
+                  alt="Analyzed meal"
+                  className="w-full object-cover"
+                  style={{ maxHeight: "320px" }}
+                />
+                <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-xs font-medium">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  Analysis complete
+                </div>
+                <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-neutral-800 text-xs font-mono uppercase tracking-wider">
+                  {result.confidence}
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-950 p-5">
+                <p className="text-xs font-mono uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
+                  Total calories
+                </p>
+                <p className="text-4xl font-bold tracking-tighter text-neutral-950 dark:text-neutral-50 mt-1">
+                  {Math.round(result.calories)}
+                  <span className="text-base font-normal text-neutral-500 ml-1.5">
+                    kcal
+                  </span>
+                </p>
+
+                <div className="mt-5 grid grid-cols-3 gap-3">
+                  {(
+                    [
+                      { label: "Protein", value: result.protein },
+                      { label: "Carbs", value: result.carbs },
+                      { label: "Fat", value: result.fat },
+                    ] as const
+                  ).map((m) => (
+                    <div
+                      key={m.label}
+                      className="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-3 text-center"
+                    >
+                      <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                        {m.label}
+                      </p>
+                      <p className="text-lg font-semibold text-neutral-950 dark:text-neutral-50 mt-0.5">
+                        {Math.round(m.value)}
+                        <span className="text-xs font-normal text-neutral-500 ml-0.5">
+                          g
+                        </span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {result.foodItems.length > 0 && (
+                <div className="mt-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden">
+                  <div className="px-5 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-2">
+                    <Utensils className="w-3.5 h-3.5 text-neutral-500" />
+                    <p className="text-xs font-mono uppercase tracking-widest text-neutral-500">
+                      Items detected
+                    </p>
+                  </div>
+                  <ul className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                    {result.foodItems.map((item, i) => (
+                      <li
+                        key={i}
+                        className="px-5 py-3 flex items-center justify-between gap-3"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 truncate">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-neutral-500 truncate">
+                            {item.portion}
+                          </p>
+                        </div>
+                        <p className="text-sm font-mono tabular-nums text-neutral-700 dark:text-neutral-300 shrink-0">
+                          {Math.round(item.calories)} kcal
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="mt-4 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 overflow-hidden">
+                <div className="px-5 py-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-2">
+                  <Scan className="w-3.5 h-3.5 text-neutral-500" />
+                  <p className="text-xs font-mono uppercase tracking-widest text-neutral-500">
+                    LLM response
+                  </p>
+                </div>
+                <pre className="max-h-80 overflow-auto px-5 py-4 text-[11px] leading-5 text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap break-words">
+                  {formatLlmResponse(result.llmResponse)}
+                </pre>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mt-4"
+              >
+                <Button
+                  onClick={reset}
+                  className="w-full rounded-xl h-12 gap-2 bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-neutral-100 font-semibold shadow-md"
+                >
+                  Analyze another
+                  <Camera className="w-4 h-4" />
+                </Button>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {stage === "error" && (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full max-w-md"
+            >
+              <div className="rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center shrink-0">
+                    <XCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-red-800 dark:text-red-300">
+                      Analysis failed
+                    </p>
+                    <p className="text-xs text-red-600 dark:text-red-400 break-words">
+                      {errorMessage || "Something went wrong. Please retry."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={reset}
+                  className="flex-1 rounded-xl h-12 gap-2 border-neutral-200 dark:border-neutral-800"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Start over
+                </Button>
+                <Button
+                  onClick={() => {
+                    setStage("confirmed");
+                    setErrorMessage("");
+                  }}
+                  disabled={!file}
+                  className="flex-1 rounded-xl h-12 gap-2 bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 hover:bg-neutral-800 dark:hover:bg-neutral-100"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Retry
+                </Button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
