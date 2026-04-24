@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Loader2,
+  Lock,
   RefreshCw,
   Scan,
   Utensils,
@@ -774,30 +775,30 @@ export default function CalculatePage() {
           showCloseButton={false}
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
-          className="sm:max-w-md p-0 overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-black shadow-2xl"
+          className="sm:max-w-[400px] p-0 overflow-hidden border border-border/50 bg-background/95 backdrop-blur-3xl shadow-[0_10px_40px_rgb(0,0,0,0.12)] dark:shadow-[0_10px_40px_rgb(0,0,0,0.4)] rounded-[28px]"
         >
           <div className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-900 rounded-full flex items-center justify-center mb-6 border border-black/10 dark:border-white/10">
-              <Zap className="w-8 h-8 text-black dark:text-white" />
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+              <Lock className="w-7 h-7 text-primary" />
             </div>
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold tracking-tighter uppercase mb-2">
-                Access Restricted
+              <DialogTitle className="text-2xl font-bold tracking-tight mb-2">
+                Sign in to continue
               </DialogTitle>
-              <DialogDescription className="text-sm text-neutral-500 font-mono tracking-wide">
-                Neural engine requires user authentication to proceed. Please initialize your session.
+              <DialogDescription className="text-base text-muted-foreground leading-relaxed">
+                Please log in or create an account to use the Aevio Engine and analyze your meals.
               </DialogDescription>
             </DialogHeader>
 
             <div className="mt-8 w-full flex flex-col gap-3">
               <Link href="/authentication" className="w-full block">
-                <button className="w-full px-6 py-4 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
-                  Initialize Session
+                <button className="w-full h-12 bg-foreground text-background font-semibold hover:bg-foreground/90 transition-all flex items-center justify-center gap-2 rounded-xl cursor-pointer shadow-sm">
+                  Log in to continue
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </Link>
               <Link href="/" className="w-full block">
-                <button className="w-full px-6 py-4 border border-black/10 dark:border-white/10 text-neutral-500 hover:text-black dark:hover:text-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
+                <button className="w-full h-12 bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex items-center justify-center rounded-xl font-medium cursor-pointer">
                   Return to Home
                 </button>
               </Link>

@@ -23,37 +23,11 @@ const navItems: NavItem[] = [
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const { data: session, isPending } = useSession();
-
-  useEffect(() => {
-    let rafId: number;
-    let isThrottling = false;
-
-    const handleScroll = () => {
-      if (isThrottling) return;
-      isThrottling = true;
-
-      rafId = requestAnimationFrame(() => {
-        if (window.scrollY > 50 && !isScrolled) {
-          setIsScrolled(true);
-        } else if (window.scrollY <= 50 && isScrolled) {
-          setIsScrolled(false);
-        }
-        isThrottling = false;
-      });
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, [isScrolled]);
 
 
 
@@ -97,100 +71,99 @@ export function Navbar() {
 
   return (
     <>
-      <div className="absolute top-0 left-0 right-0 z-50 flex justify-center pointer-events-none">
-        <header
-          className={cn(
-            "relative flex items-center justify-between px-6 py-4 w-full transition-all duration-300 pointer-events-auto",
-            isScrolled
-              ? "bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm"
-              : "bg-transparent border-b border-transparent"
-          )}
-        >
-          {/* Logo — home */}
+      <header className="relative w-full border-b border-border/60 bg-background">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link
             href="/"
-            className="flex items-center gap-2 mr-4 cursor-pointer rounded-lg outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+            className="flex items-center gap-3 rounded-md px-1 py-1 outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
           >
-            <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
-              <Zap size={18} fill="currentColor" />
+            <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <Zap size={16} fill="currentColor" />
             </div>
-            <span className="font-bold text-lg tracking-tight whitespace-nowrap text-foreground">
+            <span className="text-base font-semibold tracking-tight text-foreground">
               Aevio
             </span>
           </Link>
 
-          {/* Desktop Nav Items */}
-          <div className="hidden md:flex items-center gap-1 relative h-10">
-            <nav className="flex items-center gap-1 h-full">
-              {navItems.map((item) => (
+          <nav className="hidden items-center gap-1 md:flex">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+
+              return (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-colors cursor-pointer"
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                  )}
                 >
                   {item.label}
                 </Link>
-              ))}
-            </nav>
-          </div>
+              );
+            })}
+          </nav>
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-2 ml-4">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
 
             {session?.user ? (
-              // Logged in: Show user menu
               <div ref={userMenuRef} className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer size-10"
+                  className="flex size-9 items-center justify-center rounded-md border border-border/60 bg-background text-foreground transition-colors hover:bg-muted cursor-pointer"
                 >
-                  <User size={20} />
+                  <User size={18} />
                 </button>
 
-                {/* User Dropdown Menu */}
-                {isUserMenuOpen && session?.user && (
-                  <div className="absolute top-full right-0 mt-2 w-56 p-2 bg-background/90 backdrop-blur-xl border border-border/50 rounded-xl shadow-xl overflow-hidden">
-                    <div className="px-4 py-3 border-b border-border/50">
-                      <p className="text-sm font-medium text-foreground">
-                        {session.user.name || "User"}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {session.user.email}
-                      </p>
-                    </div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-2 mt-1 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer"
+                <AnimatePresence>
+                  {isUserMenuOpen && session?.user && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: 0.16 }}
+                      className="absolute right-0 top-full z-50 mt-2 w-60 overflow-hidden rounded-lg border border-border/60 bg-background shadow-lg"
                     >
-                      <LogOut size={16} />
-                      Log out
-                    </button>
-                  </div>
-                )}
+                      <div className="border-b border-border/60 px-4 py-3">
+                        <p className="text-sm font-medium text-foreground">
+                          {session.user.name || "User"}
+                        </p>
+                        <p className="mt-1 truncate text-xs text-muted-foreground">
+                          {session.user.email}
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="flex w-full items-center gap-2 px-4 py-3 text-sm text-destructive transition-colors hover:bg-muted cursor-pointer"
+                      >
+                        <LogOut size={16} />
+                        Log out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
-              // Not logged in: Show login/signup buttons
-              <>
-                <Link
-                  href="/authentication"
-                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap cursor-pointer"
-                >
-                  Log in
-                </Link>
-              </>
+              <Link
+                href="/authentication"
+                className="hidden rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-foreground/90 sm:inline-flex"
+              >
+                Log in
+              </Link>
             )}
 
-            {/* Mobile Menu Toggle */}
             <button
-              className="md:hidden p-2 text-muted-foreground hover:text-foreground cursor-pointer"
+              className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer md:hidden"
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <Menu size={20} />
             </button>
           </div>
-        </header>
-      </div>
+        </div>
+      </header>
 
       {/* Mobile Fullscreen Menu */}
       <AnimatePresence>
@@ -200,29 +173,29 @@ export function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 z-[60] bg-background/95 backdrop-blur-2xl p-6 flex flex-col"
+            className="fixed inset-0 z-[60] flex flex-col bg-background/95 p-6 backdrop-blur-xl"
           >
-            <div className="flex items-center justify-between mb-12">
+            <div className="mb-10 flex items-center justify-between border-b border-border/60 pb-4">
               <Link
                 href="/"
-                className="flex items-center gap-2 cursor-pointer rounded-lg outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+                className="flex items-center gap-3 rounded-md outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <div className="size-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
-                  <Zap size={18} fill="currentColor" />
+                <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                  <Zap size={16} fill="currentColor" />
                 </div>
-                <span className="font-bold text-lg text-foreground">Aevio</span>
+                <span className="text-base font-semibold text-foreground">Aevio</span>
               </Link>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 bg-muted/50 hover:bg-muted rounded-full text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
               >
                 <X size={20} />
               </button>
             </div>
 
-            <nav className="flex flex-col gap-6 flex-1">
-              <div className="flex flex-col gap-4">
+            <nav className="flex flex-1 flex-col gap-6">
+              <div className="flex flex-col gap-2">
                 {navItems.map((item, i) => (
                   <motion.div
                     key={item.label}
@@ -232,17 +205,24 @@ export function Navbar() {
                   >
                     <Link
                       href={item.href}
-                      className="group flex items-center justify-between text-2xl font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                      className={cn(
+                        "flex items-center justify-between rounded-lg px-4 py-3 text-base font-medium transition-colors",
+                        pathname === item.href
+                          ? "bg-muted text-foreground"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      )}
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <span>{item.label}</span>
-                      <ChevronRight className="size-6 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                      <div className="flex size-8 items-center justify-center rounded-md border border-border/60 bg-background">
+                        <ChevronRight className="size-5 text-foreground" />
+                      </div>
                     </Link>
                   </motion.div>
                 ))}
               </div>
 
-              <div className="mt-auto flex flex-col gap-6 mb-8">
+              <div className="mb-8 mt-auto flex flex-col gap-4 border-t border-border/60 pt-6">
                 {session?.user ? (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -250,13 +230,13 @@ export function Navbar() {
                     transition={{ delay: 0.3, duration: 0.4 }}
                     className="flex flex-col gap-4"
                   >
-                    <div className="px-5 py-4 bg-muted/40 backdrop-blur-xl border border-border/50 rounded-2xl">
+                    <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                        <div className="flex size-10 items-center justify-center rounded-md bg-primary/10 text-base font-semibold text-primary">
                           {session?.user?.name?.charAt(0).toUpperCase() || "U"}
                         </div>
                         <div className="flex flex-col">
-                          <p className="text-base font-medium text-foreground">
+                          <p className="text-sm font-medium text-foreground">
                             {session?.user?.name || "User"}
                           </p>
                           <p className="text-sm text-muted-foreground truncate">
@@ -270,7 +250,7 @@ export function Navbar() {
                         setIsMobileMenuOpen(false);
                         handleLogout();
                       }}
-                      className="flex items-center justify-center w-full gap-2 px-4 py-3 bg-destructive/10 text-destructive hover:bg-destructive/20 font-medium rounded-xl transition-colors cursor-pointer"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium text-destructive transition-colors hover:bg-destructive/10 cursor-pointer"
                     >
                       <LogOut size={18} />
                       Log out
@@ -284,7 +264,7 @@ export function Navbar() {
                   >
                     <Link
                       href="/authentication"
-                      className="flex items-center justify-center w-full gap-2 px-4 py-4 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 transition-colors cursor-pointer"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-3 font-medium text-background transition-colors hover:bg-foreground/90 cursor-pointer"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       Log in
