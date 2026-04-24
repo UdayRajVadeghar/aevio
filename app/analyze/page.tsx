@@ -223,7 +223,7 @@ export default function CalculatePage() {
   }, [file, trimmedMealHint]);
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-white font-sans text-black selection:bg-black selection:text-white dark:bg-black dark:text-white dark:selection:bg-white dark:selection:text-black">
+    <main className="relative min-h-screen overflow-x-hidden [overflow-anchor:none] bg-white font-sans text-black selection:bg-black selection:text-white dark:bg-black dark:text-white dark:selection:bg-white dark:selection:text-black">
       {/* Ambient glassmorphism background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
         <div className="absolute top-[20%] left-[-10%] w-[600px] h-[600px] bg-neutral-200/50 dark:bg-neutral-800/20 rounded-full blur-[120px]" />
