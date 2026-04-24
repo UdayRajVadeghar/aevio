@@ -35,10 +35,10 @@ export default function Home() {
             <div className="inline-block border border-black dark:border-white px-3 py-1 text-xs font-mono uppercase tracking-widest">
               Built for everyday consistency
             </div>
-            <h1 className="text-6xl md:text-8xl font-extrabold tracking-tighter leading-[0.9]">
+            <h1 className="text-6xl md:text-8xl font-extrabold tracking-tighter leading-[1.1]">
               TRACK WHAT <br />
               MATTERS <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-neutral-400 via-neutral-200 to-neutral-400 dark:from-neutral-600 dark:via-neutral-400 dark:to-neutral-600 animate-text-shimmer bg-[length:200%_auto]">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-neutral-400 via-neutral-200 to-neutral-400 dark:from-neutral-600 dark:via-neutral-400 dark:to-neutral-600 animate-text-shimmer bg-[length:200%_auto] pb-2">
                 FEEL BETTER DAILY
               </span>
             </h1>
