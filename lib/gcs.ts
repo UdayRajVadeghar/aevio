@@ -1,6 +1,8 @@
 import { Storage } from "@google-cloud/storage";
 import { randomUUID } from "node:crypto";
 
+import { ensureGoogleCredentials } from "./google/credentials";
+
 const MIME_TO_EXT: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/jpg": "jpg",
@@ -18,7 +20,10 @@ export type UploadResult = {
 
 let cachedStorage: Storage | null = null;
 function getStorage(): Storage {
-  if (!cachedStorage) cachedStorage = new Storage();
+  if (!cachedStorage) {
+    ensureGoogleCredentials();
+    cachedStorage = new Storage();
+  }
   return cachedStorage;
 }
 
