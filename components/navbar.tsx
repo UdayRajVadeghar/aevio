@@ -3,11 +3,20 @@
 import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
 import { signOut, useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { ChevronRight, LogOut, Menu, User, X, Camera, BookOpen, BarChart3 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  BarChart3,
+  BookOpen,
+  Camera,
+  ChevronRight,
+  LogOut,
+  Menu,
+  User,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 
 interface NavItem {
   label: string;
@@ -29,8 +38,6 @@ export function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const { data: session, isPending } = useSession();
-
-
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -80,7 +87,7 @@ export function Navbar() {
           >
             <div className="w-5 h-5 bg-black dark:bg-white" />
             <span className="text-base font-semibold tracking-tight text-black dark:text-white">
-              Aevio
+              aevio
             </span>
           </Link>
 
@@ -100,12 +107,14 @@ export function Navbar() {
                       : "text-neutral-500 hover:bg-neutral-50 dark:hover:bg-white/5 hover:text-black dark:hover:text-white",
                   )}
                 >
-                  <Icon 
-                    size={16} 
+                  <Icon
+                    size={16}
                     className={cn(
-                      "transition-colors", 
-                      isActive ? "text-black dark:text-white" : "text-neutral-500 group-hover:text-black dark:group-hover:text-white"
-                    )} 
+                      "transition-colors",
+                      isActive
+                        ? "text-black dark:text-white"
+                        : "text-neutral-500 group-hover:text-black dark:group-hover:text-white",
+                    )}
                   />
                   {item.label}
                 </Link>
@@ -189,7 +198,9 @@ export function Navbar() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <div className="w-5 h-5 bg-black dark:bg-white" />
-                <span className="text-base font-semibold text-black dark:text-white">Aevio</span>
+                <span className="text-base font-semibold text-black dark:text-white">
+                  aevio
+                </span>
               </Link>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -219,13 +230,22 @@ export function Navbar() {
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={cn(
-                          "flex size-8 items-center justify-center rounded-md transition-colors",
-                          pathname === item.href 
-                            ? "bg-white dark:bg-black shadow-sm" 
-                            : "bg-neutral-100 dark:bg-white/5 group-hover:bg-white dark:group-hover:bg-black group-hover:shadow-sm"
-                        )}>
-                          <item.icon size={16} className={pathname === item.href ? "text-black dark:text-white" : "text-neutral-500 group-hover:text-black dark:group-hover:text-white"} />
+                        <div
+                          className={cn(
+                            "flex size-8 items-center justify-center rounded-md transition-colors",
+                            pathname === item.href
+                              ? "bg-white dark:bg-black shadow-sm"
+                              : "bg-neutral-100 dark:bg-white/5 group-hover:bg-white dark:group-hover:bg-black group-hover:shadow-sm",
+                          )}
+                        >
+                          <item.icon
+                            size={16}
+                            className={
+                              pathname === item.href
+                                ? "text-black dark:text-white"
+                                : "text-neutral-500 group-hover:text-black dark:group-hover:text-white"
+                            }
+                          />
                         </div>
                         <span>{item.label}</span>
                       </div>
@@ -249,7 +269,8 @@ export function Navbar() {
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-sm font-semibold text-primary shrink-0">
-                            {session?.user?.name?.charAt(0).toUpperCase() || "U"}
+                            {session?.user?.name?.charAt(0).toUpperCase() ||
+                              "U"}
                           </div>
                           <div className="flex flex-col min-w-0">
                             <p className="text-sm font-medium text-black dark:text-white truncate">
