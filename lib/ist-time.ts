@@ -2,6 +2,7 @@ const IST_TIMEZONE = "Asia/Kolkata";
 const IST_UTC_OFFSET = "+05:30";
 const IST_TIME_API_URL =
   "https://timeapi.io/api/Time/current/zone?timeZone=Asia/Kolkata";
+const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 type TimeApiResponse = {
   year: number;
@@ -54,6 +55,101 @@ function isValidTimeApiResponse(value: unknown): value is TimeApiResponse {
 
 function buildLoggedDateIst(year: number, month: number, day: number): string {
   return `${year}-${pad(month)}-${pad(day)}`;
+}
+
+function parseDateKeyParts(dateKey: string): {
+  year: number;
+  month: number;
+  day: number;
+} {
+  const [yearPart, monthPart, dayPart] = dateKey.split("-");
+
+  return {
+    year: Number(yearPart),
+    month: Number(monthPart),
+    day: Number(dayPart),
+  };
+}
+
+export function isValidIstDateKey(dateKey: string): boolean {
+  if (!DATE_KEY_PATTERN.test(dateKey)) {
+    return false;
+  }
+
+  const { year, month, day } = parseDateKeyParts(dateKey);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+
+  if (Number.isNaN(parsed.getTime())) {
+    return false;
+  }
+
+  return (
+    parsed.getUTCFullYear() === year &&
+    parsed.getUTCMonth() === month - 1 &&
+    parsed.getUTCDate() === day
+  );
+}
+
+export function getIstDateKey(date: Date = new Date()): string {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: IST_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  const parts = formatter.formatToParts(date);
+  const partMap = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value]),
+  );
+
+  return buildLoggedDateIst(
+    Number(partMap.year),
+    Number(partMap.month),
+    Number(partMap.day),
+  );
+}
+
+export function shiftIstDateKey(dateKey: string, days: number): string {
+  if (!Number.isInteger(days)) {
+    throw new Error("days must be an integer");
+  }
+
+  if (!isValidIstDateKey(dateKey)) {
+    throw new Error(`Invalid IST date key: ${dateKey}`);
+  }
+
+  const { year, month, day } = parseDateKeyParts(dateKey);
+  const nextDate = new Date(Date.UTC(year, month - 1, day + days));
+
+  return buildLoggedDateIst(
+    nextDate.getUTCFullYear(),
+    nextDate.getUTCMonth() + 1,
+    nextDate.getUTCDate(),
+  );
+}
+
+export function formatIstDateKey(
+  dateKey: string,
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  if (!isValidIstDateKey(dateKey)) {
+    return dateKey;
+  }
+
+  const { year, month, day } = parseDateKeyParts(dateKey);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: IST_TIMEZONE,
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    ...options,
+  }).format(date);
 }
 
 function parseIstDateTime(dateTime: string): Date {
