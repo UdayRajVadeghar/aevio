@@ -40,7 +40,7 @@ export function StepFinal() {
 
     try {
       await completeOnboarding(userId);
-      router.push("/dashboard"); // Redirect to dashboard after completion
+      router.push("/"); // Redirect to home after completion
     } catch (error) {
       console.error("Failed to complete onboarding", error);
       setError(

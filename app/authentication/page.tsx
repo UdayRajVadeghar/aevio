@@ -72,7 +72,7 @@ function AuthenticationContent() {
         if (result.error) {
           setError(result.error.message || "Failed to sign in");
         } else {
-          router.push("/dashboard");
+          router.push("/");
         }
       }
     } catch (err) {

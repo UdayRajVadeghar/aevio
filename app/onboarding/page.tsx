@@ -51,9 +51,9 @@ export default function OnboardingPage() {
           const data = await response.json();
           const status = data.onBoardingStatus?.toLowerCase().toString().trim();
 
-          // If onboarding is completed, redirect to dashboard
+          // If onboarding is completed, redirect to home
           if (status === "completed") {
-            router.push("/dashboard");
+            router.push("/");
             return;
           }
         }

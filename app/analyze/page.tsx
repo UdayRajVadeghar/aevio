@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useCallback, useRef, useState } from "react";
+import { useSession } from "@/lib/auth-client";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/shadcn/dialog";
+import Link from "next/link";
 
 type Stage =
   | "idle"
@@ -55,6 +58,7 @@ type AnalyzeResult = {
 const MAX_MEAL_HINT_LENGTH = 180;
 
 export default function CalculatePage() {
+  const { data: session, isPending } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [stage, setStage] = useState<Stage>("idle");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -764,6 +768,43 @@ export default function CalculatePage() {
           )}
         </AnimatePresence>
       </div>
+
+      <Dialog open={!isPending && !session?.user}>
+        <DialogContent
+          showCloseButton={false}
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          className="sm:max-w-md p-0 overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-black shadow-2xl"
+        >
+          <div className="flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-900 rounded-full flex items-center justify-center mb-6 border border-black/10 dark:border-white/10">
+              <Zap className="w-8 h-8 text-black dark:text-white" />
+            </div>
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold tracking-tighter uppercase mb-2">
+                Access Restricted
+              </DialogTitle>
+              <DialogDescription className="text-sm text-neutral-500 font-mono tracking-wide">
+                Neural engine requires user authentication to proceed. Please initialize your session.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="mt-8 w-full flex flex-col gap-3">
+              <Link href="/authentication" className="w-full block">
+                <button className="w-full px-6 py-4 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
+                  Initialize Session
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </Link>
+              <Link href="/" className="w-full block">
+                <button className="w-full px-6 py-4 border border-black/10 dark:border-white/10 text-neutral-500 hover:text-black dark:hover:text-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
+                  Return to Home
+                </button>
+              </Link>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
