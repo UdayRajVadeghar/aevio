@@ -17,7 +17,7 @@ import {
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/shadcn/dialog";
 import Link from "next/link";
@@ -66,6 +66,24 @@ type SignedUploadResponse = {
 };
 
 const MAX_MEAL_HINT_LENGTH = 180;
+const ANALYZE_STREAM_TERMS = [
+  "EXTRACTING_FEATURES...",
+  "QUANTIZING_VECTORS...",
+  "NEURAL_SYNC_ACTIVE",
+  "CALIBRATING_PIXELS...",
+  "NORMALIZING_INPUT...",
+  "MATRIX_TRACE_OK",
+];
+
+const generateDataStreamEntries = (count: number) => {
+  return Array.from({ length: count }, (_, index) => {
+    if (index % 3 === 0) {
+      const length = 16 + Math.floor(Math.random() * 10);
+      return Array.from({ length }, () => (Math.random() > 0.5 ? "1" : "0")).join("");
+    }
+    return ANALYZE_STREAM_TERMS[index % ANALYZE_STREAM_TERMS.length];
+  });
+};
 
 export default function CalculatePage() {
   const { data: session, isPending } = useSession();
@@ -93,6 +111,18 @@ export default function CalculatePage() {
     "relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-[28px] border border-black/10 bg-white px-4 py-6 shadow-[0_20px_60px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-black/40";
   const captureImageClass =
     "block h-auto max-h-[min(62vh,540px)] w-auto max-w-full object-contain";
+  const analyzingDataStream = useMemo(
+    () => (stage === "analyzing" ? generateDataStreamEntries(100) : []),
+    [stage, imageUrl],
+  );
+  const confidenceToneClass = result
+    ? {
+        high: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/20 dark:text-emerald-200 dark:border-emerald-400/40",
+        medium:
+          "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/20 dark:text-amber-200 dark:border-amber-400/40",
+        low: "bg-red-100 text-red-800 border-red-300 dark:bg-red-500/20 dark:text-red-200 dark:border-red-400/40",
+      }[result.confidence]
+    : "";
 
   const handleCapture = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -570,13 +600,15 @@ export default function CalculatePage() {
                       {/* Data stream effect */}
                       <div className="absolute bottom-4 left-4 right-4 flex h-12 flex-col justify-end overflow-hidden text-[8px] font-mono uppercase text-white/50">
                         <motion.div
-                          animate={{ y: [0, -20] }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          animate={{ y: ["0%", "-50%"] }}
+                          transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
+                          className="space-y-1"
                         >
-                          <div>101010111000101010</div>
-                          <div>EXTRACTING_FEATURES...</div>
-                          <div>QUANTIZING_VECTORS...</div>
-                          <div>NEURAL_SYNC_ACTIVE</div>
+                          {[...analyzingDataStream, ...analyzingDataStream].map(
+                            (entry, index) => (
+                              <div key={`${entry}-${index}`}>{entry}</div>
+                            ),
+                          )}
                         </motion.div>
                       </div>
                     </div>
@@ -638,7 +670,12 @@ export default function CalculatePage() {
                     <div className="absolute top-4 left-4 px-3 py-1 bg-black text-white text-[10px] font-mono uppercase tracking-widest border border-white/20">
                       Analysis Complete
                     </div>
-                    <div className="absolute top-4 right-4 px-2 py-1 bg-white text-black text-[10px] font-mono uppercase tracking-widest border border-black/20">
+                    <div
+                      className={cn(
+                        "absolute top-4 right-4 px-2 py-1 text-[10px] font-mono uppercase tracking-widest border",
+                        confidenceToneClass,
+                      )}
+                    >
                       Conf: {result.confidence.toUpperCase()}
                     </div>
                   </div>
