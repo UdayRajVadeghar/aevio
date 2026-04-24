@@ -21,7 +21,10 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-x-hidden font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black" style={{ willChange: "auto" }}>
+    <main
+      className="relative min-h-screen bg-white dark:bg-black text-black dark:text-white overflow-x-hidden font-sans selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black"
+      style={{ willChange: "auto" }}
+    >
       {/* Light Mode "Vapor" Background */}
       <div
         className="absolute inset-0 z-0 pointer-events-none dark:hidden overflow-hidden"
@@ -211,7 +214,7 @@ export default function Home() {
             AEVIO INC.
           </div>
           <div className="text-xs text-neutral-500 font-mono">
-            © 2024 AEVIO SYSTEM. ALL RIGHTS RESERVED.
+            © 2026 AEVIO SYSTEM. ALL RIGHTS RESERVED.
           </div>
         </div>
       </footer>
