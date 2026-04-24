@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatedBeam } from "@/components/ui/magic-ui/animated-beam";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
@@ -262,54 +261,6 @@ export const HeroVisual = ({ className }: { className?: string }) => {
         </div>
       </div>
 
-      {/* Animated Beams */}
-      <AnimatedBeam
-        containerRef={containerRef}
-        fromRef={brainRef}
-        toRef={journalRef}
-        curvature={-20}
-        endYOffset={10}
-        gradientStartColor="#a3a3a3" // neutral-400
-        gradientStopColor="#ea580c" // orange-600
-      />
-      <AnimatedBeam
-        containerRef={containerRef}
-        fromRef={brainRef}
-        toRef={streakRef}
-        curvature={20}
-        endYOffset={-10}
-        gradientStartColor="#a3a3a3"
-        gradientStopColor="#9333ea" // purple-600
-        reverse
-      />
-      <AnimatedBeam
-        containerRef={containerRef}
-        fromRef={brainRef}
-        toRef={fuelRef}
-        curvature={-20}
-        endYOffset={-10}
-        gradientStartColor="#a3a3a3"
-        gradientStopColor="#ca8a04" // yellow-600
-      />
-      <AnimatedBeam
-        containerRef={containerRef}
-        fromRef={brainRef}
-        toRef={bioRef}
-        curvature={20}
-        endYOffset={10}
-        gradientStartColor="#a3a3a3"
-        gradientStopColor="#e11d48" // rose-600
-        reverse
-      />
-      <AnimatedBeam
-        containerRef={containerRef}
-        fromRef={brainRef}
-        toRef={growthRef}
-        curvature={-20}
-        endYOffset={10}
-        gradientStartColor="#a3a3a3"
-        gradientStopColor="#059669" // emerald-600
-      />
     </div>
   );
 };

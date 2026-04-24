@@ -8,7 +8,7 @@ import {
   Brain,
   Lock,
   Shield,
-  Sparkles,
+  TrendingUp,
   Zap,
 } from "lucide-react";
 
@@ -17,24 +17,25 @@ export function FeaturesOrbit({ className }: { className?: string }) {
     <div
       className={cn(
         "relative flex h-[600px] w-full flex-col items-center justify-center overflow-visible",
-        className
+        className,
       )}
     >
       {/* Central Element */}
-      <div className="relative flex items-center justify-center group cursor-pointer">
-        {/* The Bubble - Spinning */}
+      <div className="relative flex items-center justify-center">
+        {/* Slow decorative ring */}
         <div
-          className="absolute inset-[-40px] rounded-full border border-neutral-200/30 dark:border-neutral-700/30 bg-transparent shadow-xl animate-spin [animation-duration:20s] group-hover:[animation-play-state:paused] overflow-hidden"
+          className="absolute inset-[-40px] rounded-full border border-neutral-200/30 dark:border-neutral-700/30 bg-transparent shadow-xl animate-spin motion-reduce:animate-none [animation-duration:28s] overflow-hidden"
           style={{ willChange: "transform" }}
         ></div>
 
-        {/* The 'aevio' Text - Static but Crazy */}
-        <div className="relative z-10 flex items-center justify-center w-32 h-32 bg-transparent rounded-full">
-          <div className="relative">
-            <span className="relative text-2xl font-bold tracking-widest text-neutral-900 dark:text-white font-mono lowercase">
-              aevio
-            </span>
-          </div>
+        {/* Center label */}
+        <div className="relative z-10 flex h-32 w-32 flex-col items-center justify-center rounded-full border border-neutral-200/60 bg-white/70 backdrop-blur-sm dark:border-neutral-800/60 dark:bg-black/40">
+          <span className="text-2xl font-bold tracking-widest text-neutral-900 dark:text-white font-mono lowercase">
+            aevio
+          </span>
+          <span className="mt-1 text-[10px] font-mono uppercase tracking-[0.18em] text-neutral-500 dark:text-neutral-400">
+            focus
+          </span>
         </div>
       </div>
 
@@ -80,7 +81,7 @@ export function FeaturesOrbit({ className }: { className?: string }) {
           <BarChart3 className="size-6 text-blue-500" />
         </div>
         <div className="flex items-center justify-center w-full h-full rounded-full bg-white/50 dark:bg-black/50 backdrop-blur-md border border-neutral-200 dark:border-neutral-800 shadow-sm">
-          <Sparkles className="size-6 text-purple-500" />
+          <TrendingUp className="size-6 text-purple-500" />
         </div>
       </OrbitingCircles>
     </div>
