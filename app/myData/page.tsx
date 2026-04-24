@@ -35,6 +35,8 @@ import {
 import Image from "next/image";
 import React, { useMemo, useState } from "react";
 
+const MEALS_PAGE_SIZE = 5;
+
 function toDateKey(date: Date): string {
   return format(date, "yyyy-MM-dd");
 }
@@ -152,9 +154,17 @@ function StatCard({
 export default function MyDataPage() {
   const todayDateKey = useMemo(() => getIstDateKey(), []);
   const [selectedDate, setSelectedDate] = useState(todayDateKey);
-
-  const { data, isLoading, isError, error, isFetching, refetch } =
-    useDailySummary(selectedDate);
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isFetching,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useDailySummary(selectedDate, MEALS_PAGE_SIZE);
 
   const isTodaySelected = selectedDate === todayDateKey;
   const disableNextDay = selectedDate >= todayDateKey;
@@ -166,20 +176,26 @@ export default function MyDataPage() {
     return parseISO(`${selectedDate}T00:00:00`);
   }, [selectedDate]);
 
+  const latestPage = data?.pages[0];
+  const meals = useMemo(
+    () => data?.pages.flatMap((page) => page.meals) ?? [],
+    [data?.pages],
+  );
+
   const insights = useMemo(() => {
-    if (!data) {
+    if (!latestPage) {
       return [];
     }
 
     return buildInsights(
-      data.meals,
-      data.summary.totalProtein,
-      data.summary.totalCarbs,
-      data.summary.totalFat,
+      meals,
+      latestPage.summary.totalProtein,
+      latestPage.summary.totalCarbs,
+      latestPage.summary.totalFat,
     );
-  }, [data]);
+  }, [latestPage, meals]);
 
-  const calorieDelta = data?.comparison.calorieDelta ?? 0;
+  const calorieDelta = latestPage?.comparison.calorieDelta ?? 0;
   const hasHigherCaloriesThanYesterday = calorieDelta >= 0;
 
   return (
@@ -317,7 +333,7 @@ export default function MyDataPage() {
               Retry Sync
             </Button>
           </section>
-        ) : data ? (
+        ) : latestPage ? (
           <motion.section 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -327,31 +343,31 @@ export default function MyDataPage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
               <StatCard
                 label="Calories"
-                value={Math.round(data.summary.totalCalories).toString()}
+                value={Math.round(latestPage.summary.totalCalories).toString()}
                 unit="KCAL"
                 icon={Flame}
               />
               <StatCard
                 label="Protein"
-                value={data.summary.totalProtein.toFixed(1)}
+                value={latestPage.summary.totalProtein.toFixed(1)}
                 unit="G"
                 icon={Drumstick}
               />
               <StatCard
                 label="Carbs"
-                value={data.summary.totalCarbs.toFixed(1)}
+                value={latestPage.summary.totalCarbs.toFixed(1)}
                 unit="G"
                 icon={Wheat}
               />
               <StatCard
                 label="Fat"
-                value={data.summary.totalFat.toFixed(1)}
+                value={latestPage.summary.totalFat.toFixed(1)}
                 unit="G"
                 icon={Droplets}
               />
               <StatCard
                 label="Entries"
-                value={String(data.summary.mealCount)}
+                value={String(latestPage.summary.mealCount)}
                 unit="MEALS"
                 icon={Utensils}
               />
@@ -365,7 +381,7 @@ export default function MyDataPage() {
                 <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Delta compared to{" "}
                   <span className="font-semibold text-black dark:text-white">
-                    {formatIstDateKey(data.comparison.previousDate)}
+                    {formatIstDateKey(latestPage.comparison.previousDate)}
                   </span>
                   .
                 </p>
@@ -411,15 +427,15 @@ export default function MyDataPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="flex size-6 items-center justify-center rounded-md bg-black text-xs font-mono font-medium text-white dark:bg-white dark:text-black">
-                      {data.meals.length}
+                      {meals.length}
                     </span>
                     <span className="text-xs font-mono uppercase tracking-widest text-neutral-500">
-                      entries
+                      / {latestPage.summary.mealCount} entries
                     </span>
                   </div>
                 </div>
 
-                {data.meals.length === 0 ? (
+                {meals.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-black/20 bg-black/5 p-12 text-center dark:border-white/20 dark:bg-white/5">
                     <Utensils className="mx-auto mb-4 size-8 text-neutral-400 dark:text-neutral-600" />
                     <p className="font-mono text-sm uppercase tracking-widest font-semibold mb-2">Awaiting Data</p>
@@ -429,7 +445,7 @@ export default function MyDataPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {data.meals.map((meal) => (
+                    {meals.map((meal) => (
                       <article
                         key={meal.id}
                         className="group relative overflow-hidden rounded-xl border border-black/10 bg-white/80 transition-all hover:border-black/20 hover:shadow-md dark:border-white/10 dark:bg-black/50 dark:hover:border-white/20"
@@ -442,6 +458,7 @@ export default function MyDataPage() {
                               fill
                               sizes="(max-width: 640px) 100vw, 220px"
                               className="object-cover transition-transform duration-700 group-hover:scale-105"
+                              loading="lazy"
                               unoptimized
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent sm:bg-gradient-to-r" />
@@ -504,6 +521,19 @@ export default function MyDataPage() {
                         </div>
                       </article>
                     ))}
+                    {hasNextPage && (
+                      <div className="pt-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full rounded-lg font-mono text-xs uppercase tracking-widest"
+                          onClick={() => fetchNextPage()}
+                          disabled={isFetchingNextPage}
+                        >
+                          {isFetchingNextPage ? "Loading..." : "Load older entries"}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
