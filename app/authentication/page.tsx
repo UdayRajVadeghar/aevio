@@ -179,7 +179,7 @@ function AuthenticationContent() {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="text-xs font-medium text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors py-1"
+                  className="text-xs font-medium text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors duration-200 py-1 px-2 rounded-md"
                 >
                   Forgot password?
                 </button>
@@ -190,7 +190,7 @@ function AuthenticationContent() {
           <button
             type="submit"
             disabled={isLoading}
-            className="group relative w-full flex items-center justify-center gap-2 h-12 sm:h-11 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium text-base sm:text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+            className="group relative w-full flex items-center justify-center gap-2 h-12 sm:h-11 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium text-base sm:text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
             {isLoading ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -207,7 +207,7 @@ function AuthenticationContent() {
           {isSignUp ? "Already have an account? " : "Don't have an account? "}
           <button
             onClick={toggleMode}
-            className="font-medium text-black dark:text-white hover:underline underline-offset-4 outline-none"
+            className="font-medium text-black dark:text-white hover:underline underline-offset-4 outline-none hover:bg-neutral-100 dark:hover:bg-white/10 rounded-md px-2 py-1 transition-colors duration-200"
           >
             {isSignUp ? "Sign in" : "Sign up"}
           </button>
