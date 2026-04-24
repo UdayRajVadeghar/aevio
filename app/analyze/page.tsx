@@ -9,15 +9,15 @@ import {
   CheckCircle2,
   ChevronRight,
   Loader2,
-  Lock,
   RefreshCw,
   Scan,
   Utensils,
+  X,
   XCircle,
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/shadcn/dialog";
 import Link from "next/link";
@@ -87,7 +87,12 @@ const generateDataStreamEntries = (count: number) => {
 
 export default function CalculatePage() {
   const shouldReduceMotion = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
   const { data: session, isPending } = useSession();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [stage, setStage] = useState<Stage>("idle");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -334,7 +339,7 @@ export default function CalculatePage() {
                   aria-hidden
                   className={cn(
                     "absolute inset-x-0 h-[2px] bg-black/20 dark:bg-white/20",
-                    !shouldReduceMotion && "animate-[slideIn_2.5s_ease-in-out_infinite]"
+                    mounted && !shouldReduceMotion && "animate-[slideIn_2.5s_ease-in-out_infinite]"
                   )}
                 />
 
@@ -739,36 +744,56 @@ export default function CalculatePage() {
       </div>
 
       <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
-        <DialogContent
-          className="sm:max-w-[400px] p-0 overflow-hidden border border-border/50 bg-background/95 backdrop-blur-3xl shadow-[0_10px_40px_rgb(0,0,0,0.12)] dark:shadow-[0_10px_40px_rgb(0,0,0,0.4)] rounded-[28px]"
-        >
-          <div className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-              <Lock className="w-7 h-7 text-primary" />
+        <DialogContent className="sm:max-w-[360px] p-0 overflow-hidden border border-black/10 dark:border-white/10 bg-white dark:bg-black shadow-2xl">
+          {/* Close button */}
+          <button
+            onClick={() => setIsAuthDialogOpen(false)}
+            className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors rounded-md"
+          >
+            <X size={18} />
+          </button>
+
+          <div className="p-8 pt-10">
+            {/* App Logo */}
+            <div className="flex justify-center mb-5">
+              <div className="w-7 h-7 bg-black dark:bg-white" />
             </div>
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold tracking-tight mb-2">
-                Sign in to continue
+
+            <DialogHeader className="space-y-2">
+              <DialogTitle className="text-lg font-semibold tracking-tight text-center text-black dark:text-white">
+                Sign in to track your meals
               </DialogTitle>
-              <DialogDescription className="text-base text-muted-foreground leading-relaxed">
-                Please log in or create an account to use the Aevio Engine and analyze your meals.
+              <DialogDescription className="text-sm text-neutral-500 dark:text-neutral-400 text-center leading-relaxed">
+                Create a free account to analyze your food and track nutrition with AI.
               </DialogDescription>
             </DialogHeader>
 
-            <div className="mt-8 w-full flex flex-col gap-3">
-              <Link href="/authentication" className="w-full block">
-                <button className="w-full h-12 bg-foreground text-background font-semibold hover:bg-foreground/90 transition-all flex items-center justify-center gap-2 rounded-xl cursor-pointer shadow-sm">
-                  Log in to continue
+            <div className="mt-6 space-y-2.5">
+              <Link
+                href="/authentication?view=signup"
+                className="block w-full"
+                onClick={() => setIsAuthDialogOpen(false)}
+              >
+                <button className="w-full h-11 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 rounded-lg">
+                  Create free account
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </Link>
-              <button 
+
+              <Link
+                href="/authentication"
+                className="block w-full"
                 onClick={() => setIsAuthDialogOpen(false)}
-                className="w-full h-12 bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex items-center justify-center rounded-xl font-medium cursor-pointer"
               >
-                Cancel
-              </button>
+                <button className="w-full h-11 border border-black/10 dark:border-white/10 text-black dark:text-white font-medium text-sm hover:bg-neutral-50 dark:hover:bg-white/5 hover:border-black/20 dark:hover:border-white/20 transition-all duration-200 rounded-lg">
+                  Sign in
+                </button>
+              </Link>
             </div>
+
+            <p className="mt-4 text-xs text-neutral-400 text-center">
+              Free forever. No credit card required.
+            </p>
           </div>
         </DialogContent>
       </Dialog>
