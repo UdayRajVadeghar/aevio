@@ -46,7 +46,7 @@ export function PreFooterCTA() {
             The previous crosshairs were full screen. Let's keep them large but centered on the button.
         */}
         <div className="absolute h-[200vh] w-[1px] bg-black/10 dark:bg-white/10 top-1/2 -translate-y-1/2 pointer-events-none left-1/2 -translate-x-1/2" />
-        <div className="absolute w-[200vw] h-[1px] bg-black/10 dark:bg-white/10 left-1/2 -translate-x-1/2 pointer-events-none top-1/2 -translate-y-1/2" />
+        <div className="absolute inset-x-0 h-[1px] bg-black/10 dark:bg-white/10 pointer-events-none top-1/2 -translate-y-1/2" />
 
         {/* The Button */}
         <div className="relative bg-black dark:bg-white px-8 py-4 group cursor-pointer transition-transform active:scale-95">
