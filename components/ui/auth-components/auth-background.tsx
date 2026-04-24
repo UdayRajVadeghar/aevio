@@ -1,10 +1,45 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { memo, useEffect, useMemo, useState } from "react";
 
-export const AuthBackground = () => {
+type StreamConfig = {
+  duration: number;
+  delay: number;
+};
+
+type NodeConfig = {
+  x: number;
+  y: number;
+  size: number;
+  duration: number;
+  delay: number;
+};
+
+export const AuthBackground = memo(function AuthBackground() {
   const [mounted, setMounted] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+
+  const streamConfigs = useMemo<StreamConfig[]>(
+    () =>
+      Array.from({ length: 5 }, () => ({
+        duration: 3 + Math.random() * 2,
+        delay: Math.random() * 2,
+      })),
+    [],
+  );
+
+  const nodeConfigs = useMemo<NodeConfig[]>(
+    () =>
+      Array.from({ length: 8 }, () => ({
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: 4 + Math.random() * 4,
+        duration: 4 + Math.random() * 4,
+        delay: Math.random() * 2,
+      })),
+    [],
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -26,17 +61,17 @@ export const AuthBackground = () => {
 
       {/* Animated Data Streams */}
       <div className="absolute inset-0 flex justify-around opacity-20 dark:opacity-10">
-        {[...Array(5)].map((_, i) => (
+        {streamConfigs.map((stream, i) => (
           <motion.div
             key={i}
             className="w-[1px] h-full bg-gradient-to-b from-transparent via-black dark:via-white to-transparent"
             initial={{ y: "-100%" }}
-            animate={{ y: "100%" }}
+            animate={shouldReduceMotion ? { y: 0 } : { y: "100%" }}
             transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
+              duration: stream.duration,
+              repeat: shouldReduceMotion ? 0 : Infinity,
               ease: "linear",
-              delay: Math.random() * 2,
+              delay: stream.delay,
             }}
           />
         ))}
@@ -44,8 +79,12 @@ export const AuthBackground = () => {
 
       {/* Floating Nodes */}
       <div className="absolute inset-0">
-        {[...Array(8)].map((_, i) => (
-          <FloatingNode key={i} />
+        {nodeConfigs.map((node, i) => (
+          <FloatingNode
+            key={i}
+            config={node}
+            shouldReduceMotion={Boolean(shouldReduceMotion)}
+          />
         ))}
       </div>
 
@@ -53,12 +92,16 @@ export const AuthBackground = () => {
       <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:from-black dark:via-transparent dark:to-transparent opacity-80" />
     </div>
   );
-};
+});
 
-const FloatingNode = () => {
-  const randomX = Math.random() * 100;
-  const randomY = Math.random() * 100;
-  const size = 4 + Math.random() * 4;
+function FloatingNode({
+  config,
+  shouldReduceMotion,
+}: {
+  config: NodeConfig;
+  shouldReduceMotion: boolean;
+}) {
+  const { x, y, size, duration, delay } = config;
 
   return (
     <motion.div
@@ -66,20 +109,24 @@ const FloatingNode = () => {
       style={{
         width: size,
         height: size,
-        left: `${randomX}%`,
-        top: `${randomY}%`,
+        left: `${x}%`,
+        top: `${y}%`,
       }}
-      animate={{
-        y: [0, -20, 0],
-        opacity: [0.1, 0.3, 0.1],
-        scale: [1, 1.2, 1],
-      }}
+      animate={
+        shouldReduceMotion
+          ? { y: 0, opacity: 0.12, scale: 1 }
+          : {
+              y: [0, -20, 0],
+              opacity: [0.1, 0.3, 0.1],
+              scale: [1, 1.2, 1],
+            }
+      }
       transition={{
-        duration: 4 + Math.random() * 4,
-        repeat: Infinity,
+        duration,
+        repeat: shouldReduceMotion ? 0 : Infinity,
         ease: "easeInOut",
-        delay: Math.random() * 2,
+        delay,
       }}
     />
   );
-};
+}
