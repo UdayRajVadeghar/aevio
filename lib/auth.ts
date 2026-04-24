@@ -1,17 +1,44 @@
-import { PrismaClient } from "@/lib/generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { db } from "@/lib/db";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import pg from "pg";
 import { Resend } from "resend";
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendApiKey = process.env.RESEND_API_KEY;
+const emailFrom = process.env.EMAIL_FROM;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
+async function sendAuthEmail({
+  to,
+  subject,
+  html,
+  context,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  context: "reset password" | "verification";
+}) {
+  if (!resend || !emailFrom) {
+    console.error(
+      `[auth] Skipping ${context} email: missing RESEND_API_KEY or EMAIL_FROM`
+    );
+    return;
+  }
+
+  try {
+    await resend.emails.send({
+      from: emailFrom,
+      to,
+      subject,
+      html,
+    });
+  } catch (error) {
+    console.error(`[auth] Failed to send ${context} email`, error);
+  }
+}
 
 export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
+  database: prismaAdapter(db, {
     provider: "postgresql",
   }),
   emailAndPassword: {
@@ -19,10 +46,10 @@ export const auth = betterAuth({
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
       console.log("Sending reset password email to", user.email);
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM!,
+      await sendAuthEmail({
         to: user.email,
         subject: "Reset your password",
+        context: "reset password",
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>Reset your password</h2>
@@ -37,10 +64,10 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM!,
+      await sendAuthEmail({
         to: user.email,
         subject: "Verify your email",
+        context: "verification",
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>Welcome to Aevio!</h2>
