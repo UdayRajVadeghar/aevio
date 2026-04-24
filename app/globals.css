@@ -216,6 +216,7 @@ svg,
 html {
   scroll-behavior: auto;
   overflow-x: clip;
+  overscroll-behavior: none;
   width: 100%;
 }
 

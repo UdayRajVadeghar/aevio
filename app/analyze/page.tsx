@@ -111,7 +111,7 @@ export default function CalculatePage() {
   const captureMediaInnerClass =
     "relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-[28px] border border-black/10 bg-white px-4 py-6 shadow-[0_20px_60px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-black/40";
   const captureImageClass =
-    "block h-auto max-h-[min(62vh,540px)] w-auto max-w-full object-contain";
+    "block h-auto max-h-[min(62dvh,540px)] w-auto max-w-full object-contain";
   const analyzingDataStream = useMemo(
     () => (stage === "analyzing" ? generateDataStreamEntries(100) : []),
     [stage, imageUrl],
@@ -224,7 +224,7 @@ export default function CalculatePage() {
   }, [file, trimmedMealHint]);
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden overscroll-none [overflow-anchor:none] bg-white font-sans text-black selection:bg-black selection:text-white dark:bg-black dark:text-white dark:selection:bg-white dark:selection:text-black" style={{ WebkitOverflowScrolling: "touch" }}>
+    <main className="relative min-h-[100dvh] overflow-x-clip bg-white font-sans text-black selection:bg-black selection:text-white dark:bg-black dark:text-white dark:selection:bg-white dark:selection:text-black">
       {/* Ambient glassmorphism background */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
         <div className="hidden md:block absolute top-[20%] left-[-10%] w-[600px] h-[600px] bg-neutral-200/50 dark:bg-neutral-800/20 rounded-full blur-[120px] transform-gpu" />
@@ -243,7 +243,7 @@ export default function CalculatePage() {
 
       <div
         className={cn(
-          "relative z-10 flex min-h-screen flex-col items-center px-6 touch-pan-y",
+          "relative z-10 flex min-h-[100dvh] flex-col items-center px-6",
           isActiveStage
             ? "justify-start pt-20 pb-10 sm:pt-24 sm:pb-12"
             : "justify-center pt-20 pb-12 sm:pt-24 sm:pb-16",
@@ -276,14 +276,15 @@ export default function CalculatePage() {
         </motion.div>
 
         {/* Main card */}
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           {stage === "idle" && (
             <motion.div
               key="idle"
+              layout
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               className="w-full max-w-md transform-gpu"
             >
               <button
@@ -369,10 +370,11 @@ export default function CalculatePage() {
           {(stage === "preview" || stage === "confirmed" || stage === "analyzing") && imageUrl && (
             <motion.div
               key="capture-stage"
+              layout
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               className={cn(captureStageClass, "transform-gpu")}
             >
               <div className={captureStageGridClass}>
@@ -535,10 +537,11 @@ export default function CalculatePage() {
           {stage === "result" && result && (
             <motion.div
               key="result"
+              layout
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               className="w-full max-w-4xl transform-gpu"
             >
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
@@ -690,10 +693,11 @@ export default function CalculatePage() {
           {stage === "error" && (
             <motion.div
               key="error"
+              layout
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               className="w-full max-w-md transform-gpu"
             >
               <div className="border border-black dark:border-white bg-black text-white p-6 text-center">
