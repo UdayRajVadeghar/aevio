@@ -268,10 +268,10 @@ export default function CalculatePage() {
                 : "text-4xl sm:text-5xl md:text-6xl",
             )}
           >
-            CAPTURE & <br className="sm:hidden" /> CALCULATE
+            SNAP & <br className="sm:hidden" /> TRACK
           </h1>
           <p className="text-neutral-600 dark:text-neutral-400 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-            Snap a photo and let the Aevio Engine decode your meal&apos;s metrics instantly.
+            Take a photo of your meal and instantly get calories, protein, carbs, and fat breakdown.
           </p>
         </motion.div>
 
@@ -345,7 +345,7 @@ export default function CalculatePage() {
                   </div>
                   <div className="text-center font-mono uppercase tracking-widest">
                     <p className="text-xs font-bold text-black dark:text-white">
-                      Initialize Camera
+                      Take Photo
                     </p>
                     <p className="text-[10px] text-neutral-500 mt-1">
                       or drop image
@@ -362,7 +362,7 @@ export default function CalculatePage() {
                 className="mt-6 flex items-center justify-center gap-2 text-[10px] font-mono uppercase tracking-widest text-neutral-500"
               >
                 <Zap className="w-3 h-3" />
-                <span>Processing latency &lt; 3s</span>
+                <span>AI analysis in seconds</span>
               </motion.div>
             </motion.div>
           )}
