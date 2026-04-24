@@ -1,13 +1,16 @@
 "use client";
 
+import { useSession } from "@/lib/auth-client";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import Link from "next/link";
 import React from "react";
 
 export function PreFooterCTA() {
+  const { data: session } = useSession();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const rafRef = React.useRef<number | null>(null);
+  const isLoggedIn = !!session?.user;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     // Throttle with requestAnimationFrame for better performance
@@ -51,10 +54,10 @@ export function PreFooterCTA() {
         {/* The Button */}
         <div className="relative bg-black dark:bg-white px-8 py-4 group cursor-pointer transition-transform active:scale-95">
           <Link
-            href="/authentication?view=signup"
+            href={isLoggedIn ? "/analyze" : "/authentication?view=signup"}
             className="block text-white dark:text-black font-medium text-base md:text-lg whitespace-nowrap tracking-tight"
           >
-            Start creating
+            {isLoggedIn ? "Track calories" : "Start creating"}
           </Link>
 
           {/* Corner accents */}

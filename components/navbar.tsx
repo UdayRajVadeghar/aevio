@@ -3,7 +3,7 @@
 import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
 import { signOut, useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { ChevronRight, LogOut, Menu, User, X, Zap, Camera, BookOpen, BarChart3 } from "lucide-react";
+import { ChevronRight, LogOut, Menu, User, X, Camera, BookOpen, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -78,9 +78,7 @@ export function Navbar() {
             href="/"
             className="flex items-center gap-3 rounded-md px-1 py-1 outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
           >
-            <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Zap size={16} fill="currentColor" />
-            </div>
+            <div className="w-5 h-5 bg-black dark:bg-white" />
             <span className="text-base font-semibold tracking-tight text-black dark:text-white">
               Aevio
             </span>
@@ -190,9 +188,7 @@ export function Navbar() {
                 className="flex items-center gap-3 rounded-md outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                  <Zap size={16} fill="currentColor" />
-                </div>
+                <div className="w-5 h-5 bg-black dark:bg-white" />
                 <span className="text-base font-semibold text-black dark:text-white">Aevio</span>
               </Link>
               <button
@@ -247,33 +243,36 @@ export function Navbar() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3, duration: 0.4 }}
-                    className="flex flex-col gap-4"
+                    className="flex flex-col gap-3"
                   >
-                    <div className="rounded-lg border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-10 items-center justify-center rounded-md bg-primary/10 text-base font-semibold text-primary">
-                          {session?.user?.name?.charAt(0).toUpperCase() || "U"}
+                    <div className="rounded-lg border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 px-3 py-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-sm font-semibold text-primary shrink-0">
+                            {session?.user?.name?.charAt(0).toUpperCase() || "U"}
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <p className="text-sm font-medium text-black dark:text-white truncate">
+                              {session?.user?.name || "User"}
+                            </p>
+                            <p className="text-xs text-neutral-500 truncate">
+                              {session?.user?.email}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex flex-col">
-                          <p className="text-sm font-medium text-black dark:text-white">
-                            {session?.user?.name || "User"}
-                          </p>
-                          <p className="text-sm text-neutral-500 truncate">
-                            {session?.user?.email}
-                          </p>
-                        </div>
+                        <button
+                          onClick={() => {
+                            setIsMobileMenuOpen(false);
+                            handleLogout();
+                          }}
+                          className="flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer shrink-0"
+                          title="Log out"
+                        >
+                          <LogOut size={14} />
+                          <span>Log out</span>
+                        </button>
                       </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        setIsMobileMenuOpen(false);
-                        handleLogout();
-                      }}
-                      className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
-                    >
-                      <LogOut size={18} />
-                      Log out
-                    </button>
                   </motion.div>
                 ) : (
                   <motion.div

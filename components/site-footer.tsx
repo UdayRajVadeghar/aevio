@@ -7,7 +7,7 @@ export function SiteFooter() {
           AEVIO INC.
         </div>
         <p className="text-xs text-neutral-500 font-mono uppercase tracking-widest">
-          © 2026 AEVIO SYSTEM. ALL RIGHTS RESERVED.
+          © 2026 AEVIO SYSTEM
         </p>
       </div>
     </footer>
