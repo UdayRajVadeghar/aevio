@@ -1,6 +1,10 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { uploadImage } from "@/lib/gcs";
+import {
+  getObjectMetadata,
+  getUploadResultFromObjectKey,
+  isUserOwnedObjectKey,
+} from "@/lib/gcs";
 import { analyzeMealFromGcs } from "@/lib/gemini";
 import { getCurrentIstTime } from "@/lib/ist-time";
 import { headers } from "next/headers";
@@ -27,33 +31,46 @@ export async function POST(req: NextRequest) {
   }
   const userId = session.user.id;
 
-  let form: FormData;
+  let payload: {
+    objectKey?: unknown;
+    mimeType?: unknown;
+    mealHint?: unknown;
+  };
   try {
-    form = await req.formData();
+    payload = await req.json();
   } catch {
     return NextResponse.json(
-      { error: "Invalid multipart/form-data body" },
+      { error: "Invalid JSON body" },
       { status: 400 },
     );
   }
 
-  const fileEntry = form.get("image");
-  if (!(fileEntry instanceof File)) {
+  const objectKey =
+    typeof payload.objectKey === "string" ? payload.objectKey.trim() : "";
+  if (!objectKey) {
     return NextResponse.json(
-      { error: "Missing 'image' field in FormData" },
+      { error: "Missing 'objectKey' in body" },
       { status: 400 },
     );
   }
-
-  const mealHintEntry = form.get("mealHint");
-  if (mealHintEntry instanceof File) {
+  if (!isUserOwnedObjectKey(userId, objectKey)) {
     return NextResponse.json(
-      { error: "Invalid 'mealHint' field in FormData" },
+      { error: "Object key does not belong to the current user" },
+      { status: 403 },
+    );
+  }
+
+  const mimeType =
+    typeof payload.mimeType === "string" ? payload.mimeType.toLowerCase() : "";
+  if (!ALLOWED_MIME.has(mimeType)) {
+    return NextResponse.json(
+      { error: `Unsupported image type: ${mimeType || "unknown"}` },
       { status: 400 },
     );
   }
 
-  const mealHint = mealHintEntry?.trim() ?? "";
+  const mealHint =
+    typeof payload.mealHint === "string" ? payload.mealHint.trim() : "";
   if (mealHint.length > MAX_MEAL_HINT_LENGTH) {
     return NextResponse.json(
       {
@@ -63,32 +80,33 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const mimeType = (fileEntry.type || "").toLowerCase();
-  if (!ALLOWED_MIME.has(mimeType)) {
+  let metadata;
+  try {
+    metadata = await getObjectMetadata(objectKey);
+  } catch (err) {
+    console.error("GCS metadata lookup failed:", err);
     return NextResponse.json(
-      { error: `Unsupported image type: ${mimeType || "unknown"}` },
-      { status: 400 },
+      { error: "Failed to verify uploaded image" },
+      { status: 502 },
     );
   }
-  if (fileEntry.size <= 0 || fileEntry.size > MAX_BYTES) {
+  if (!metadata) {
+    return NextResponse.json({ error: "Uploaded image not found" }, { status: 400 });
+  }
+  if (metadata.sizeBytes <= 0 || metadata.sizeBytes > MAX_BYTES) {
     return NextResponse.json(
       { error: "Image must be between 1 byte and 10 MB" },
       { status: 400 },
     );
   }
-
-  const buffer = Buffer.from(await fileEntry.arrayBuffer());
-
-  let uploaded: Awaited<ReturnType<typeof uploadImage>>;
-  try {
-    uploaded = await uploadImage(buffer, mimeType, userId);
-  } catch (err) {
-    console.error("GCS upload failed:", err);
+  if (metadata.mimeType !== mimeType) {
     return NextResponse.json(
-      { error: "Failed to store image" },
-      { status: 502 },
+      { error: "Uploaded image MIME type does not match requested MIME type" },
+      { status: 400 },
     );
   }
+
+  const uploaded = getUploadResultFromObjectKey(objectKey);
 
   const row = await db.mealAnalysis.create({
     data: {

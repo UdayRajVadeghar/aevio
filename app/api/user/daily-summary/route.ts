@@ -47,6 +47,19 @@ function extractFoodItems(value: unknown): FoodItem[] {
   return items.filter(isValidFoodItem);
 }
 
+function parseNonNegativeInt(value: string | null, fallback: number): number {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
 export async function GET(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
 
@@ -55,7 +68,11 @@ export async function GET(req: NextRequest) {
   }
 
   const userId = session.user.id;
-  const dateParam = new URL(req.url).searchParams.get("date")?.trim();
+  const searchParams = new URL(req.url).searchParams;
+  const dateParam = searchParams.get("date")?.trim();
+  const offset = parseNonNegativeInt(searchParams.get("offset"), 0);
+  const rawLimit = parseNonNegativeInt(searchParams.get("limit"), 5);
+  const limit = Math.min(rawLimit || 5, 25);
   const selectedDate = dateParam || getIstDateKey();
 
   if (!isValidIstDateKey(selectedDate)) {
@@ -68,7 +85,8 @@ export async function GET(req: NextRequest) {
   const previousDate = shiftIstDateKey(selectedDate, -1);
 
   try {
-    const [meals, dailyTotal, previousDailyTotal] = await db.$transaction([
+    const [meals, mealTotals, mealCount, dailyTotal, previousDailyTotal] =
+      await db.$transaction([
       db.mealAnalysis.findMany({
         where: {
           userId,
@@ -87,6 +105,28 @@ export async function GET(req: NextRequest) {
           createdAt: true,
         },
         orderBy: [{ loggedAtIst: "desc" }, { createdAt: "desc" }],
+        skip: offset,
+        take: limit,
+      }),
+      db.mealAnalysis.aggregate({
+        where: {
+          userId,
+          status: "COMPLETE",
+          loggedDateIst: selectedDate,
+        },
+        _sum: {
+          calories: true,
+          protein: true,
+          carbs: true,
+          fat: true,
+        },
+      }),
+      db.mealAnalysis.count({
+        where: {
+          userId,
+          status: "COMPLETE",
+          loggedDateIst: selectedDate,
+        },
       }),
       db.dailyCalorieTotal.findUnique({
         where: {
@@ -111,26 +151,25 @@ export async function GET(req: NextRequest) {
           totalCalories: true,
         },
       }),
-    ]);
+      ]);
 
-    const totals = meals.reduce(
-      (acc, meal) => ({
-        calories: acc.calories + (meal.calories ?? 0),
-        protein: acc.protein + (meal.protein ?? 0),
-        carbs: acc.carbs + (meal.carbs ?? 0),
-        fat: acc.fat + (meal.fat ?? 0),
-      }),
-      { calories: 0, protein: 0, carbs: 0, fat: 0 },
-    );
+    const totals = {
+      calories: mealTotals._sum.calories ?? 0,
+      protein: mealTotals._sum.protein ?? 0,
+      carbs: mealTotals._sum.carbs ?? 0,
+      fat: mealTotals._sum.fat ?? 0,
+    };
 
     const totalCalories = dailyTotal?.totalCalories ?? totals.calories;
     const previousCalories = previousDailyTotal?.totalCalories ?? 0;
+    const nextOffset = offset + meals.length;
+    const hasMore = nextOffset < mealCount;
 
     return NextResponse.json({
       selectedDate,
       timezone: dailyTotal?.timezone ?? "Asia/Kolkata",
       summary: {
-        mealCount: meals.length,
+        mealCount,
         totalCalories: toRounded(totalCalories),
         recordedCalories: toRounded(dailyTotal?.totalCalories ?? 0),
         totalProtein: toRounded(totals.protein),
@@ -152,6 +191,12 @@ export async function GET(req: NextRequest) {
         loggedAtIst: meal.loggedAtIst,
         foodItems: extractFoodItems(meal.foodItems),
       })),
+      pagination: {
+        limit,
+        offset,
+        hasMore,
+        nextOffset: hasMore ? nextOffset : null,
+      },
     });
   } catch (error) {
     console.error("Error fetching daily summary:", error);
