@@ -7,6 +7,28 @@ const resendApiKey = process.env.RESEND_API_KEY;
 const emailFrom = process.env.EMAIL_FROM;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
+function buildVerificationLandingUrl(verificationUrl: string) {
+  try {
+    const parsedUrl = new URL(verificationUrl);
+    const landingUrl = new URL("/verify-email", parsedUrl.origin);
+    const token = parsedUrl.searchParams.get("token");
+    const callbackURL = parsedUrl.searchParams.get("callbackURL");
+
+    if (token) {
+      landingUrl.searchParams.set("token", token);
+    }
+
+    if (callbackURL) {
+      landingUrl.searchParams.set("callbackURL", callbackURL);
+    }
+
+    return landingUrl.toString();
+  } catch (error) {
+    console.error("[auth] Failed to build verification landing URL", error);
+    return verificationUrl;
+  }
+}
+
 async function sendAuthEmail({
   to,
   subject,
@@ -20,7 +42,7 @@ async function sendAuthEmail({
 }) {
   if (!resend || !emailFrom) {
     console.error(
-      `[auth] Skipping ${context} email: missing RESEND_API_KEY or EMAIL_FROM`
+      `[auth] Skipping ${context} email: missing RESEND_API_KEY or EMAIL_FROM`,
     );
     return;
   }
@@ -64,6 +86,8 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
+      const verifyLandingUrl = buildVerificationLandingUrl(url);
+
       await sendAuthEmail({
         to: user.email,
         subject: "Verify your email",
@@ -72,7 +96,7 @@ export const auth = betterAuth({
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>Welcome to Aevio!</h2>
             <p>Click the link below to verify your email address:</p>
-            <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px;">Verify Email</a>
+            <a href="${verifyLandingUrl}" style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px;">Verify Email</a>
             <p>This link will expire in 24 hours.</p>
           </div>
         `,
