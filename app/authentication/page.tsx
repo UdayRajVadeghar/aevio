@@ -113,14 +113,12 @@ function AuthenticationContent() {
       title={isSignUp ? "Create an account" : "Welcome back"}
       subtitle={
         isSignUp
-          ? "Join Aevio to start tracking your high-performance metrics"
-          : "Enter your credentials to access your journal"
+          ? "Join Aevio to start tracking your nutrition"
+          : "Enter your credentials to access your account"
       }
     >
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-3"></div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           {error && (
             <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
@@ -181,7 +179,7 @@ function AuthenticationContent() {
                 <button
                   type="button"
                   onClick={handleForgotPassword}
-                  className="text-xs font-medium text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
+                  className="text-xs font-medium text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors py-1"
                 >
                   Forgot password?
                 </button>
@@ -192,7 +190,7 @@ function AuthenticationContent() {
           <button
             type="submit"
             disabled={isLoading}
-            className="group relative w-full flex items-center justify-center gap-2 h-11 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+            className="group relative w-full flex items-center justify-center gap-2 h-12 sm:h-11 bg-black dark:bg-white text-white dark:text-black rounded-xl font-medium text-base sm:text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -205,7 +203,7 @@ function AuthenticationContent() {
           </button>
         </form>
 
-        <div className="text-center text-sm text-neutral-500 dark:text-neutral-400 mt-6">
+        <div className="text-center text-sm text-neutral-500 dark:text-neutral-400 mt-4 sm:mt-6">
           {isSignUp ? "Already have an account? " : "Don't have an account? "}
           <button
             onClick={toggleMode}
