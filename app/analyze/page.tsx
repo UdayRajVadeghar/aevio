@@ -459,16 +459,16 @@ export default function CalculatePage() {
                     {stage === "preview" && (
                       <motion.div key="right-preview" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6">
                         <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center">
-                          <p className="text-sm font-bold tracking-tight mb-1 uppercase">Verify Capture</p>
-                          <p className="text-xs text-neutral-500 font-mono">Ensure subject clarity before proceeding.</p>
+                          <p className="text-sm font-bold tracking-tight mb-1 uppercase">How's this look?</p>
+                          <p className="text-xs text-neutral-500 font-mono">Make sure your meal is clearly visible.</p>
                         </div>
                         <div className="flex gap-4">
-                          <button onClick={retake} className="flex-1 px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs">
+                          <button onClick={retake} className="flex-1 px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
                             <RefreshCw className="w-3.5 h-3.5" />
-                            Discard
+                            Retake
                           </button>
-                          <button onClick={confirm} className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs">
-                            Confirm
+                          <button onClick={confirm} className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
+                            Looks Good
                             <CheckCircle2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -478,23 +478,23 @@ export default function CalculatePage() {
                     {stage === "confirmed" && (
                       <motion.div key="right-confirmed" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6">
                         <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center">
-                          <p className="text-sm font-bold tracking-tight mb-1 uppercase">Data Locked</p>
-                          <p className="text-xs text-neutral-500 font-mono">Neural engine standing by for analysis.</p>
+                          <p className="text-sm font-bold tracking-tight mb-1 uppercase">Image Ready</p>
+                          <p className="text-xs text-neutral-500 font-mono">AI is ready to analyze your meal.</p>
                         </div>
                         <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5">
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <p className="text-sm font-bold tracking-tight uppercase">Known Meal Details</p>
-                              <p className="text-xs text-neutral-500 font-mono mt-1">Optional. Add the item name, brand, or amount if you already know it.</p>
+                              <p className="text-sm font-bold tracking-tight uppercase">Meal Context</p>
+                              <p className="text-xs text-neutral-500 font-mono mt-1">Know what you're eating? Add details like food name, brand, or portion size for better accuracy.</p>
                             </div>
-                            <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 shrink-0">Optional</p>
+                            <span className="px-2 py-1 bg-neutral-200 dark:bg-neutral-800 text-[10px] font-mono uppercase tracking-widest text-neutral-700 dark:text-neutral-300 shrink-0 rounded">Optional</span>
                           </div>
                           <textarea
                             value={mealHint}
                             onChange={(e) => setMealHint(e.target.value)}
                             rows={2}
                             maxLength={MAX_MEAL_HINT_LENGTH}
-                            placeholder="McDonald's Double Cheeseburger, 1 burger"
+                            placeholder="e.g., Grilled chicken breast, 1 cup rice, handful of almonds"
                             className="mt-4 w-full resize-none border border-black/10 dark:border-white/10 bg-white dark:bg-black px-4 py-3 text-sm text-black dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white"
                           />
                           <div className="mt-2 flex items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
@@ -503,12 +503,12 @@ export default function CalculatePage() {
                           </div>
                         </div>
                         <div className="flex gap-4">
-                          <button onClick={reset} className="px-4 py-3 text-neutral-500 hover:text-black dark:hover:text-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs">
+                          <button onClick={reset} className="px-4 py-3 text-neutral-500 hover:text-black dark:hover:text-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
                             <XCircle className="w-3.5 h-3.5" />
-                            Abort
+                            Cancel
                           </button>
-                          <button onClick={analyze} disabled={!file} className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs">
-                            Execute Analysis
+                          <button onClick={analyze} disabled={!file} className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                            Analyze
                             <ArrowRight className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -525,9 +525,9 @@ export default function CalculatePage() {
                             exit={{ opacity: 0, y: -4 }}
                             transition={{ duration: 0.2 }}
                           >
-                            <p className="text-sm font-bold tracking-tight uppercase">{subStatus.toUpperCase()}</p>
+                            <p className="text-sm font-bold tracking-tight uppercase">{subStatus === "Uploading…" ? "Uploading Photo" : "Analyzing Your Meal"}</p>
                             <p className="text-[10px] text-neutral-500 font-mono mt-1 uppercase tracking-widest">
-                              {subStatus === "Uploading…" ? "Establishing secure uplink" : "Processing biological data"}
+                              {subStatus === "Uploading…" ? "Getting your image ready" : "Identifying ingredients and calories"}
                             </p>
                           </motion.div>
                         </AnimatePresence>
@@ -580,7 +580,7 @@ export default function CalculatePage() {
                   >
                     <button
                       onClick={reset}
-                      className="w-full px-6 py-4 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
+                      className="w-full px-6 py-4 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-widest cursor-pointer"
                     >
                       <Scan className="w-4 h-4" />
                       New Analysis
@@ -672,7 +672,7 @@ export default function CalculatePage() {
                       <div className="flex items-center gap-2 min-w-0">
                         <Brain className="w-3 h-3 shrink-0" />
                         <span className="text-[10px] font-mono uppercase tracking-widest text-[#A8906D]">
-                          How we calculated this
+                          How your meal was analyzed
                         </span>
                       </div>
                       <ChevronRight className="w-4 h-4 text-neutral-500 shrink-0" aria-hidden />
@@ -723,9 +723,9 @@ export default function CalculatePage() {
               <div className="mt-6 flex gap-4">
                 <button
                   onClick={reset}
-                  className="flex-1 px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                  className="flex-1 px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer"
                 >
-                  Abort
+                  Cancel
                 </button>
                 <button
                   onClick={() => {
@@ -733,9 +733,9 @@ export default function CalculatePage() {
                     setErrorMessage("");
                   }}
                   disabled={!file}
-                  className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs"
+                  className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Retry Uplink
+                  Try Again
                 </button>
               </div>
             </motion.div>

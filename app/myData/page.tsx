@@ -238,12 +238,12 @@ export default function MyDataPage() {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-black/10 bg-white/50 p-2 backdrop-blur-md dark:border-white/10 dark:bg-white/5 w-fit">
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-black/10 bg-white/50 p-2 backdrop-blur-md dark:border-white/10 dark:bg-white/5 w-fit cursor-pointer">
             <Button
               type="button"
               variant="outline"
               size="icon"
-              className="rounded-lg h-9 w-9 bg-transparent border-transparent hover:bg-black/5 dark:hover:bg-white/10"
+              className="rounded-lg h-9 w-9 bg-transparent border-transparent hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
               onClick={() => setSelectedDate((previous) => shiftIstDateKey(previous, -1))}
             >
               <ChevronLeft className="size-4" />
@@ -254,7 +254,7 @@ export default function MyDataPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="min-w-[220px] justify-start gap-3 rounded-lg font-mono text-sm bg-transparent border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/10"
+                  className="min-w-[220px] justify-start gap-3 rounded-lg font-mono text-sm bg-transparent border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer"
                 >
                   <CalendarDays className="size-4" />
                   {formatIstDateKey(selectedDate, {
@@ -285,7 +285,7 @@ export default function MyDataPage() {
               type="button"
               variant="outline"
               size="icon"
-              className="rounded-lg h-9 w-9 bg-transparent border-transparent hover:bg-black/5 dark:hover:bg-white/10"
+              className="rounded-lg h-9 w-9 bg-transparent border-transparent hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer disabled:cursor-not-allowed"
               onClick={() => setSelectedDate((previous) => shiftIstDateKey(previous, 1))}
               disabled={disableNextDay}
             >
@@ -297,7 +297,7 @@ export default function MyDataPage() {
             <Button
               type="button"
               variant="ghost"
-              className={cn("rounded-lg px-4 h-9 font-mono text-xs uppercase tracking-wider", isTodaySelected ? "font-bold bg-black/5 dark:bg-white/10" : "hover:bg-black/5 dark:hover:bg-white/10")}
+              className={cn("rounded-lg px-4 h-9 font-mono text-xs uppercase tracking-wider cursor-pointer disabled:cursor-not-allowed", isTodaySelected ? "font-bold bg-black/5 dark:bg-white/10" : "hover:bg-black/5 dark:hover:bg-white/10")}
               disabled={isTodaySelected}
               onClick={() => setSelectedDate(todayDateKey)}
             >
@@ -329,7 +329,7 @@ export default function MyDataPage() {
             <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
               {error instanceof Error ? error.message : "Please try again."}
             </p>
-            <Button onClick={() => refetch()} className="mt-6 rounded-lg font-mono uppercase tracking-widest text-xs" variant="outline">
+            <Button onClick={() => refetch()} className="mt-6 rounded-lg font-mono uppercase tracking-widest text-xs cursor-pointer" variant="outline">
               Retry Sync
             </Button>
           </section>
@@ -498,7 +498,7 @@ export default function MyDataPage() {
                                 </ul>
                               ) : (
                                 <p className="mb-8 text-sm text-neutral-500 italic">
-                                  No structural breakdown available.
+                                  Food details not available for this entry.
                                 </p>
                               )}
                             </div>
@@ -526,7 +526,7 @@ export default function MyDataPage() {
                         <Button
                           type="button"
                           variant="outline"
-                          className="w-full rounded-lg font-mono text-xs uppercase tracking-widest"
+                          className="w-full rounded-lg font-mono text-xs uppercase tracking-widest cursor-pointer disabled:cursor-not-allowed"
                           onClick={() => fetchNextPage()}
                           disabled={isFetchingNextPage}
                         >

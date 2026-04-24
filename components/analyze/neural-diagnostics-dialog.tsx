@@ -154,11 +154,10 @@ export function NeuralDiagnosticsDialog({
               </div>
               <div className="min-w-0 pr-6 sm:pr-0">
                 <DialogTitle className="text-balance text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-2xl">
-                  How we calculated this
+                  How your meal was analyzed
                 </DialogTitle>
                 <DialogDescription className="mt-1.5 text-pretty text-left text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
-                  Your photo was read by the model to produce these numbers, confidence, and
-                  line-item detail—all in one place.
+                  Our AI looked at your photo to identify foods, estimate portion sizes, and calculate calories and macros. Here's the full breakdown.
                 </DialogDescription>
               </div>
             </div>
