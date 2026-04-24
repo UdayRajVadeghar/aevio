@@ -1,0 +1,13 @@
+[project]
+name = "adk-api"
+version = "0.1.0"
+description = "ADK-backed coaching service for Aevio"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "google-adk",
+    "pydantic-settings",
+    "uvicorn[standard]",
+]
+
