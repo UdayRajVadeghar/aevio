@@ -15,12 +15,7 @@ export default function OnboardingLayout({
           <span className="font-semibold">Onboarding Progress</span>
         </div>
 
-        <main
-          className="flex-1 overflow-y-auto overflow-x-hidden"
-          data-lenis-prevent="true"
-          data-lenis-prevent-wheel="true"
-          data-lenis-prevent-touch="true"
-        >
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full max-w-3xl mx-auto p-6 md:p-12 min-h-full flex items-center">
             <div className="w-full py-12">{children}</div>
           </div>

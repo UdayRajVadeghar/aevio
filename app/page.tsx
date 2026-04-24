@@ -3,7 +3,6 @@
 import { BentoCard, BentoGrid } from "@/components/ui/hero-section/bento-grid";
 import { FeaturesOrbit } from "@/components/ui/landing/features-orbit";
 import { PreFooterCTA } from "@/components/ui/pre-footer-cta";
-import { GymNeonShowcase } from "@/components/ui/showcase/gym-neon-showcase";
 import { motion } from "framer-motion";
 import {
   Activity,
@@ -34,18 +33,18 @@ export default function Home() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
             <div className="inline-block border border-black dark:border-white px-3 py-1 text-xs font-mono uppercase tracking-widest">
-              v1.0.0 Public Beta
+              Built for everyday consistency
             </div>
             <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-[0.9]">
-              METRICS <br />
-              FOR THE <br />
+              TRACK WHAT <br />
+              MATTERS <br />
               <span className="text-neutral-400 dark:text-neutral-600">
-                UNBOUND
+                FEEL BETTER DAILY
               </span>
             </h1>
             <p className="text-lg md:text-xl text-neutral-600 dark:text-neutral-400 max-w-md leading-relaxed">
-              The minimal AI journal for high-performance individuals. Track
-              sleep, fitness, and cognitive load without the noise.
+              Aevio helps you log sleep, workouts, and focus in minutes, then
+              shows what is actually improving your energy and performance.
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -68,7 +67,6 @@ export default function Home() {
             <div className="" />
             <FeaturesOrbit />
             {/* Decorative elements */}
-            <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-black dark:bg-white z-0 opacity-10 pattern-dots" />
           </div>
         </div>
       </section>
@@ -161,7 +159,7 @@ export default function Home() {
 
       {/* Showcase Section */}
 
-      <GymNeonShowcase />
+      {/* <GymNeonShowcase /> */}
 
       <PreFooterCTA />
 
