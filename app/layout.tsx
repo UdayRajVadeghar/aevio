@@ -1,7 +1,6 @@
 "use client";
 
 import { Navbar } from "@/components/navbar";
-import { SmoothScroll } from "@/components/smooth-scroll";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -38,10 +37,8 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <SmoothScroll>
-              <Navbar />
-              {children}
-            </SmoothScroll>
+            <Navbar />
+            {children}
           </ThemeProvider>
         </QueryClientProvider>
       </body>

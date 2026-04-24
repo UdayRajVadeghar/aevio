@@ -1,7 +1,6 @@
 "use client";
 
 import { BentoCard, BentoGrid } from "@/components/ui/hero-section/bento-grid";
-import { IntuitiveInteractions } from "@/components/ui/intuitive-interactions/intuitive-interactions";
 import { FeaturesOrbit } from "@/components/ui/landing/features-orbit";
 import { PreFooterCTA } from "@/components/ui/pre-footer-cta";
 import { GymNeonShowcase } from "@/components/ui/showcase/gym-neon-showcase";
@@ -78,8 +77,8 @@ export default function Home() {
       <section className="relative py-24 px-6 bg-neutral-50 dark:bg-black overflow-hidden">
         {/* Ambient Background for Glassmorphism */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none z-0">
-          <div className="absolute top-[20%] left-[-10%] w-[600px] h-[600px] bg-neutral-200/50 dark:bg-neutral-800/20 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[10%] right-[-10%] w-[500px] h-[500px] bg-neutral-200/50 dark:bg-neutral-800/20 rounded-full blur-[100px]" />
+          <div className="hidden md:block absolute top-[20%] left-[-10%] w-[600px] h-[600px] bg-neutral-200/50 dark:bg-neutral-800/20 rounded-full blur-[120px] transform-gpu" />
+          <div className="hidden md:block absolute bottom-[10%] right-[-10%] w-[500px] h-[500px] bg-neutral-200/50 dark:bg-neutral-800/20 rounded-full blur-[100px] transform-gpu" />
         </div>
         <div className="relative z-10 max-w-7xl mx-auto mb-16">
           <motion.div
@@ -89,11 +88,11 @@ export default function Home() {
             transition={{ duration: 0.4, ease: "easeOut" }}
           >
             <h2 className="text-4xl font-bold tracking-tighter mb-6">
-              THE AEVIO ENGINE
+              BUILT FOR REAL DAILY PROGRESS
             </h2>
             <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl">
-              The neural architecture powering your biological optimization. We
-              don't just track data; we interpret the signal in the noise.
+              Aevio helps you connect sleep, training, and mental energy so you
+              can make better decisions each day, not just collect more numbers.
             </p>
           </motion.div>
         </div>
@@ -101,88 +100,54 @@ export default function Home() {
         <div className="relative z-10">
           <BentoGrid>
             <BentoCard
-              title="Neural Synapse"
-              description="Proprietary AI that decodes your biological signals into actionable insights."
+              title="Smarter Daily Insights"
+              description="Turn your logs into clear takeaways so you know what helped, what hurt, and what to adjust next."
               header={
                 <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-white/5 flex items-center justify-center overflow-hidden">
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      opacity: [0.5, 1, 0.5],
-                    }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                    style={{ willChange: "transform, opacity" }}
-                  >
+                  <div>
                     <Brain className="w-12 h-12 text-neutral-800 dark:text-neutral-200 opacity-80" />
-                  </motion.div>
+                  </div>
                 </div>
               }
               className="md:col-span-2"
               icon={<Cpu className="w-4 h-4" />}
             />
             <BentoCard
-              title="Quantum Link"
-              description="State synchronization across your digital ecosystem with zero latency."
+              title="All Your Metrics Together"
+              description="See sleep, workouts, and focus in one place so your day makes sense at a glance."
               header={
                 <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-white/5 flex items-center justify-center overflow-hidden">
-                  <motion.div
-                    animate={{
-                      rotate: [0, 360],
-                    }}
-                    transition={{
-                      duration: 20,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                    style={{ willChange: "transform" }}
-                  >
+                  <div>
                     <Network className="w-12 h-12 text-neutral-800 dark:text-neutral-200 opacity-80" />
-                  </motion.div>
+                  </div>
                 </div>
               }
               className="md:col-span-1"
               icon={<Zap className="w-4 h-4" />}
             />
             <BentoCard
-              title="Vault Zero"
-              description="Military-grade AES-256 encryption. Your data remains yours, always."
+              title="Private by Default"
+              description="Your health and performance data stays protected, and you stay in control of what you share."
               header={
                 <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-white/5 flex items-center justify-center overflow-hidden">
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                  >
+                  <div>
                     <ShieldCheck className="w-12 h-12 text-neutral-800 dark:text-neutral-200 opacity-80" />
-                  </motion.div>
+                  </div>
                 </div>
               }
               className="md:col-span-1"
               icon={<Lock className="w-4 h-4" />}
             />
             <BentoCard
-              title="Predictive State"
-              description="Forecast your cognitive and physical capacity 24 hours in advance."
+              title="Plan Better Days"
+              description="Spot patterns early and prepare for low-energy days before they throw off your routine."
               header={
                 <div className="h-full min-h-[6rem] w-full bg-neutral-100 dark:bg-white/5 flex items-center justify-center overflow-hidden gap-2">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <motion.div
+                  {[20, 28, 36, 30, 24].map((height, i) => (
+                    <div
                       key={i}
                       className="w-2 bg-neutral-400 dark:bg-neutral-600 rounded-full"
-                      animate={{
-                        height: [20, 40, 20],
-                        backgroundColor: ["#a3a3a3", "#525252", "#a3a3a3"],
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: i * 0.2,
-                      }}
-                      style={{ willChange: "height, background-color" }}
+                      style={{ height }}
                     />
                   ))}
                 </div>
@@ -193,9 +158,6 @@ export default function Home() {
           </BentoGrid>
         </div>
       </section>
-
-      {/* Intuitive Interactions Section */}
-      <IntuitiveInteractions />
 
       {/* Showcase Section */}
 
