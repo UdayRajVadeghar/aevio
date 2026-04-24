@@ -38,7 +38,7 @@ export default function PlannerPage() {
             <span>AI Protocol Architect</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 font-sans">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-6 font-sans">
             DESIGN YOUR <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-neutral-900 via-neutral-500 to-neutral-900 dark:from-white dark:via-neutral-500 dark:to-white animate-text-shimmer bg-[length:200%_auto]">
               BLUEPRINT
@@ -143,7 +143,7 @@ export default function PlannerPage() {
             viewport={{ once: true }}
             className="mb-12"
           >
-            <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-6 font-sans">
+            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tighter mb-6 font-sans">
               THE{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-neutral-900 via-neutral-500 to-neutral-900 dark:from-white dark:via-neutral-500 dark:to-white animate-text-shimmer bg-[length:200%_auto]">
                 METHODOLOGY

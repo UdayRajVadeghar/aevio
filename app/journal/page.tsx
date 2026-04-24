@@ -94,7 +94,7 @@ export default function JournalPage() {
               <span>Cognitive Log</span>
             </div>
 
-            <h1 className="text-5xl md:text-6xl font-black tracking-tighter font-sans">
+            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tighter font-sans">
               YOUR <br />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-neutral-900 via-neutral-500 to-neutral-900 dark:from-white dark:via-neutral-500 dark:to-white animate-text-shimmer bg-[length:200%_auto]">
                 CHRONICLE

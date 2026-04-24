@@ -1,7 +1,16 @@
 "use client";
 
 import { NeuralDiagnosticsDialog } from "@/components/analyze/neural-diagnostics-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/shadcn/dialog";
+import { useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
   Brain,
@@ -16,11 +25,14 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSession } from "@/lib/auth-client";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/shadcn/dialog";
 import Link from "next/link";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 type Stage =
   | "idle"
@@ -79,7 +91,9 @@ const generateDataStreamEntries = (count: number) => {
   return Array.from({ length: count }, (_, index) => {
     if (index % 3 === 0) {
       const length = 16 + Math.floor(Math.random() * 10);
-      return Array.from({ length }, () => (Math.random() > 0.5 ? "1" : "0")).join("");
+      return Array.from({ length }, () =>
+        Math.random() > 0.5 ? "1" : "0",
+      ).join("");
     }
     return ANALYZE_STREAM_TERMS[index % ANALYZE_STREAM_TERMS.length];
   });
@@ -190,11 +204,13 @@ export default function CalculatePage() {
       if (!uploadTargetRes.ok) {
         const body = await uploadTargetRes.json().catch(() => ({}));
         throw new Error(
-          body?.error ?? `Failed to initialize upload (${uploadTargetRes.status})`,
+          body?.error ??
+            `Failed to initialize upload (${uploadTargetRes.status})`,
         );
       }
 
-      const uploadTarget = (await uploadTargetRes.json()) as SignedUploadResponse;
+      const uploadTarget =
+        (await uploadTargetRes.json()) as SignedUploadResponse;
       const uploadRes = await fetch(uploadTarget.uploadUrl, {
         method: uploadTarget.method,
         headers: uploadTarget.headers,
@@ -264,10 +280,9 @@ export default function CalculatePage() {
             isActiveStage ? "mb-6 sm:mb-8" : "mb-8",
           )}
         >
-         
           <h1
             className={cn(
-              "mb-3 sm:mb-4 font-bold tracking-tighter leading-tight",
+              "mb-3 sm:mb-4 font-extrabold tracking-tighter leading-tight bg-clip-text text-transparent bg-gradient-to-r from-neutral-900 via-neutral-500 to-neutral-900 dark:from-white dark:via-neutral-500 dark:to-white animate-text-shimmer bg-[length:200%_auto]",
               isActiveStage
                 ? "text-3xl sm:text-4xl md:text-5xl"
                 : "text-4xl sm:text-5xl md:text-6xl",
@@ -276,7 +291,8 @@ export default function CalculatePage() {
             SNAP & <br className="sm:hidden" /> TRACK
           </h1>
           <p className="text-neutral-600 dark:text-neutral-400 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-            Take a photo of your meal and instantly get calories, protein, carbs, and fat breakdown.
+            Take a photo of your meal and instantly get calories, protein,
+            carbs, and fat breakdown.
           </p>
         </motion.div>
 
@@ -339,7 +355,9 @@ export default function CalculatePage() {
                   aria-hidden
                   className={cn(
                     "absolute inset-x-0 h-[2px] bg-black/20 dark:bg-white/20",
-                    mounted && !shouldReduceMotion && "animate-[slideIn_2.5s_ease-in-out_infinite]"
+                    mounted &&
+                      !shouldReduceMotion &&
+                      "animate-[slideIn_2.5s_ease-in-out_infinite]",
                   )}
                 />
 
@@ -372,172 +390,275 @@ export default function CalculatePage() {
             </motion.div>
           )}
 
-          {(stage === "preview" || stage === "confirmed" || stage === "analyzing") && imageUrl && (
-            <motion.div
-              key="capture-stage"
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className={cn(captureStageClass, "transform-gpu")}
-            >
-              <div className={captureStageGridClass}>
-                {/* Left Column (Persistent) */}
-                <div className="flex flex-col">
-                  <div className={captureMediaFrameClass}>
-                    <div className={captureMediaInnerClass}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={imageUrl}
-                        alt="Captured Media"
-                        className={cn(
-                          captureImageClass,
-                          stage === "confirmed" && "opacity-60 grayscale",
-                          stage === "analyzing" && "opacity-40 grayscale"
-                        )}
-                        style={stage === "preview" ? { filter: "grayscale(12%) contrast(1.03)" } : undefined}
-                      />
-                      
-                      <AnimatePresence>
-                        {stage === "preview" && (
-                          <motion.div key="preview-badge" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute top-6 left-6 flex items-center gap-2 border border-white/20 bg-black px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-white">
-                            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                            Signal Acquired
-                          </motion.div>
-                        )}
-                        
-                        {stage === "confirmed" && (
-                          <motion.div key="confirmed-success" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0 flex items-center justify-center">
-                            <motion.div
-                              initial={{ scale: 0, opacity: 0 }}
-                              animate={{ scale: 1, opacity: 1 }}
-                              transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
-                              className="flex h-16 w-16 items-center justify-center border border-black bg-white text-black dark:border-white dark:bg-black dark:text-white"
-                            >
-                              <CheckCircle2 className="w-8 h-8" />
-                            </motion.div>
-                          </motion.div>
-                        )}
+          {(stage === "preview" ||
+            stage === "confirmed" ||
+            stage === "analyzing") &&
+            imageUrl && (
+              <motion.div
+                key="capture-stage"
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className={cn(captureStageClass, "transform-gpu")}
+              >
+                <div className={captureStageGridClass}>
+                  {/* Left Column (Persistent) */}
+                  <div className="flex flex-col">
+                    <div className={captureMediaFrameClass}>
+                      <div className={captureMediaInnerClass}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={imageUrl}
+                          alt="Captured Media"
+                          className={cn(
+                            captureImageClass,
+                            stage === "confirmed" && "opacity-60 grayscale",
+                            stage === "analyzing" && "opacity-40 grayscale",
+                          )}
+                          style={
+                            stage === "preview"
+                              ? { filter: "grayscale(12%) contrast(1.03)" }
+                              : undefined
+                          }
+                        />
 
-                        {stage === "analyzing" && (
-                          <motion.div key="analyzing-scan" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0 pointer-events-none">
-                            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <AnimatePresence>
+                          {stage === "preview" && (
+                            <motion.div
+                              key="preview-badge"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute top-6 left-6 flex items-center gap-2 border border-white/20 bg-black px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-white"
+                            >
+                              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                              Signal Acquired
+                            </motion.div>
+                          )}
+
+                          {stage === "confirmed" && (
+                            <motion.div
+                              key="confirmed-success"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute inset-0 flex items-center justify-center"
+                            >
                               <motion.div
-                                animate={shouldReduceMotion ? {} : { rotate: 360 }}
-                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                className="h-16 w-16 rounded-full border border-white/20 border-t-white"
-                              />
-                              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                                <Loader2 className="h-6 w-6 animate-spin text-white" aria-hidden />
-                              </div>
-                            </div>
-                            <div className="absolute bottom-4 left-4 right-4 flex h-12 flex-col justify-end overflow-hidden text-[8px] font-mono uppercase text-white/50">
-                              <motion.div
-                                animate={shouldReduceMotion ? {} : { y: ["0%", "-50%"] }}
-                                transition={{ duration: 14, repeat: Infinity, ease: "linear" }}
-                                className="space-y-1"
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{
+                                  type: "spring",
+                                  stiffness: 300,
+                                  damping: 20,
+                                  delay: 0.1,
+                                }}
+                                className="flex h-16 w-16 items-center justify-center border border-black bg-white text-black dark:border-white dark:bg-black dark:text-white"
                               >
-                                {[...analyzingDataStream, ...analyzingDataStream].map(
-                                  (entry, index) => (
-                                    <div key={`${entry}-${index}`}>{entry}</div>
-                                  ),
-                                )}
+                                <CheckCircle2 className="w-8 h-8" />
                               </motion.div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                            </motion.div>
+                          )}
+
+                          {stage === "analyzing" && (
+                            <motion.div
+                              key="analyzing-scan"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute inset-0 pointer-events-none"
+                            >
+                              <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <motion.div
+                                  animate={
+                                    shouldReduceMotion ? {} : { rotate: 360 }
+                                  }
+                                  transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: "linear",
+                                  }}
+                                  className="h-16 w-16 rounded-full border border-white/20 border-t-white"
+                                />
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                                  <Loader2
+                                    className="h-6 w-6 animate-spin text-white"
+                                    aria-hidden
+                                  />
+                                </div>
+                              </div>
+                              <div className="absolute bottom-4 left-4 right-4 flex h-12 flex-col justify-end overflow-hidden text-[8px] font-mono uppercase text-white/50">
+                                <motion.div
+                                  animate={
+                                    shouldReduceMotion
+                                      ? {}
+                                      : { y: ["0%", "-50%"] }
+                                  }
+                                  transition={{
+                                    duration: 14,
+                                    repeat: Infinity,
+                                    ease: "linear",
+                                  }}
+                                  className="space-y-1"
+                                >
+                                  {[
+                                    ...analyzingDataStream,
+                                    ...analyzingDataStream,
+                                  ].map((entry, index) => (
+                                    <div key={`${entry}-${index}`}>{entry}</div>
+                                  ))}
+                                </motion.div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Right Column (Transitions) */}
-                <div className="flex h-full flex-col justify-center">
-                  <AnimatePresence mode="wait">
-                    {stage === "preview" && (
-                      <motion.div key="right-preview" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6">
-                        <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center">
-                          <p className="text-sm font-bold tracking-tight mb-1 uppercase">How's this look?</p>
-                          <p className="text-xs text-neutral-500 font-mono">Make sure your meal is clearly visible.</p>
-                        </div>
-                        <div className="flex gap-4">
-                          <button onClick={retake} className="flex-1 px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
-                            <RefreshCw className="w-3.5 h-3.5" />
-                            Retake
-                          </button>
-                          <button onClick={confirm} className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
-                            Looks Good
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-                    
-                    {stage === "confirmed" && (
-                      <motion.div key="right-confirmed" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-6">
-                        <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center">
-                          <p className="text-sm font-bold tracking-tight mb-1 uppercase">Image Ready</p>
-                          <p className="text-xs text-neutral-500 font-mono">AI is ready to analyze your meal.</p>
-                        </div>
-                        <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="text-sm font-bold tracking-tight uppercase">Meal Context</p>
-                              <p className="text-xs text-neutral-500 font-mono mt-1">Know what you're eating? Add details like food name, brand, or portion size for better accuracy.</p>
-                            </div>
-                            <span className="px-2 py-1 bg-neutral-200 dark:bg-neutral-800 text-[10px] font-mono uppercase tracking-widest text-neutral-700 dark:text-neutral-300 shrink-0 rounded">Optional</span>
-                          </div>
-                          <textarea
-                            value={mealHint}
-                            onChange={(e) => setMealHint(e.target.value)}
-                            rows={2}
-                            maxLength={MAX_MEAL_HINT_LENGTH}
-                            placeholder="e.g., Grilled chicken breast, 1 cup rice, handful of almonds"
-                            className="mt-4 w-full resize-none border border-black/10 dark:border-white/10 bg-white dark:bg-black px-4 py-3 text-sm text-black dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white"
-                          />
-                          <div className="mt-2 flex items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
-                            <p>Used only to improve estimate accuracy</p>
-                            <p>{mealHint.length}/{MAX_MEAL_HINT_LENGTH}</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-4">
-                          <button onClick={reset} className="px-4 py-3 text-neutral-500 hover:text-black dark:hover:text-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer">
-                            <XCircle className="w-3.5 h-3.5" />
-                            Cancel
-                          </button>
-                          <button onClick={analyze} disabled={!file} className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
-                            Analyze
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {stage === "analyzing" && (
-                      <motion.div key="right-analyzing" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center flex flex-col items-center justify-center min-h-[120px] gap-2">
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key={subStatus}
-                            initial={{ opacity: 0, y: 4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -4 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <p className="text-sm font-bold tracking-tight uppercase">{subStatus === "Uploading…" ? "Uploading Photo" : "Analyzing Your Meal"}</p>
-                            <p className="text-[10px] text-neutral-500 font-mono mt-1 uppercase tracking-widest">
-                              {subStatus === "Uploading…" ? "Getting your image ready" : "Identifying ingredients and calories"}
+                  {/* Right Column (Transitions) */}
+                  <div className="flex h-full flex-col justify-center">
+                    <AnimatePresence mode="wait">
+                      {stage === "preview" && (
+                        <motion.div
+                          key="right-preview"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          className="flex flex-col gap-6"
+                        >
+                          <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center">
+                            <p className="text-sm font-bold tracking-tight mb-1 uppercase">
+                              How's this look?
                             </p>
-                          </motion.div>
-                        </AnimatePresence>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                            <p className="text-xs text-neutral-500 font-mono">
+                              Make sure your meal is clearly visible.
+                            </p>
+                          </div>
+                          <div className="flex gap-4">
+                            <button
+                              onClick={retake}
+                              className="flex-1 px-6 py-3 border border-black dark:border-white text-black dark:text-white font-medium text-sm hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer"
+                            >
+                              <RefreshCw className="w-3.5 h-3.5" />
+                              Retake
+                            </button>
+                            <button
+                              onClick={confirm}
+                              className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer"
+                            >
+                              Looks Good
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {stage === "confirmed" && (
+                        <motion.div
+                          key="right-confirmed"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          className="flex flex-col gap-6"
+                        >
+                          <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center">
+                            <p className="text-sm font-bold tracking-tight mb-1 uppercase">
+                              Image Ready
+                            </p>
+                            <p className="text-xs text-neutral-500 font-mono">
+                              AI is ready to analyze your meal.
+                            </p>
+                          </div>
+                          <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-bold tracking-tight uppercase">
+                                  Meal Context
+                                </p>
+                                <p className="text-xs text-neutral-500 font-mono mt-1">
+                                  Know what you're eating? Add details like food
+                                  name, brand, or portion size for better
+                                  accuracy.
+                                </p>
+                              </div>
+                              <span className="px-2 py-1 bg-neutral-200 dark:bg-neutral-800 text-[10px] font-mono uppercase tracking-widest text-neutral-700 dark:text-neutral-300 shrink-0 rounded">
+                                Optional
+                              </span>
+                            </div>
+                            <textarea
+                              value={mealHint}
+                              onChange={(e) => setMealHint(e.target.value)}
+                              rows={2}
+                              maxLength={MAX_MEAL_HINT_LENGTH}
+                              placeholder="e.g., Grilled chicken breast, 1 cup rice, handful of almonds"
+                              className="mt-4 w-full resize-none border border-black/10 dark:border-white/10 bg-white dark:bg-black px-4 py-3 text-sm text-black dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white"
+                            />
+                            <div className="mt-2 flex items-center justify-between gap-3 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                              <p>Used only to improve estimate accuracy</p>
+                              <p>
+                                {mealHint.length}/{MAX_MEAL_HINT_LENGTH}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-4">
+                            <button
+                              onClick={reset}
+                              className="px-4 py-3 text-neutral-500 hover:text-black dark:hover:text-white transition-colors flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer"
+                            >
+                              <XCircle className="w-3.5 h-3.5" />
+                              Cancel
+                            </button>
+                            <button
+                              onClick={analyze}
+                              disabled={!file}
+                              className="flex-1 px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Analyze
+                              <ArrowRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {stage === "analyzing" && (
+                        <motion.div
+                          key="right-analyzing"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center flex flex-col items-center justify-center min-h-[120px] gap-2"
+                        >
+                          <AnimatePresence mode="wait">
+                            <motion.div
+                              key={subStatus}
+                              initial={{ opacity: 0, y: 4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -4 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <p className="text-sm font-bold tracking-tight uppercase">
+                                {subStatus === "Uploading…"
+                                  ? "Uploading Photo"
+                                  : "Analyzing Your Meal"}
+                              </p>
+                              <p className="text-[10px] text-neutral-500 font-mono mt-1 uppercase tracking-widest">
+                                {subStatus === "Uploading…"
+                                  ? "Getting your image ready"
+                                  : "Identifying ingredients and calories"}
+                              </p>
+                            </motion.div>
+                          </AnimatePresence>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
           {stage === "result" && result && (
             <motion.div
@@ -622,7 +743,7 @@ export default function CalculatePage() {
                             {Math.round(m.value)}
                             <span className="text-[10px] font-mono text-neutral-500 ml-0.5">
                               g
-                        </span>
+                            </span>
                           </p>
                         </div>
                       ))}
@@ -637,7 +758,11 @@ export default function CalculatePage() {
                           Detected Elements
                         </p>
                         <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">
-                          Ref: {result.plateContents.referenceObject.replace("_", " ")}
+                          Ref:{" "}
+                          {result.plateContents.referenceObject.replace(
+                            "_",
+                            " ",
+                          )}
                         </p>
                       </div>
                       <ul className="divide-y divide-black/10 dark:divide-white/10 bg-white dark:bg-black">
@@ -651,7 +776,9 @@ export default function CalculatePage() {
                                 {item.name}
                               </p>
                               <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mt-0.5 truncate">
-                                Qty {item.quantity} • {Math.round(item.caloriesPerUnit)} kcal each • {item.portion}
+                                Qty {item.quantity} •{" "}
+                                {Math.round(item.caloriesPerUnit)} kcal each •{" "}
+                                {item.portion}
                               </p>
                             </div>
                             <p className="text-xs font-mono uppercase tracking-widest text-neutral-500 shrink-0">
@@ -675,7 +802,10 @@ export default function CalculatePage() {
                           How your meal was analyzed
                         </span>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-neutral-500 shrink-0" aria-hidden />
+                      <ChevronRight
+                        className="w-4 h-4 text-neutral-500 shrink-0"
+                        aria-hidden
+                      />
                     </button>
                   </div>
                 </div>
@@ -715,7 +845,8 @@ export default function CalculatePage() {
                       System Failure
                     </p>
                     <p className="text-xs font-mono text-white/70">
-                      {errorMessage || "Connection severed. Re-initialize sequence."}
+                      {errorMessage ||
+                        "Connection severed. Re-initialize sequence."}
                     </p>
                   </div>
                 </div>
@@ -764,7 +895,8 @@ export default function CalculatePage() {
                 Sign in to track your meals
               </DialogTitle>
               <DialogDescription className="text-sm text-neutral-500 dark:text-neutral-400 text-center leading-relaxed">
-                Create a free account to analyze your food and track nutrition with AI.
+                Create a free account to analyze your food and track nutrition
+                with AI.
               </DialogDescription>
             </DialogHeader>
 
