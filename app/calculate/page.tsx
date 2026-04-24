@@ -50,6 +50,15 @@ type AnalyzeResult = {
   llmResponse: string;
 };
 
+type SignedUploadResponse = {
+  uploadUrl: string;
+  objectKey: string;
+  method: "PUT";
+  headers: {
+    "Content-Type": string;
+  };
+};
+
 function formatLlmResponse(text: string): string {
   try {
     return JSON.stringify(JSON.parse(text), null, 2);
@@ -110,30 +119,52 @@ export default function CalculatePage() {
     setSubStatus("Uploading…");
     setErrorMessage("");
 
-    // Flip to "Analyzing…" after a short delay so the user sees progress
-    // even though the backend response is a single round-trip.
-    const flipTimer = window.setTimeout(() => setSubStatus("Analyzing…"), 1500);
-
-    const fd = new FormData();
-    fd.append("image", file);
-
     try {
-      const res = await fetch("/api/analyze", {
+      const uploadTargetRes = await fetch("/api/analyze/upload-url", {
         method: "POST",
-        body: fd,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mimeType: file.type,
+          fileSize: file.size,
+        }),
       });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? `Request failed (${res.status})`);
+      if (!uploadTargetRes.ok) {
+        const body = await uploadTargetRes.json().catch(() => ({}));
+        throw new Error(
+          body?.error ?? `Failed to initialize upload (${uploadTargetRes.status})`,
+        );
       }
-      const data = (await res.json()) as AnalyzeResult;
+
+      const uploadTarget = (await uploadTargetRes.json()) as SignedUploadResponse;
+      const uploadRes = await fetch(uploadTarget.uploadUrl, {
+        method: uploadTarget.method,
+        headers: uploadTarget.headers,
+        body: file,
+      });
+      if (!uploadRes.ok) {
+        throw new Error(`Upload failed (${uploadRes.status})`);
+      }
+
+      setSubStatus("Analyzing…");
+      const analyzeRes = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          objectKey: uploadTarget.objectKey,
+          mimeType: file.type,
+        }),
+      });
+      if (!analyzeRes.ok) {
+        const body = await analyzeRes.json().catch(() => ({}));
+        throw new Error(body?.error ?? `Request failed (${analyzeRes.status})`);
+      }
+
+      const data = (await analyzeRes.json()) as AnalyzeResult;
       setResult(data);
       setStage("result");
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : String(err));
       setStage("error");
-    } finally {
-      window.clearTimeout(flipTimer);
     }
   }, [file]);
 

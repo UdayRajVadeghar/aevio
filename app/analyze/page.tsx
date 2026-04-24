@@ -56,6 +56,15 @@ type AnalyzeResult = {
   llmResponse: string;
 };
 
+type SignedUploadResponse = {
+  uploadUrl: string;
+  objectKey: string;
+  method: "PUT";
+  headers: {
+    "Content-Type": string;
+  };
+};
+
 const MAX_MEAL_HINT_LENGTH = 180;
 
 export default function CalculatePage() {
@@ -72,6 +81,7 @@ export default function CalculatePage() {
   const [result, setResult] = useState<AnalyzeResult | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const trimmedMealHint = mealHint.trim();
   const isActiveStage = stage !== "idle";
   const captureStageClass = "w-full max-w-5xl";
@@ -97,7 +107,13 @@ export default function CalculatePage() {
     [],
   );
 
-  const openCamera = () => fileInputRef.current?.click();
+  const openCamera = () => {
+    if (!isPending && !session?.user) {
+      setIsAuthDialogOpen(true);
+      return;
+    }
+    fileInputRef.current?.click();
+  };
 
   const retake = () => {
     if (imageUrl) URL.revokeObjectURL(imageUrl);
@@ -126,31 +142,53 @@ export default function CalculatePage() {
     setSubStatus("Uploading…");
     setErrorMessage("");
 
-    const flipTimer = window.setTimeout(() => setSubStatus("Analyzing…"), 1500);
-
-    const fd = new FormData();
-    fd.append("image", file);
-    if (trimmedMealHint) {
-      fd.append("mealHint", trimmedMealHint);
-    }
-
     try {
-      const res = await fetch("/api/analyze", {
+      const uploadTargetRes = await fetch("/api/analyze/upload-url", {
         method: "POST",
-        body: fd,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mimeType: file.type,
+          fileSize: file.size,
+        }),
       });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error ?? `Request failed (${res.status})`);
+      if (!uploadTargetRes.ok) {
+        const body = await uploadTargetRes.json().catch(() => ({}));
+        throw new Error(
+          body?.error ?? `Failed to initialize upload (${uploadTargetRes.status})`,
+        );
       }
-      const data = (await res.json()) as AnalyzeResult;
+
+      const uploadTarget = (await uploadTargetRes.json()) as SignedUploadResponse;
+      const uploadRes = await fetch(uploadTarget.uploadUrl, {
+        method: uploadTarget.method,
+        headers: uploadTarget.headers,
+        body: file,
+      });
+      if (!uploadRes.ok) {
+        throw new Error(`Upload failed (${uploadRes.status})`);
+      }
+
+      setSubStatus("Analyzing…");
+      const analyzeRes = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          objectKey: uploadTarget.objectKey,
+          mimeType: file.type,
+          mealHint: trimmedMealHint || undefined,
+        }),
+      });
+      if (!analyzeRes.ok) {
+        const body = await analyzeRes.json().catch(() => ({}));
+        throw new Error(body?.error ?? `Request failed (${analyzeRes.status})`);
+      }
+
+      const data = (await analyzeRes.json()) as AnalyzeResult;
       setResult(data);
       setStage("result");
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : String(err));
       setStage("error");
-    } finally {
-      window.clearTimeout(flipTimer);
     }
   }, [file, trimmedMealHint]);
 
@@ -227,6 +265,10 @@ export default function CalculatePage() {
                 onDrop={(e) => {
                   e.preventDefault();
                   setIsDragging(false);
+                  if (!isPending && !session?.user) {
+                    setIsAuthDialogOpen(true);
+                    return;
+                  }
                   const f = e.dataTransfer.files?.[0];
                   if (f && f.type.startsWith("image/")) {
                     const url = URL.createObjectURL(f);
@@ -770,11 +812,8 @@ export default function CalculatePage() {
         </AnimatePresence>
       </div>
 
-      <Dialog open={!isPending && !session?.user}>
+      <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
         <DialogContent
-          showCloseButton={false}
-          onInteractOutside={(e) => e.preventDefault()}
-          onEscapeKeyDown={(e) => e.preventDefault()}
           className="sm:max-w-[400px] p-0 overflow-hidden border border-border/50 bg-background/95 backdrop-blur-3xl shadow-[0_10px_40px_rgb(0,0,0,0.12)] dark:shadow-[0_10px_40px_rgb(0,0,0,0.4)] rounded-[28px]"
         >
           <div className="flex flex-col items-center justify-center p-8 text-center">
@@ -797,11 +836,12 @@ export default function CalculatePage() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </Link>
-              <Link href="/" className="w-full block">
-                <button className="w-full h-12 bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex items-center justify-center rounded-xl font-medium cursor-pointer">
-                  Return to Home
-                </button>
-              </Link>
+              <button 
+                onClick={() => setIsAuthDialogOpen(false)}
+                className="w-full h-12 bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex items-center justify-center rounded-xl font-medium cursor-pointer"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </DialogContent>

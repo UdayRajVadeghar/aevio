@@ -1,7 +1,6 @@
 "use client";
 
 import { BentoCard, BentoGrid } from "@/components/ui/hero-section/bento-grid";
-import { IntegrationDiagram } from "@/components/ui/integration-diagram";
 import { IntuitiveInteractions } from "@/components/ui/intuitive-interactions/intuitive-interactions";
 import { FeaturesOrbit } from "@/components/ui/landing/features-orbit";
 import { PreFooterCTA } from "@/components/ui/pre-footer-cta";
@@ -197,8 +196,6 @@ export default function Home() {
 
       {/* Intuitive Interactions Section */}
       <IntuitiveInteractions />
-
-      <IntegrationDiagram />
 
       {/* Showcase Section */}
 
