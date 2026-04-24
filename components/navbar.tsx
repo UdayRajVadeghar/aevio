@@ -16,6 +16,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "Analyze", href: "/analyze" },
   { label: "Journal", href: "/journal" },
+  { label: "My Data", href: "/myData" },
 ];
 
 export function Navbar() {
@@ -26,6 +27,7 @@ export function Navbar() {
   const [isCompactMenuOpen, setIsCompactMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const compactMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const { data: session, isPending } = useSession();
 
@@ -75,6 +77,28 @@ export function Navbar() {
       document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [isCompactMenuOpen]);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    if (!isUserMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [isUserMenuOpen]);
 
   // Early return after all hooks have been called
   if (
@@ -177,7 +201,7 @@ export function Navbar() {
 
             {session?.user ? (
               // Logged in: Show user menu
-              <div className="relative">
+              <div ref={userMenuRef} className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className={cn(
