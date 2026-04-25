@@ -15,20 +15,22 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  profile       UserProfile?
-  onBoardingStatus onBoardingStatus?
-  workouts Workout[]
-  mealAnalyses MealAnalysis[]
+    id                 String              @id
+  name               String
+  email              String
+  emailVerified      Boolean             @default(false)
+  image              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now()) @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  profile            UserProfile?
+  onBoardingStatus   onBoardingStatus?
+  workouts           Workout[]
+  mealAnalyses       MealAnalysis[]
   dailyCalorieTotals DailyCalorieTotal[]
+  coachContext       CoachContext?
+
   @@unique([email])
   @@map("user")
 }
@@ -79,129 +81,127 @@ model Verification {
 }
 
 model UserProfile {
-  id                    String   @id @default(cuid())
-  userId                String   @unique
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Basic Profile
-  dateOfBirth           DateTime?
-  age                   Int?
-  gender                String?   // "male", "female", "other", "prefer_not_to_say"
-  timezone              String?
+  dateOfBirth DateTime?
+  age         Int?
+  gender      String? // "male", "female", "other", "prefer_not_to_say"
+  timezone    String?
 
   // Health & Wellness
-  height                Float?    // cm
-  weight                Float?    // kg
-  activityLevel         String?   // "sedentary", "light", "moderate", "active", "athlete"
-  primaryGoal           String?   // "lose_weight", "build_muscle", "improve_sleep", etc.
-  dietaryPreference     String?   // "veg", "non_veg", "vegan", "keto"
+  height            Float? // cm
+  weight            Float? // kg
+  activityLevel     String? // "sedentary", "light", "moderate", "active", "athlete"
+  primaryGoal       String? // "lose_weight", "build_muscle", "improve_sleep", etc.
+  dietaryPreference String? // "veg", "non_veg", "vegan", "keto"
 
   // Body Composition (optional but powerful for scientific plans)
-  bodyFatPercentage     Float?    // percentage
-  waistCircumference    Float?    // cm
-  hipCircumference      Float?    // cm
-  restingHeartRate      Int?      // bpm
+  bodyFatPercentage  Float? // percentage
+  waistCircumference Float? // cm
+  hipCircumference   Float? // cm
+  restingHeartRate   Int? // bpm
 
   // Experience & Skill Level
-  trainingExperience    String?   // "beginner", "intermediate", "advanced"
-  exerciseFamiliarity   Json?     // { squat: true, deadlift: false, pullup: true, pushup: true }
-  
+  trainingExperience  String? // "beginner", "intermediate", "advanced"
+  exerciseFamiliarity Json? // { squat: true, deadlift: false, pullup: true, pushup: true }
+
   // Equipment Availability
-  equipmentAvailable    Json?     // { gym: true, dumbbells: { available: true, weightRange: "5-50" }, resistanceBands: true, pullupBar: false, bench: true, barbellPlates: true, machines: true, cardioEquipment: true }
+  equipmentAvailable Json? // { gym: true, dumbbells: { available: true, weightRange: "5-50" }, resistanceBands: true, pullupBar: false, bench: true, barbellPlates: true, machines: true, cardioEquipment: true }
 
   // Workout Schedule & Preferences
-  workoutDays           Int?      // number of days per week (1-7)
-  workoutDuration       Int?      // preferred duration in minutes (20, 30, 45, 60, 90)
-  
+  workoutDays     Int? // number of days per week (1-7)
+  workoutDuration Int? // preferred duration in minutes (20, 30, 45, 60, 90)
+
   // Training Style & Preferences
-  trainingStyle         String[]  // ["hiit", "strength", "calisthenics", "yoga", "functional", "crossfit", "pilates"]
-  targetBodyParts       String[]  // ["chest", "shoulders", "arms", "abs", "legs", "back"]
-  exerciseDislikes      String[]  // ["running", "burpees", "jumping jacks"]
-  
+  trainingStyle    String[] // ["hiit", "strength", "calisthenics", "yoga", "functional", "crossfit", "pilates"]
+  targetBodyParts  String[] // ["chest", "shoulders", "arms", "abs", "legs", "back"]
+  exerciseDislikes String[] // ["running", "burpees", "jumping jacks"]
+
   // Lifestyle Factors
-  stepCount             Int?      // daily step count target
-  sleepHours            Float?    // hours per day
-  stressLevel           Int?      // 1-5 scale
-  workType              String?   // "desk_job", "on_feet", "heavy_labor"
+  stepCount   Int? // daily step count target
+  sleepHours  Float? // hours per day
+  stressLevel Int? // 1-5 scale
+  workType    String? // "desk_job", "on_feet", "heavy_labor"
 
   // Restrictions & Safety
-  injuries              Json?     // [{ area: "knee", severity: "mild", notes: "avoid deep squats" }]
+  injuries Json? // [{ area: "knee", severity: "mild", notes: "avoid deep squats" }]
 
   // Accountability & Motivation
-  motivationStyle       String?   // "strict", "chill", "encouraging"
+  motivationStyle String? // "strict", "chill", "encouraging"
 
   // Journaling
-  journalingStyle       String?   // "daily_reflections", "gratitude", "mood_logs", "freeform"
-  journalingTimeOfDay   String?   // "morning", "evening", "no_preference"
-  moodTrackingEnabled   Boolean   @default(false)
+  journalingStyle     String? // "daily_reflections", "gratitude", "mood_logs", "freeform"
+  journalingTimeOfDay String? // "morning", "evening", "no_preference"
+  moodTrackingEnabled Boolean @default(false)
 
   // Health Conditions
-  healthConditions      String[]  // Array of conditions
+  healthConditions String[] // Array of conditions
 
   // Consent & Goals
-  dataUsageConsent      Boolean   @default(false)
-  thirtyDayGoal         String?
+  dataUsageConsent Boolean @default(false)
+  thirtyDayGoal    String?
 
   // Onboarding Status
-  onboardingCompleted   Boolean   @default(false)
-  onboardingStep        Int       @default(0)
+  onboardingCompleted Boolean @default(false)
+  onboardingStep      Int     @default(0)
 
   // Workout Planner Status
   workoutPlannerCompleted Boolean @default(false)
 
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  habits                Habit[]
+  habits Habit[]
 }
 
 model Habit {
-  id              String        @id @default(cuid())
-  profileId       String
-  profile         UserProfile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  id        String      @id @default(cuid())
+  profileId String
+  profile   UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-  name            String        // "Water intake", "Steps", "Sleep", etc.
-  type            String        // "boolean", "count", "duration"
-  target          Float?        // Target value (8 glasses, 10000 steps, etc.)
-  unit            String?       // "glasses", "steps", "hours"
-  enabled         Boolean       @default(true)
+  name    String // "Water intake", "Steps", "Sleep", etc.
+  type    String // "boolean", "count", "duration"
+  target  Float? // Target value (8 glasses, 10000 steps, etc.)
+  unit    String? // "glasses", "steps", "hours"
+  enabled Boolean @default(true)
 
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([profileId])
 }
 
+model onBoardingStatus {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  onBoardingStatus String   @default("incomplete") // incomplete, completed, skipped
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-model onBoardingStatus{
-  id String @id @default(cuid())
-  userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  onBoardingStatus String @default("incomplete")// incomplete, completed, skipped
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  @@map("onBoardingStatus")
   @@unique([userId])
-} 
-
-
+  @@map("onBoardingStatus")
+}
 
 model Workout {
-  id          String   @id @default(cuid())
-  userId      String
-  rawWorkout  Json
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  userId     String
+  rawWorkout Json
+  createdAt  DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 }
 
 model MealAnalysis {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   imageUrl       String
   gcsUri         String
-  status         String   @default("PENDING") // PENDING | COMPLETE | FAILED
+  status         String    @default("PENDING") // PENDING | COMPLETE | FAILED
   calories       Float?
   protein        Float?
   carbs          Float?
@@ -211,8 +211,8 @@ model MealAnalysis {
   loggedAtIst    DateTime?
   loggedDateIst  String?
   loggedTimezone String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@index([userId, createdAt])
   @@index([userId, loggedDateIst])
@@ -231,4 +231,26 @@ model DailyCalorieTotal {
 
   @@unique([userId, dateKey])
   @@map("user_daily_calories")
+}
+
+model CoachContext {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Short rolling memory for AI
+  historySummary String @db.Text
+
+  // Structured context blob AI can consume safely
+  context Json
+
+  // Optional metadata
+  source  String? // e.g. "daily-cron", "on-demand-refresh"
+  version Int     @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([updatedAt])
+  @@map("coach_contexts")
 }
