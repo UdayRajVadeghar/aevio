@@ -1,4 +1,5 @@
 import { coachContextToAdkPayload } from "@/lib/agent-coach-payload";
+import { forwardToAdk } from "@/lib/adk-upstream";
 import { auth } from "@/lib/auth";
 import { getOrBuildCoachContextForAdk } from "@/lib/coach-context";
 import { headers } from "next/headers";
@@ -7,9 +8,6 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 /** First request may run a full coach-context refresh. */
 export const maxDuration = 60;
-
-const DEFAULT_ADK_API_URL = "http://127.0.0.1:8010";
-const ADK_API_URL = process.env.ADK_API_URL?.trim() || DEFAULT_ADK_API_URL;
 
 type AgentRequestPayload = {
   message?: unknown;
@@ -44,7 +42,7 @@ export async function POST(req: NextRequest) {
 
   let upstream: Response;
   try {
-    upstream = await fetch(`${ADK_API_URL}/chat`, {
+    upstream = await forwardToAdk("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
