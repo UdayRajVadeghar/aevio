@@ -5,51 +5,13 @@ import {
   isValidIstDateKey,
   shiftIstDateKey,
 } from "@/lib/ist-time";
+import {
+  extractFoodItems,
+  getNutritionTotalsForDate,
+  toRounded,
+} from "@/lib/nutrition-metrics";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-
-type FoodItem = {
-  name: string;
-  quantity: number;
-  portion: string;
-  caloriesPerUnit: number;
-  calories: number;
-};
-
-function toRounded(value: number): number {
-  return Number(value.toFixed(1));
-}
-
-function isValidFoodItem(value: unknown): value is FoodItem {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  const item = value as Record<string, unknown>;
-
-  return (
-    typeof item.name === "string" &&
-    typeof item.quantity === "number" &&
-    typeof item.portion === "string" &&
-    typeof item.caloriesPerUnit === "number" &&
-    typeof item.calories === "number"
-  );
-}
-
-function extractFoodItems(value: unknown): FoodItem[] {
-  if (!value || typeof value !== "object") {
-    return [];
-  }
-
-  const record = value as Record<string, unknown>;
-  const items = record.items;
-
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  return items.filter(isValidFoodItem);
-}
 
 function parseNonNegativeInt(value: string | null, fallback: number): number {
   if (!value) {
@@ -89,96 +51,69 @@ export async function GET(req: NextRequest) {
   const previousDate = shiftIstDateKey(selectedDate, -1);
 
   try {
-    const [meals, mealTotals, mealCount, dailyTotal, previousDailyTotal] =
-      await db.$transaction([
-        db.mealAnalysis.findMany({
-          where: {
+    const [meals, totals, dailyTotal, previousDailyTotal] = await Promise.all([
+      db.mealAnalysis.findMany({
+        where: {
+          userId,
+          status: "COMPLETE",
+          loggedDateIst: selectedDate,
+        },
+        select: {
+          id: true,
+          imageUrl: true,
+          calories: true,
+          protein: true,
+          carbs: true,
+          fat: true,
+          foodItems: true,
+          loggedAtIst: true,
+          createdAt: true,
+        },
+        orderBy: [{ loggedAtIst: "desc" }, { createdAt: "desc" }],
+        skip: offset,
+        take: limit,
+      }),
+      getNutritionTotalsForDate(userId, selectedDate),
+      db.dailyCalorieTotal.findUnique({
+        where: {
+          userId_dateKey: {
             userId,
-            status: "COMPLETE",
-            loggedDateIst: selectedDate,
+            dateKey: selectedDate,
           },
-          select: {
-            id: true,
-            imageUrl: true,
-            calories: true,
-            protein: true,
-            carbs: true,
-            fat: true,
-            foodItems: true,
-            loggedAtIst: true,
-            createdAt: true,
-          },
-          orderBy: [{ loggedAtIst: "desc" }, { createdAt: "desc" }],
-          skip: offset,
-          take: limit,
-        }),
-        db.mealAnalysis.aggregate({
-          where: {
+        },
+        select: {
+          totalCalories: true,
+          timezone: true,
+        },
+      }),
+      db.dailyCalorieTotal.findUnique({
+        where: {
+          userId_dateKey: {
             userId,
-            status: "COMPLETE",
-            loggedDateIst: selectedDate,
+            dateKey: previousDate,
           },
-          _sum: {
-            calories: true,
-            protein: true,
-            carbs: true,
-            fat: true,
-          },
-        }),
-        db.mealAnalysis.count({
-          where: {
-            userId,
-            status: "COMPLETE",
-            loggedDateIst: selectedDate,
-          },
-        }),
-        db.dailyCalorieTotal.findUnique({
-          where: {
-            userId_dateKey: {
-              userId,
-              dateKey: selectedDate,
-            },
-          },
-          select: {
-            totalCalories: true,
-            timezone: true,
-          },
-        }),
-        db.dailyCalorieTotal.findUnique({
-          where: {
-            userId_dateKey: {
-              userId,
-              dateKey: previousDate,
-            },
-          },
-          select: {
-            totalCalories: true,
-          },
-        }),
-      ]);
+        },
+        select: {
+          totalCalories: true,
+        },
+      }),
+    ]);
 
-    const totals = {
-      calories: mealTotals._sum.calories ?? 0,
-      protein: mealTotals._sum.protein ?? 0,
-      carbs: mealTotals._sum.carbs ?? 0,
-      fat: mealTotals._sum.fat ?? 0,
-    };
-
-    const totalCalories = dailyTotal?.totalCalories ?? totals.calories;
+    const totalCalories = dailyTotal?.totalCalories ?? totals.totalCalories;
     const previousCalories = previousDailyTotal?.totalCalories ?? 0;
     const nextOffset = offset + meals.length;
-    const hasMore = nextOffset < mealCount;
+    const hasMore = nextOffset < totals.mealCount;
 
     return NextResponse.json({
       selectedDate,
       timezone: dailyTotal?.timezone ?? "Asia/Kolkata",
       summary: {
-        mealCount,
+        mealCount: totals.mealCount,
         totalCalories: toRounded(totalCalories),
         recordedCalories: toRounded(dailyTotal?.totalCalories ?? 0),
-        totalProtein: toRounded(totals.protein),
-        totalCarbs: toRounded(totals.carbs),
-        totalFat: toRounded(totals.fat),
+        totalProtein: toRounded(totals.totalProtein),
+        totalCarbs: toRounded(totals.totalCarbs),
+        totalFat: toRounded(totals.totalFat),
       },
       comparison: {
         previousDate,
