@@ -28,6 +28,8 @@ export default function AgentPage() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [contextStatus, setContextStatus] = useState<string | null>(null);
+  /** First message after opening this page: server loads & sends `userProfile` to the ADK; then off until next visit. */
+  const [includeUserProfile, setIncludeUserProfile] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,7 +83,10 @@ export default function AgentPage() {
       const response = await fetch("/api/agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed }),
+        body: JSON.stringify({
+          message: trimmed,
+          includeUserProfile,
+        }),
       });
 
       const data = (await response.json()) as AgentApiResponse;
@@ -89,6 +94,7 @@ export default function AgentPage() {
         throw new Error(data.error || "Failed to get response from AI coach.");
       }
 
+      setIncludeUserProfile(false);
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: data.answer || "No response received." },
@@ -119,8 +125,10 @@ export default function AgentPage() {
         <h1 className="text-2xl font-semibold tracking-tight">AI Coach</h1>
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
           Each message uses your stored{" "}
-          <code className="text-xs">CoachContext</code> from the database; first
-          send builds it if missing.
+          <code className="text-xs">CoachContext</code> from the database (first
+          send builds it if missing). Your profile is attached on the first
+          message in this visit only; the coach still receives windowed history
+          every time.
         </p>
 
         {contextStatus ? (

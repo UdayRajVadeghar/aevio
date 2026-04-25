@@ -2,6 +2,7 @@ import { coachContextToAdkPayload } from "@/lib/agent-coach-payload";
 import { forwardToAdk } from "@/lib/adk-upstream";
 import { auth } from "@/lib/auth";
 import { getOrBuildCoachContextForAdk } from "@/lib/coach-context";
+import { db } from "@/lib/db";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -11,6 +12,8 @@ export const maxDuration = 60;
 
 type AgentRequestPayload = {
   message?: unknown;
+  /** When `false`, skip UserProfile DB read and omit `context.userProfile` (follow-up messages in same chat visit). */
+  includeUserProfile?: unknown;
 };
 
 export async function POST(req: NextRequest) {
@@ -37,8 +40,27 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const includeUserProfile =
+    payload.includeUserProfile === false ? false : true;
+
   const row = await getOrBuildCoachContextForAdk(userId);
-  const { historySummary, context } = coachContextToAdkPayload(row);
+  const userProfile = includeUserProfile
+    ? await db.userProfile.findUnique({
+        where: { userId },
+        select: {
+          thirtyDayGoal: true,
+          healthConditions: true,
+          dietaryPreference: true,
+          primaryGoal: true,
+          activityLevel: true,
+          height: true,
+          weight: true,
+          age: true,
+          gender: true,
+        },
+      })
+    : null;
+  const { historySummary, context } = coachContextToAdkPayload(row, userProfile);
 
   let upstream: Response;
   try {
