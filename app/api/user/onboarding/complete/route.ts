@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     // console.log(result.data);
 
-    const onBoardingStatus = await db.onBoardingStatus.findUnique({
+    const existingOnBoardingStatus = await db.onBoardingStatus.findUnique({
       where: {
         userId: userId,
       },
@@ -51,15 +51,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    if (!onBoardingStatus || onBoardingStatus.id === null) {
-      return NextResponse.json(
-        { error: "Onboarding status not found" },
-        { status: 404 }
-      );
-    }
-
-    const status = onBoardingStatus.onBoardingStatus
-      .toLowerCase()
+    const status = existingOnBoardingStatus?.onBoardingStatus
+      ?.toLowerCase()
       .toString()
       .trim();
 
@@ -170,10 +163,16 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Update onboarding status to completed
-      await tx.onBoardingStatus.update({
-        where: { id: onBoardingStatus.id },
-        data: { onBoardingStatus: "completed" },
+      // Always upsert onboarding status to completed.
+      await tx.onBoardingStatus.upsert({
+        where: { userId },
+        create: {
+          userId,
+          onBoardingStatus: "completed",
+        },
+        update: {
+          onBoardingStatus: "completed",
+        },
       });
     });
 
