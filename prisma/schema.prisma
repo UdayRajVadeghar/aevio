@@ -242,7 +242,13 @@ model CoachContext {
   historySummary String @db.Text
 
   // Structured context blob AI can consume safely
-  context Json
+  threeMonthsContext Json
+  twoMonthsContext Json
+  oneMonthContext Json
+  twoWeeksContext Json
+  oneWeekContext Json
+  todayContext Json
+
 
   // Optional metadata
   source  String? // e.g. "daily-cron", "on-demand-refresh"
