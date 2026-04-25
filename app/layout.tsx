@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Geist, Geist_Mono } from "next/font/google";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import "./globals.css";
 
@@ -24,6 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [queryClient] = useState(() => new QueryClient());
+  const pathname = usePathname();
+  const hideFooter = pathname === "/agent";
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -40,7 +43,7 @@ export default function RootLayout({
           >
             <Navbar />
             {children}
-            <SiteFooter />
+            {!hideFooter && <SiteFooter />}
           </ThemeProvider>
         </QueryClientProvider>
       </body>
