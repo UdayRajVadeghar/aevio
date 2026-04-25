@@ -12,6 +12,7 @@ export const maxDuration = 60;
 
 type AgentRequestPayload = {
   message?: unknown;
+  sessionId?: unknown;
   /** When `false`, skip UserProfile DB read and omit `context.userProfile` (follow-up messages in same chat visit). */
   includeUserProfile?: unknown;
 };
@@ -64,12 +65,16 @@ export async function POST(req: NextRequest) {
 
   let upstream: Response;
   try {
+    const sessionId =
+      typeof payload.sessionId === "string" ? payload.sessionId.trim() : undefined;
+
     upstream = await forwardToAdk("/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userId: session.user.id,
         message,
+        sessionId: sessionId || undefined,
         historySummary,
         context,
       }),
