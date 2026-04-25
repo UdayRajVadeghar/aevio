@@ -10,6 +10,7 @@ import {
   Camera,
   ChevronRight,
   LogOut,
+  MessageCircle,
   Menu,
   User,
   X,
@@ -28,6 +29,7 @@ const navItems: NavItem[] = [
   { label: "Analyze", href: "/analyze", icon: Camera },
   { label: "Journal", href: "/journal", icon: BookOpen },
   { label: "My Data", href: "/myData", icon: BarChart3 },
+  { label: "AI Coach", href: "/agent", icon: MessageCircle },
 ];
 
 export function Navbar() {
