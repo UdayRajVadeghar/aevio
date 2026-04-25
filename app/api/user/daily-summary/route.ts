@@ -1,6 +1,10 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { getIstDateKey, isValidIstDateKey, shiftIstDateKey } from "@/lib/ist-time";
+import {
+  getIstDateKey,
+  isValidIstDateKey,
+  shiftIstDateKey,
+} from "@/lib/ist-time";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -87,70 +91,70 @@ export async function GET(req: NextRequest) {
   try {
     const [meals, mealTotals, mealCount, dailyTotal, previousDailyTotal] =
       await db.$transaction([
-      db.mealAnalysis.findMany({
-        where: {
-          userId,
-          status: "COMPLETE",
-          loggedDateIst: selectedDate,
-        },
-        select: {
-          id: true,
-          imageUrl: true,
-          calories: true,
-          protein: true,
-          carbs: true,
-          fat: true,
-          foodItems: true,
-          loggedAtIst: true,
-          createdAt: true,
-        },
-        orderBy: [{ loggedAtIst: "desc" }, { createdAt: "desc" }],
-        skip: offset,
-        take: limit,
-      }),
-      db.mealAnalysis.aggregate({
-        where: {
-          userId,
-          status: "COMPLETE",
-          loggedDateIst: selectedDate,
-        },
-        _sum: {
-          calories: true,
-          protein: true,
-          carbs: true,
-          fat: true,
-        },
-      }),
-      db.mealAnalysis.count({
-        where: {
-          userId,
-          status: "COMPLETE",
-          loggedDateIst: selectedDate,
-        },
-      }),
-      db.dailyCalorieTotal.findUnique({
-        where: {
-          userId_dateKey: {
+        db.mealAnalysis.findMany({
+          where: {
             userId,
-            dateKey: selectedDate,
+            status: "COMPLETE",
+            loggedDateIst: selectedDate,
           },
-        },
-        select: {
-          totalCalories: true,
-          timezone: true,
-        },
-      }),
-      db.dailyCalorieTotal.findUnique({
-        where: {
-          userId_dateKey: {
+          select: {
+            id: true,
+            imageUrl: true,
+            calories: true,
+            protein: true,
+            carbs: true,
+            fat: true,
+            foodItems: true,
+            loggedAtIst: true,
+            createdAt: true,
+          },
+          orderBy: [{ loggedAtIst: "desc" }, { createdAt: "desc" }],
+          skip: offset,
+          take: limit,
+        }),
+        db.mealAnalysis.aggregate({
+          where: {
             userId,
-            dateKey: previousDate,
+            status: "COMPLETE",
+            loggedDateIst: selectedDate,
           },
-        },
-        select: {
-          totalCalories: true,
-        },
-      }),
+          _sum: {
+            calories: true,
+            protein: true,
+            carbs: true,
+            fat: true,
+          },
+        }),
+        db.mealAnalysis.count({
+          where: {
+            userId,
+            status: "COMPLETE",
+            loggedDateIst: selectedDate,
+          },
+        }),
+        db.dailyCalorieTotal.findUnique({
+          where: {
+            userId_dateKey: {
+              userId,
+              dateKey: selectedDate,
+            },
+          },
+          select: {
+            totalCalories: true,
+            timezone: true,
+          },
+        }),
+        db.dailyCalorieTotal.findUnique({
+          where: {
+            userId_dateKey: {
+              userId,
+              dateKey: previousDate,
+            },
+          },
+          select: {
+            totalCalories: true,
+          },
+        }),
       ]);
 
     const totals = {
