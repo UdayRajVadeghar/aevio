@@ -85,6 +85,7 @@ export function Navbar() {
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link
             href="/"
+            prefetch={false}
             className="flex items-center gap-3 rounded-md px-1 py-1 outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
           >
             <div className="w-5 h-5 bg-black dark:bg-white" />
@@ -102,6 +103,7 @@ export function Navbar() {
                 <Link
                   key={item.label}
                   href={item.href}
+                  prefetch={false}
                   className={cn(
                     "group flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
                     isActive
@@ -167,6 +169,7 @@ export function Navbar() {
             ) : (
               <Link
                 href="/authentication"
+                prefetch={false}
                 className="hidden rounded-md bg-black dark:bg-white px-4 py-2 text-sm font-medium text-white dark:text-black transition-colors hover:bg-black/90 dark:hover:bg-white/90 sm:inline-flex"
               >
                 Log in
@@ -196,6 +199,7 @@ export function Navbar() {
             <div className="mb-10 flex items-center justify-between border-b border-black/10 dark:border-white/10 pb-4">
               <Link
                 href="/"
+                prefetch={false}
                 className="flex items-center gap-3 rounded-md outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -223,6 +227,7 @@ export function Navbar() {
                   >
                     <Link
                       href={item.href}
+                      prefetch={false}
                       className={cn(
                         "group flex items-center justify-between rounded-lg px-4 py-3 text-base font-medium transition-all duration-200",
                         pathname === item.href
@@ -305,6 +310,7 @@ export function Navbar() {
                   >
                     <Link
                       href="/authentication"
+                      prefetch={false}
                       className="flex w-full items-center justify-center gap-2 rounded-lg bg-black dark:bg-white px-4 py-3 font-medium text-white dark:text-black transition-colors hover:bg-black/90 dark:hover:bg-white/90 cursor-pointer"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
