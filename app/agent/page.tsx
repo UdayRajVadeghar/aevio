@@ -87,6 +87,13 @@ export default function AgentPage() {
     fetchChatList();
   }, [fetchChatList]);
 
+  useEffect(() => {
+    // Default sidebar to closed on mobile on mount
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  }, []);
+
   async function loadChat(sessionId: string) {
     if (sessionId === activeSessionId) return;
     setHistoryLoading(true);
@@ -212,20 +219,29 @@ export default function AgentPage() {
       <aside
         className={cn(
           "absolute md:relative z-20 h-full flex flex-col border-r border-black/10 bg-white/90 backdrop-blur-xl transition-all duration-300 ease-in-out dark:border-white/10 dark:bg-black/90",
-          sidebarOpen ? "w-80 translate-x-0" : "w-0 -translate-x-full md:translate-x-0 overflow-hidden border-r-0",
+          sidebarOpen ? "w-full md:w-80 translate-x-0" : "w-0 -translate-x-full md:translate-x-0 overflow-hidden border-r-0",
         )}
       >
         <div className="flex h-[68px] items-center justify-between gap-2 border-b border-black/10 px-5 dark:border-white/10 shrink-0">
           <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">
             Active Sessions
           </span>
-          <button
-            onClick={startNewChat}
-            className="p-2 text-neutral-500 hover:text-black dark:hover:text-white transition-colors cursor-pointer rounded hover:bg-black/5 dark:hover:bg-white/5"
-            title="New Session"
-          >
-            <MessageSquarePlus className="size-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={startNewChat}
+              className="p-2 text-neutral-500 hover:text-black dark:hover:text-white transition-colors cursor-pointer rounded hover:bg-black/5 dark:hover:bg-white/5"
+              title="New Session"
+            >
+              <MessageSquarePlus className="size-4" />
+            </button>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden p-2 text-neutral-500 hover:text-black dark:hover:text-white transition-colors cursor-pointer rounded hover:bg-black/5 dark:hover:bg-white/5"
+              title="Close Sidebar"
+            >
+              <PanelLeftClose className="size-4" />
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
@@ -281,14 +297,6 @@ export default function AgentPage() {
         </div>
       </aside>
 
-      {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
-        <div
-          className="md:hidden absolute inset-0 bg-black/20 dark:bg-black/40 z-10 backdrop-blur-sm"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
       {/* ── Main chat area ── */}
       <div className="flex flex-1 flex-col relative z-10 w-full min-w-0">
         {/* Top bar */}
@@ -307,7 +315,7 @@ export default function AgentPage() {
           <div className="flex flex-col">
             <h1 className="text-sm font-bold tracking-tight uppercase flex items-center gap-2">
               <Brain className="w-4 h-4" />
-              AI Coach
+              Aevio
             </h1>
             <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 flex items-center gap-1.5 mt-0.5">
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
@@ -362,7 +370,7 @@ export default function AgentPage() {
                   <div className="space-y-2 max-w-md">
                     <h2 className="text-sm font-bold uppercase tracking-tight">Initiate Sequence</h2>
                     <p className="text-xs text-neutral-500 leading-relaxed font-mono">
-                      Your AI Coach is ready. Ask about your nutrition goals, request an analysis of your daily habits, or seek guidance on your next meal.
+                      Aevio is ready. Ask about your nutrition goals, request an analysis of your daily habits, or seek guidance on your next meal.
                     </p>
                   </div>
                   <div className="flex flex-wrap justify-center gap-2 mt-4">
@@ -391,9 +399,9 @@ export default function AgentPage() {
                   >
                     <div className="flex items-center gap-1.5 px-1 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
                       {entry.role === "user" ? (
-                        <>User <User className="w-3 h-3" /></>
+                        <>You <User className="w-3 h-3" /></>
                       ) : (
-                        <><Brain className="w-3 h-3" /> AI Coach</>
+                        <><Brain className="w-3 h-3" /> Aevio</>
                       )}
                     </div>
                     <div
@@ -416,7 +424,7 @@ export default function AgentPage() {
                   className="flex flex-col gap-1.5 max-w-[85%] self-start items-start"
                 >
                   <div className="flex items-center gap-1.5 px-1 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
-                    <Brain className="w-3 h-3" /> AI Coach
+                    <Brain className="w-3 h-3" /> Aevio
                   </div>
                   <div className="bg-white/80 dark:bg-black/80 backdrop-blur-sm border border-black/10 dark:border-white/10 px-5 py-4 flex items-center gap-2 shadow-sm">
                     <span className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 animate-bounce [animation-delay:-0.3s]" />
