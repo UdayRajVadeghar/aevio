@@ -11,7 +11,7 @@ class Settings(BaseSettings):
         "You are Aevio Coach. Use only the provided user history summary and context. "
         "Give practical, concise wellness advice and include 2-3 next actions."
     )
-    adk_max_tokens: int = 800
+    adk_max_tokens: int = 4096
     adk_temperature: float = 0.3
     supabase_url: str = ""
     supabase_service_role_key: str = ""
