@@ -1,5 +1,8 @@
 import { db } from "@/lib/db";
-import { getNutritionAveragesForWindow, toRounded } from "@/lib/nutrition-metrics";
+import {
+  getNutritionAveragesForWindow,
+  toRounded,
+} from "@/lib/nutrition-metrics";
 
 const DEFAULT_WINDOW_DAYS = 90;
 const MAX_WINDOW_DAYS = 180;
@@ -95,8 +98,13 @@ async function buildWindowPayload(
   now: Date,
   mode: "full" | "incremental",
 ): Promise<CoachWindowPayload> {
-  const windowStart = new Date(now.getTime() - config.days * 24 * 60 * 60 * 1000);
-  const windowMetrics = await getNutritionAveragesForWindow(userId, windowStart);
+  const windowStart = new Date(
+    now.getTime() - config.days * 24 * 60 * 60 * 1000,
+  );
+  const windowMetrics = await getNutritionAveragesForWindow(
+    userId,
+    windowStart,
+  );
 
   return {
     label: config.label,
@@ -130,7 +138,8 @@ export async function refreshCoachContext(
   const requestedMode = options?.mode ?? DEFAULT_MODE;
   const now = new Date();
   const sourcePrefix = options?.sourcePrefix ?? "nextjs";
-  const summaryWindowDays = options?.windowDaysForSummary ?? DEFAULT_WINDOW_DAYS;
+  const summaryWindowDays =
+    options?.windowDaysForSummary ?? DEFAULT_WINDOW_DAYS;
 
   if (requestedMode === "incremental") {
     const existingCoachContext = await db.coachContext.findUnique({
@@ -175,7 +184,10 @@ export async function refreshCoachContext(
   const summaryWindow = new Date(
     now.getTime() - summaryWindowDays * 24 * 60 * 60 * 1000,
   );
-  const summaryMetrics = await getNutritionAveragesForWindow(userId, summaryWindow);
+  const summaryMetrics = await getNutritionAveragesForWindow(
+    userId,
+    summaryWindow,
+  );
   const historySummary = buildHistorySummary({
     windowDays: summaryWindowDays,
     mealsTracked: summaryMetrics.mealsTracked,
@@ -214,4 +226,18 @@ export async function refreshCoachContext(
     mode: "full" as const,
     coachContext,
   };
+}
+
+/** Loads stored coach context, or runs a full refresh if none exists (e.g. first agent chat). */
+export async function getOrBuildCoachContextForAdk(userId: string) {
+  const existing = await db.coachContext.findUnique({
+    where: { userId },
+  });
+  if (existing) {
+    return existing;
+  }
+  const { coachContext } = await refreshCoachContext(userId, {
+    sourcePrefix: "agent",
+  });
+  return coachContext;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 type AgentApiResponse = {
   answer?: string;
@@ -12,12 +12,58 @@ type ChatMessage = {
   content: string;
 };
 
+type AgentContextResponse = {
+  exists?: boolean;
+  coachContext?: {
+    version?: number;
+    source?: string | null;
+    updatedAt?: string;
+  };
+  error?: string;
+};
+
 export default function AgentPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [message, setMessage] = useState("");
-  const [historySummary, setHistorySummary] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [contextStatus, setContextStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/agent/context");
+        const data = (await res.json()) as AgentContextResponse;
+        if (cancelled) {
+          return;
+        }
+        if (!res.ok) {
+          setContextStatus(
+            data.error || "Could not load coach context (read-only).",
+          );
+          return;
+        }
+        if (data.exists && data.coachContext) {
+          const { version, source, updatedAt } = data.coachContext;
+          setContextStatus(
+            `Stored coach context (v${version ?? "?"}${source ? `, ${source}` : ""})${updatedAt ? ` — updated ${new Date(updatedAt).toLocaleString()}` : ""}.`,
+          );
+        } else {
+          setContextStatus(
+            "No row yet — a full context is built on your first message.",
+          );
+        }
+      } catch {
+        if (!cancelled) {
+          setContextStatus("Could not load coach context.");
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,11 +81,7 @@ export default function AgentPage() {
       const response = await fetch("/api/agent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: trimmed,
-          historySummary: historySummary.trim(),
-          context: { source: "agent-page" },
-        }),
+        body: JSON.stringify({ message: trimmed }),
       });
 
       const data = (await response.json()) as AgentApiResponse;
@@ -51,6 +93,15 @@ export default function AgentPage() {
         ...prev,
         { role: "assistant", content: data.answer || "No response received." },
       ]);
+
+      const ctxRes = await fetch("/api/agent/context");
+      const ctxData = (await ctxRes.json()) as AgentContextResponse;
+      if (ctxRes.ok && ctxData.exists && ctxData.coachContext) {
+        const { version, source, updatedAt } = ctxData.coachContext;
+        setContextStatus(
+          `Stored coach context (v${version ?? "?"}${source ? `, ${source}` : ""})${updatedAt ? ` — updated ${new Date(updatedAt).toLocaleString()}` : ""}.`,
+        );
+      }
     } catch (submitError) {
       const msg =
         submitError instanceof Error
@@ -67,30 +118,23 @@ export default function AgentPage() {
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">AI Coach</h1>
         <p className="text-sm text-neutral-600 dark:text-neutral-400">
-          Minimal chat wired to your ADK backend.
+          Each message uses your stored{" "}
+          <code className="text-xs">CoachContext</code> from the database; first
+          send builds it if missing.
         </p>
 
-        <div className="rounded-lg border border-black/10 bg-neutral-50 p-4 dark:border-white/10 dark:bg-white/5">
-          <label
-            htmlFor="historySummary"
-            className="mb-2 block text-xs font-medium uppercase tracking-wide text-neutral-500"
-          >
-            Optional history summary
-          </label>
-          <textarea
-            id="historySummary"
-            value={historySummary}
-            onChange={(event) => setHistorySummary(event.target.value)}
-            placeholder="Last 7 days summary..."
-            className="h-24 w-full resize-y rounded-md border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-black/40 dark:border-white/10 dark:bg-black dark:focus:border-white/40"
-          />
-        </div>
+        {contextStatus ? (
+          <p className="rounded-lg border border-black/10 bg-neutral-50 px-3 py-2 text-sm text-neutral-700 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300">
+            {contextStatus}
+          </p>
+        ) : null}
 
         <div className="min-h-[280px] rounded-lg border border-black/10 bg-neutral-50 p-4 dark:border-white/10 dark:bg-white/5">
           <div className="flex flex-col gap-3">
             {messages.length === 0 ? (
               <p className="text-sm text-neutral-500">
-                Start by asking something like: What should I focus on this week?
+                Start by asking something like: What should I focus on this
+                week?
               </p>
             ) : (
               messages.map((entry, index) => (
@@ -121,7 +165,7 @@ export default function AgentPage() {
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             ) : (
               <span className="text-xs text-neutral-500">
-                Connected via `/api/agent`
+                GET `/api/agent/context` · POST `/api/agent`
               </span>
             )}
             <button
@@ -137,4 +181,3 @@ export default function AgentPage() {
     </main>
   );
 }
-

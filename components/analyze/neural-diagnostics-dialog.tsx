@@ -157,7 +157,9 @@ export function NeuralDiagnosticsDialog({
                   How your meal was analyzed
                 </DialogTitle>
                 <DialogDescription className="mt-1.5 text-pretty text-left text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
-                  Our AI looked at your photo to identify foods, estimate portion sizes, and calculate calories and macros. Here's the full breakdown.
+                  Our AI looked at your photo to identify foods, estimate
+                  portion sizes, and calculate calories and macros. Here's the
+                  full breakdown.
                 </DialogDescription>
               </div>
             </div>
@@ -171,7 +173,6 @@ export function NeuralDiagnosticsDialog({
           )}
         >
           <div className="grid min-w-0 grid-cols-1 items-start gap-8 lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] lg:gap-12">
-            
             {/* Left Column: At a Glance */}
             <section
               aria-labelledby="nd-snapshot-heading"
@@ -228,8 +229,8 @@ export function NeuralDiagnosticsDialog({
 
         <div className="shrink-0 border-t border-neutral-200 bg-neutral-50 px-6 py-4 dark:border-neutral-800 dark:bg-neutral-900/50 sm:px-8">
           <p className="text-center text-xs font-medium leading-relaxed text-neutral-500 dark:text-neutral-400">
-            Estimates are model-generated from your image and may vary with portion size
-            and lighting.
+            Estimates are model-generated from your image and may vary with
+            portion size and lighting.
           </p>
         </div>
       </DialogContent>

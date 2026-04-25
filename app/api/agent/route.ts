@@ -1,38 +1,27 @@
+import { coachContextToAdkPayload } from "@/lib/agent-coach-payload";
 import { auth } from "@/lib/auth";
+import { getOrBuildCoachContextForAdk } from "@/lib/coach-context";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+/** First request may run a full coach-context refresh. */
+export const maxDuration = 60;
 
 const DEFAULT_ADK_API_URL = "http://127.0.0.1:8010";
 const ADK_API_URL = process.env.ADK_API_URL?.trim() || DEFAULT_ADK_API_URL;
 
 type AgentRequestPayload = {
   message?: unknown;
-  historySummary?: unknown;
-  context?: unknown;
 };
-
-function normalizeHistorySummary(value: unknown): string {
-  if (typeof value !== "string") {
-    return "";
-  }
-  return value.trim().slice(0, 12000);
-}
-
-function normalizeContext(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return {};
-  }
-  return value as Record<string, unknown>;
-}
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const userId = session.user.id;
 
   let payload: AgentRequestPayload;
   try {
@@ -50,8 +39,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const historySummary = normalizeHistorySummary(payload.historySummary);
-  const context = normalizeContext(payload.context);
+  const row = await getOrBuildCoachContextForAdk(userId);
+  const { historySummary, context } = coachContextToAdkPayload(row);
 
   let upstream: Response;
   try {
