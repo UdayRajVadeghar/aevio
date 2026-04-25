@@ -23,13 +23,18 @@ export const onBoardingDataSchema = z
       primaryGoal: z.string().min(1, "Please select a primary goal"),
       dietaryPreference: z.string().optional(),
     }),
-    journaling: z.object({
-      journalingStyle: z.string().min(1, "Please select a journaling style"),
-      journalingTimeOfDay: z
-        .string()
-        .min(1, "Please select a journaling time of day"),
-      moodTrackingEnabled: z.boolean().default(false),
-    }),
+    journaling: z
+      .object({
+        journalingStyle: z.string().optional().default(""),
+        journalingTimeOfDay: z.string().optional().default(""),
+        moodTrackingEnabled: z.boolean().default(false),
+      })
+      .optional()
+      .default({
+        journalingStyle: "",
+        journalingTimeOfDay: "",
+        moodTrackingEnabled: false,
+      }),
     habits: z.array(
       z
         .object({
@@ -45,7 +50,8 @@ export const onBoardingDataSchema = z
     consent: z.boolean().default(false),
     goal: z
       .string()
-      .min(1, "Please enter your 30 day goal")
-      .max(200, "Goal must be less than 200 characters"),
+      .max(200, "Goal must be less than 200 characters")
+      .optional()
+      .default(""),
   })
   .optional();

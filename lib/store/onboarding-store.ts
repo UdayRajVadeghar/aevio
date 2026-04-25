@@ -16,7 +16,6 @@ export interface OnboardingState {
       gender: string;
     };
     healthWellness: Record<string, any>;
-    journaling: Record<string, any>;
     habits: Habit[];
     healthConditions: string[];
     consent: boolean;
@@ -39,7 +38,6 @@ export const useOnboardingStore = create<OnboardingState>()(
           gender: "",
         },
         healthWellness: {},
-        journaling: {},
         habits: [],
         healthConditions: [],
         consent: false,
@@ -112,12 +110,9 @@ export const useOnboardingStore = create<OnboardingState>()(
             dietaryPreference: storeData.healthWellness.dietaryPreference,
           },
           journaling: {
-            journalingStyle: storeData.journaling.style || "",
-            journalingTimeOfDay: storeData.journaling.timeOfDay || "",
-            moodTrackingEnabled:
-              typeof storeData.journaling.moodTracking === "boolean"
-                ? storeData.journaling.moodTracking
-                : false,
+            journalingStyle: "",
+            journalingTimeOfDay: "",
+            moodTrackingEnabled: false,
           },
           habits: storeData.habits.map((habit) => {
             const mapping = habitMappings[habit.id] || {
