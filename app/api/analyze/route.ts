@@ -23,6 +23,179 @@ const ALLOWED_MIME = new Set([
 ]);
 const MAX_BYTES = 10 * 1024 * 1024;
 const MAX_MEAL_HINT_LENGTH = 180;
+const COACH_CONTEXT_WINDOW_DAYS = 90;
+
+function buildHistorySummary(input: {
+  windowDays: number;
+  mealsTracked: number;
+  avgCalories: number;
+  avgProtein: number;
+}): string {
+  const { windowDays, mealsTracked, avgCalories, avgProtein } = input;
+
+  return [
+    `Summary window: last ${windowDays} days.`,
+    `Meals tracked: ${mealsTracked}.`,
+    `Average calories per logged meal: ${avgCalories.toFixed(1)}.`,
+    `Average protein per logged meal: ${avgProtein.toFixed(1)}g.`,
+    "Use this as high-level guidance, not a diagnosis.",
+  ].join(" ");
+}
+
+async function refreshCoachContextAfterMeal(userId: string): Promise<void> {
+  const now = new Date();
+  const dayStart = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const windowStart = new Date(
+    now.getTime() - COACH_CONTEXT_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+  );
+
+  const [existingCoachContext, mealAggToday, mealsTrackedToday] =
+    await db.$transaction([
+      db.coachContext.findUnique({
+        where: { userId },
+      }),
+      db.mealAnalysis.aggregate({
+        where: {
+          userId,
+          status: "COMPLETE",
+          createdAt: { gte: dayStart },
+        },
+        _avg: {
+          calories: true,
+          protein: true,
+          carbs: true,
+          fat: true,
+        },
+      }),
+      db.mealAnalysis.count({
+        where: {
+          userId,
+          status: "COMPLETE",
+          createdAt: { gte: dayStart },
+        },
+      }),
+    ]);
+
+  const existingContext =
+    existingCoachContext &&
+    existingCoachContext.context &&
+    typeof existingCoachContext.context === "object"
+      ? (existingCoachContext.context as Record<string, unknown>)
+      : {};
+
+  const hasFullWindowContext =
+    Boolean(existingContext.window) &&
+    typeof existingContext.window === "object";
+
+  if (existingCoachContext && hasFullWindowContext) {
+    const incrementalContext = {
+      ...existingContext,
+      incremental: {
+        dayStart: dayStart.toISOString(),
+        mealsTrackedToday,
+        avgCaloriesPerMealToday: Number(
+          Number(mealAggToday._avg.calories ?? 0).toFixed(1),
+        ),
+        avgProteinPerMealToday: Number(
+          Number(mealAggToday._avg.protein ?? 0).toFixed(1),
+        ),
+        avgCarbsPerMealToday: Number(
+          Number(mealAggToday._avg.carbs ?? 0).toFixed(1),
+        ),
+        avgFatPerMealToday: Number(
+          Number(mealAggToday._avg.fat ?? 0).toFixed(1),
+        ),
+        updatedAt: now.toISOString(),
+      },
+      metadata: {
+        ...(existingContext.metadata as Record<string, unknown> | undefined),
+        mode: "incremental",
+        lastIncrementalAt: now.toISOString(),
+      },
+    };
+
+    await db.coachContext.update({
+      where: { userId },
+      data: {
+        context: incrementalContext,
+        source: "nextjs-incremental-refresh",
+        version: { increment: 1 },
+      },
+    });
+    return;
+  }
+
+  const [mealAgg, mealsTracked] = await db.$transaction([
+    db.mealAnalysis.aggregate({
+      where: {
+        userId,
+        status: "COMPLETE",
+        createdAt: { gte: windowStart },
+      },
+      _avg: {
+        calories: true,
+        protein: true,
+        carbs: true,
+        fat: true,
+      },
+    }),
+    db.mealAnalysis.count({
+      where: {
+        userId,
+        status: "COMPLETE",
+        createdAt: { gte: windowStart },
+      },
+    }),
+  ]);
+
+  const avgCalories = Number(mealAgg._avg.calories ?? 0);
+  const avgProtein = Number(mealAgg._avg.protein ?? 0);
+  const avgCarbs = Number(mealAgg._avg.carbs ?? 0);
+  const avgFat = Number(mealAgg._avg.fat ?? 0);
+
+  const contextPayload = {
+    window: {
+      days: COACH_CONTEXT_WINDOW_DAYS,
+      startDate: windowStart.toISOString(),
+      endDate: now.toISOString(),
+    },
+    nutrition: {
+      mealsTracked,
+      avgCaloriesPerMeal: Number(avgCalories.toFixed(1)),
+      avgProteinPerMeal: Number(avgProtein.toFixed(1)),
+      avgCarbsPerMeal: Number(avgCarbs.toFixed(1)),
+      avgFatPerMeal: Number(avgFat.toFixed(1)),
+    },
+    metadata: {
+      generatedAt: now.toISOString(),
+      mode: "full",
+    },
+  };
+
+  const historySummary = buildHistorySummary({
+    windowDays: COACH_CONTEXT_WINDOW_DAYS,
+    mealsTracked,
+    avgCalories,
+    avgProtein,
+  });
+
+  await db.coachContext.upsert({
+    where: { userId },
+    create: {
+      userId,
+      historySummary,
+      context: contextPayload,
+      source: "nextjs-full-refresh",
+      version: 1,
+    },
+    update: {
+      historySummary,
+      context: contextPayload,
+      source: "nextjs-full-refresh",
+      version: { increment: 1 },
+    },
+  });
+}
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -39,10 +212,7 @@ export async function POST(req: NextRequest) {
   try {
     payload = await req.json();
   } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON body" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
   const objectKey =
@@ -91,7 +261,10 @@ export async function POST(req: NextRequest) {
     );
   }
   if (!metadata) {
-    return NextResponse.json({ error: "Uploaded image not found" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Uploaded image not found" },
+      { status: 400 },
+    );
   }
   if (metadata.sizeBytes <= 0 || metadata.sizeBytes > MAX_BYTES) {
     return NextResponse.json(
@@ -167,6 +340,12 @@ export async function POST(req: NextRequest) {
         },
       }),
     ]);
+
+    try {
+      await refreshCoachContextAfterMeal(userId);
+    } catch (refreshError) {
+      console.error("Coach context refresh failed:", refreshError);
+    }
 
     return NextResponse.json({
       id: row.id,

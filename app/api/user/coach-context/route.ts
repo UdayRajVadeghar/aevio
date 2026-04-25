@@ -34,16 +34,14 @@ function parseMode(searchParams: URLSearchParams): RefreshMode {
 function buildHistorySummary(input: {
   windowDays: number;
   mealsTracked: number;
-  workoutsTracked: number;
   avgCalories: number;
   avgProtein: number;
 }): string {
-  const { windowDays, mealsTracked, workoutsTracked, avgCalories, avgProtein } =
-    input;
+  const { windowDays, mealsTracked, avgCalories, avgProtein } = input;
 
   return [
     `Summary window: last ${windowDays} days.`,
-    `Meals tracked: ${mealsTracked}. Workouts logged: ${workoutsTracked}.`,
+    `Meals tracked: ${mealsTracked}.`,
     `Average calories per logged meal: ${avgCalories.toFixed(1)}.`,
     `Average protein per logged meal: ${avgProtein.toFixed(1)}g.`,
     "Use this as high-level guidance, not a diagnosis.",
@@ -99,7 +97,6 @@ export async function POST(req: NextRequest) {
         existingCoachContext,
         mealAggToday,
         mealsTrackedToday,
-        workoutsToday,
       ] = await db.$transaction([
         db.coachContext.findUnique({
           where: { userId },
@@ -124,12 +121,6 @@ export async function POST(req: NextRequest) {
             createdAt: { gte: dayStart },
           },
         }),
-        db.workout.count({
-          where: {
-            userId,
-            createdAt: { gte: dayStart },
-          },
-        }),
       ]);
 
       const existingContext =
@@ -150,7 +141,6 @@ export async function POST(req: NextRequest) {
           incremental: {
             dayStart: dayStart.toISOString(),
             mealsTrackedToday,
-            workoutsToday,
             avgCaloriesPerMealToday: Number(
               Number(mealAggToday._avg.calories ?? 0).toFixed(1),
             ),
@@ -177,7 +167,6 @@ export async function POST(req: NextRequest) {
         const fallbackSummary = buildHistorySummary({
           windowDays,
           mealsTracked: mealsTrackedToday,
-          workoutsTracked: workoutsToday,
           avgCalories: Number(mealAggToday._avg.calories ?? 0),
           avgProtein: Number(mealAggToday._avg.protein ?? 0),
         });
@@ -211,7 +200,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const [mealAgg, mealsTracked, workoutsTracked] = await db.$transaction([
+    const [mealAgg, mealsTracked] = await db.$transaction([
       db.mealAnalysis.aggregate({
         where: {
           userId,
@@ -229,12 +218,6 @@ export async function POST(req: NextRequest) {
         where: {
           userId,
           status: "COMPLETE",
-          createdAt: { gte: windowStart },
-        },
-      }),
-      db.workout.count({
-        where: {
-          userId,
           createdAt: { gte: windowStart },
         },
       }),
@@ -258,9 +241,6 @@ export async function POST(req: NextRequest) {
         avgCarbsPerMeal: Number(avgCarbs.toFixed(1)),
         avgFatPerMeal: Number(avgFat.toFixed(1)),
       },
-      training: {
-        workoutsTracked,
-      },
       metadata: {
         generatedAt: new Date().toISOString(),
         version: 1,
@@ -270,7 +250,6 @@ export async function POST(req: NextRequest) {
     const historySummary = buildHistorySummary({
       windowDays,
       mealsTracked,
-      workoutsTracked,
       avgCalories,
       avgProtein,
     });
