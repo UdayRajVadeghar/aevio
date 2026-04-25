@@ -40,28 +40,39 @@ class AdkCoachService:
         try:
             from google.adk.runners import Runner
             from google.adk.sessions import InMemorySessionService
+            from google.genai import types
         except Exception as exc:  # pragma: no cover - dependency/runtime guard
             raise RuntimeError(
                 "google-adk is unavailable. Install deps with `uv sync` in services/adk-api."
             ) from exc
 
         session_service = InMemorySessionService()
-        runner = Runner(agent=root_agent, session_service=session_service)
+        runner = Runner(
+            app_name="aevio",
+            agent=root_agent,
+            session_service=session_service,
+            auto_create_session=True,
+        )
+        message = types.Content(role="user", parts=[types.Part.from_text(text=prompt)])
 
-        result = await runner.run_async(
+        final_text = ""
+        async for event in runner.run_async(
             user_id=user_id,
             session_id=f"{user_id}-aevio-coach",
-            new_message=prompt,
-        )
+            new_message=message,
+        ):
+            if not event.is_final_response() or not event.content:
+                continue
+
+            parts = event.content.parts or []
+            final_text = "\n".join(part.text for part in parts if part.text).strip()
+            if final_text:
+                return final_text
 
         # ADK event payloads can vary by version; this is a defensive extract.
-        text = getattr(result, "output_text", None)
+        text = final_text
         if isinstance(text, str) and text.strip():
             return text.strip()
-
-        fallback_text = str(result).strip()
-        if fallback_text:
-            return fallback_text
 
         raise RuntimeError("ADK returned an empty response.")
 
