@@ -8,6 +8,7 @@ dependencies = [
     "fastapi",
     "google-adk",
     "pydantic-settings",
+    "supabase",
     "uvicorn[standard]",
 ]
 

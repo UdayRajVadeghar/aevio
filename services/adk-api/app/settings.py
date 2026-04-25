@@ -10,6 +10,13 @@ class Settings(BaseSettings):
     )
     adk_max_tokens: int = 800
     adk_temperature: float = 0.3
+    supabase_url: str = ""
+    supabase_service_role_key: str = ""
+    supabase_context_table: str = "coach_contexts"
+    supabase_user_id_column: str = "user_id"
+    supabase_history_summary_column: str = "history_summary"
+    supabase_context_column: str = "context"
+    supabase_updated_at_column: str = "updated_at"
 
     model_config = SettingsConfigDict(
         env_file=".env",
