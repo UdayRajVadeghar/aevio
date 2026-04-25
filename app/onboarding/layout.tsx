@@ -12,7 +12,7 @@ export default function OnboardingLayout({
         {/* Mobile Trigger Button */}
         <div className="sticky top-0 z-10 flex items-center gap-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 border-b md:hidden">
           <SidebarTrigger />
-          <span className="font-semibold">Onboarding Progress</span>
+          <span className="font-semibold">Getting To Know You</span>
         </div>
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden">

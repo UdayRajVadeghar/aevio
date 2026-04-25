@@ -113,7 +113,7 @@ export function StepHabits() {
       : [];
 
     updateData("habits", habitsToSave);
-    setStep(5);
+    setStep(4);
   };
 
   const toggleHabit = (id: string) => {
@@ -230,7 +230,7 @@ export function StepHabits() {
 
       <div className="pt-8 flex justify-between">
         <button
-          onClick={() => setStep(3)}
+          onClick={() => setStep(2)}
           className="px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Back

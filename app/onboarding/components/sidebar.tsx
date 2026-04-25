@@ -1,69 +1,27 @@
 "use client";
 
-import { Button } from "@/components/ui/shadcn/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/shadcn/dialog";
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent,
   SidebarHeader,
-  SidebarProvider
+  SidebarProvider,
 } from "@/components/ui/shadcn/sidebar";
-import { authClient } from "@/lib/auth-client";
 import { useOnboardingStore } from "@/lib/store/onboarding-store";
 import { cn } from "@/lib/utils";
-import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
-import { useState } from "react";
 
 const steps = [
   { number: 1, title: "Basic Profile" },
   { number: 2, title: "Health & Wellness" },
-  { number: 3, title: "Journaling" },
-  { number: 4, title: "Habits" },
-  { number: 5, title: "Health Conditions" },
-  { number: 6, title: "Consent" },
-  { number: 7, title: "Finalize" },
+  { number: 3, title: "Habits" },
+  { number: 4, title: "Health Conditions" },
+  { number: 5, title: "Consent" },
+  { number: 6, title: "Goals" },
 ];
 
 function SidebarContentComponent() {
   const { currentStep, setStep } = useOnboardingStore();
-  const userId = authClient.useSession().data?.user?.id;
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const { mutate: skipOnboarding, isPending } = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`/api/user/onboarding/skip`, {
-        method: "POST",
-        body: JSON.stringify({ userId }),
-      });
-      const data = await response.json();
-      return data;
-    },
-    onSuccess: (data) => {
-      console.log(data.message);
-      setIsDialogOpen(false);
-    },
-    onError: (error) => {
-      console.error("Failed to skip onboarding", error);
-    },
-  });
-
-  const handleSkipOnboarding = async () => {
-    if (userId === undefined || userId === null) {
-      return;
-    }
-
-    skipOnboarding();
-  };
 
   const handleStepClick = (stepNumber: number) => {
     // Only allow navigation to current step or previously visited steps
@@ -84,46 +42,11 @@ function SidebarContentComponent() {
       </SidebarHeader>
 
       <SidebarContent className="px-6">
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <button className="p-3 mb-6 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-2 border-gray-300 dark:border-gray-600 rounded-lg w-full">
-              Skip Onboarding
-            </button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Skip Onboarding?</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to skip the onboarding process? You can
-                always complete it later from your profile settings.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsDialogOpen(false)}
-                disabled={isPending}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                onClick={handleSkipOnboarding}
-                disabled={isPending}
-              >
-                {isPending ? "Skipping..." : "Yes, Skip"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
         <div className="flex-1 relative py-4">
           {/* Progress Title */}
           <div className="mb-6">
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Your Progress
+              Getting To Know You
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
               Step {currentStep} of {steps.length}

@@ -63,17 +63,17 @@ export function StepFinal() {
           <span>Final Step</span>
         </div>
         <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/50 bg-clip-text text-transparent">
-          One Last Thing...
+          Your Goals
         </h2>
         <p className="text-lg text-muted-foreground">
-          Set a specific intention for your first 30 days.
+          Tell us your general goals so we can personalize your experience.
         </p>
       </div>
 
       <div className="space-y-6">
         <div className="space-y-3">
           <label htmlFor="goal" className="block text-sm font-medium">
-            What is your main focus for the next 30 days?{" "}
+            What goals are you working toward right now?{" "}
             <span className="text-muted-foreground font-normal">
               (Optional)
             </span>
@@ -93,7 +93,7 @@ export function StepFinal() {
                 "flex w-full rounded-xl border border-input bg-background/50 px-4 py-3 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none transition-all duration-300 hover:bg-accent/20 hover:border-primary/30",
                 error && "border-destructive focus-visible:ring-destructive"
               )}
-              placeholder="e.g. I want to drink water consistently and walk 5k steps daily."
+              placeholder="e.g. Build consistency, improve sleep, and stay active most days."
             />
             <div className="absolute bottom-3 right-3 text-xs text-muted-foreground">
               {goal.length}/200
@@ -107,9 +107,9 @@ export function StepFinal() {
             Examples:
           </h4>
           <ul className="text-sm space-y-1 text-muted-foreground/80 list-disc pl-4">
-            <li>Meditate for 5 minutes every morning</li>
-            <li>Cut down sugar from my coffee</li>
-            <li>Read 10 pages of a book before bed</li>
+            <li>Feel more energetic and reduce stress</li>
+            <li>Build healthy routines I can stick to</li>
+            <li>Improve fitness and sleep quality</li>
           </ul>
         </div>
       </div>

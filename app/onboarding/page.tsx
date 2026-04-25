@@ -11,7 +11,6 @@ import { StepFinal } from "./components/step-final";
 import { StepHabits } from "./components/step-habits";
 import { StepHealthConditions } from "./components/step-health-conditions";
 import { StepHealthWellness } from "./components/step-health-wellness";
-import { StepJournaling } from "./components/step-journaling";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -79,11 +78,10 @@ export default function OnboardingPage() {
     <div className="w-full">
       {currentStep === 1 && <StepBasicProfile />}
       {currentStep === 2 && <StepHealthWellness />}
-      {currentStep === 3 && <StepJournaling />}
-      {currentStep === 4 && <StepHabits />}
-      {currentStep === 5 && <StepHealthConditions />}
-      {currentStep === 6 && <StepConsent />}
-      {currentStep === 7 && <StepFinal />}
+      {currentStep === 3 && <StepHabits />}
+      {currentStep === 4 && <StepHealthConditions />}
+      {currentStep === 5 && <StepConsent />}
+      {currentStep === 6 && <StepFinal />}
     </div>
   );
 }

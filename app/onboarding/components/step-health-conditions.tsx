@@ -5,12 +5,6 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { z } from "zod";
-
-// Fully optional
-const healthConditionsSchema = z.object({
-  conditions: z.array(z.string()).optional(),
-});
 
 export function StepHealthConditions() {
   const { data, updateData, setStep } = useOnboardingStore();
@@ -22,7 +16,7 @@ export function StepHealthConditions() {
   const handleContinue = () => {
     // Always valid as it's optional
     updateData("healthConditions", selectedConditions);
-    setStep(6);
+    setStep(5);
   };
 
   const toggleCondition = (id: string) => {
@@ -106,7 +100,7 @@ export function StepHealthConditions() {
 
       <div className="pt-8 flex justify-between">
         <button
-          onClick={() => setStep(4)}
+          onClick={() => setStep(3)}
           className="px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Back

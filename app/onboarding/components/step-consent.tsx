@@ -28,7 +28,7 @@ export function StepConsent() {
     }
 
     updateData("consent", consent);
-    setStep(7);
+    setStep(6);
   };
 
   return (
@@ -147,7 +147,7 @@ export function StepConsent() {
 
       <div className="pt-8 flex justify-between">
         <button
-          onClick={() => setStep(5)}
+          onClick={() => setStep(4)}
           className="px-6 py-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           Back
