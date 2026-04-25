@@ -55,6 +55,7 @@ export function PreFooterCTA() {
         <div className="relative bg-black dark:bg-white px-8 py-4 group cursor-pointer transition-transform active:scale-95">
           <Link
             href={isLoggedIn ? "/analyze" : "/authentication?view=signup"}
+            prefetch={false}
             className="block text-white dark:text-black font-medium text-base md:text-lg whitespace-nowrap tracking-tight"
           >
             {isLoggedIn ? "Track calories" : "Start creating"}

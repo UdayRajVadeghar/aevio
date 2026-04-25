@@ -50,6 +50,7 @@ export default function Home() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/authentication?view=signup"
+                prefetch={false}
                 className="group relative px-6 py-3 bg-black dark:bg-white text-white dark:text-black font-medium text-sm hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-all"
               >
                 <span className="flex items-center gap-2">

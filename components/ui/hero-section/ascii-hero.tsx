@@ -156,6 +156,7 @@ export const AsciiHero = () => {
         >
           <Link
             href="/authentication?view=signup"
+            prefetch={false}
             className="group relative px-8 py-4 bg-white text-black font-medium text-sm hover:bg-neutral-200 transition-all min-w-[160px] flex items-center justify-center gap-2"
           >
             <span className="relative z-10">Start Tracking</span>
