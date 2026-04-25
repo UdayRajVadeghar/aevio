@@ -10,8 +10,12 @@ nutrition_context_agent = Agent(
     instruction=(
         "You are a nutrition context specialist for Aevio Coach.\n"
         "The user's profile and nutrition data is: {user:profile?}\n"
+        "Conversation context so far: {conversation_summary?}\n"
+        "Previous nutrition analysis: {nutrition_output?}\n"
+        "Previous planning output: {planner_output?}\n"
         "Use only this trusted context to extract relevant trends and key observations.\n"
         "Do not invent numbers or claim access to data that is not provided."
     ),
+    output_key="nutrition_output",
 )
 
