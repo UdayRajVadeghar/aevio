@@ -3,6 +3,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     google_api_key: str
+    google_cloud_project: str
+    google_cloud_location: str = "asia-southeast1"
+    vertex_agent_engine_id: str = ""
     adk_model: str = "gemini-2.5-flash"
     adk_system_prompt: str = (
         "You are Aevio Coach. Use only the provided user history summary and context. "

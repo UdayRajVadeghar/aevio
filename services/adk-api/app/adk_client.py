@@ -1,99 +1,153 @@
 from __future__ import annotations
 
 import os
+import uuid
 from typing import Any
+
+from google.adk.memory import InMemoryMemoryService
+from google.adk.runners import Runner
+from google.adk.sessions import VertexAiSessionService
+from google.genai import types
 
 from .agent import root_agent
 from .settings import settings
 
+APP_NAME = "aevio"
+
 
 class AdkCoachService:
     """
-    Thin ADK wrapper for v1 using root-agent style orchestration.
-    - Root agent + sub-agents
-    - No tool calls
-    - Stateless request/response chat
+    ADK wrapper with persistent Vertex AI sessions and memory.
+
+    - VertexAiSessionService persists all chat history and agent events
+      across requests and server restarts.
+    - InMemoryMemoryService provides cross-session recall (swap to
+      VertexAiMemoryBankService later for production persistence).
+    - Runner is created once; every run_async call with the same
+      session_id automatically feeds the agent full conversation history.
     """
 
     def __init__(self) -> None:
         os.environ["GOOGLE_API_KEY"] = settings.google_api_key
 
+        self._session_service = VertexAiSessionService(
+            project=settings.google_cloud_project,
+            location=settings.google_cloud_location,
+            agent_engine_id=settings.vertex_agent_engine_id or None,
+        )
+
+        self._memory_service = InMemoryMemoryService()
+
+        self._runner = Runner(
+            app_name=APP_NAME,
+            agent=root_agent,
+            session_service=self._session_service,
+            memory_service=self._memory_service,
+        )
+
     async def chat(
         self,
         *,
         user_id: str,
+        session_id: str | None = None,
         message: str,
-        history_summary: str,
-        context: dict[str, Any],
-    ) -> str:
-        """
-        Calls ADK if available. We import ADK at runtime so startup does not fail
-        before dependencies are installed in local/dev environments.
-        """
-        prompt = self._build_prompt(
+        context: dict[str, Any] | None = None,
+    ) -> dict[str, str]:
+        if not session_id:
+            session_id = f"chat-{uuid.uuid4().hex[:12]}"
+
+        existing = await self._session_service.get_session(
+            app_name=APP_NAME,
             user_id=user_id,
-            message=message,
-            history_summary=history_summary,
-            context=context,
+            session_id=session_id,
         )
+        if existing is None:
+            await self._session_service.create_session(
+                app_name=APP_NAME,
+                user_id=user_id,
+                session_id=session_id,
+                state={
+                    "user:profile": context or {},
+                    "user:user_id": user_id,
+                },
+            )
 
-        try:
-            from google.adk.runners import Runner
-            from google.adk.sessions import InMemorySessionService
-            from google.genai import types
-        except Exception as exc:  # pragma: no cover - dependency/runtime guard
-            raise RuntimeError(
-                "google-adk is unavailable. Install deps with `uv sync` in services/adk-api."
-            ) from exc
-
-        session_service = InMemorySessionService()
-        runner = Runner(
-            app_name="aevio",
-            agent=root_agent,
-            session_service=session_service,
-            auto_create_session=True,
+        content = types.Content(
+            role="user",
+            parts=[types.Part.from_text(text=message)],
         )
-        message = types.Content(role="user", parts=[types.Part.from_text(text=prompt)])
 
         final_text = ""
-        async for event in runner.run_async(
+        async for event in self._runner.run_async(
             user_id=user_id,
-            session_id=f"{user_id}-aevio-coach",
-            new_message=message,
+            session_id=session_id,
+            new_message=content,
         ):
             if not event.is_final_response() or not event.content:
                 continue
-
             parts = event.content.parts or []
-            final_text = "\n".join(part.text for part in parts if part.text).strip()
+            final_text = "\n".join(
+                part.text for part in parts if part.text
+            ).strip()
             if final_text:
-                return final_text
+                break
 
-        # ADK event payloads can vary by version; this is a defensive extract.
-        text = final_text
-        if isinstance(text, str) and text.strip():
-            return text.strip()
+        if not final_text:
+            raise RuntimeError("ADK returned an empty response.")
 
-        raise RuntimeError("ADK returned an empty response.")
+        return {
+            "answer": final_text,
+            "session_id": session_id,
+            "model": settings.adk_model,
+        }
 
-    def _build_prompt(
-        self,
-        *,
-        user_id: str,
-        message: str,
-        history_summary: str,
-        context: dict[str, Any],
-    ) -> str:
-        return (
-            "User request:\n"
-            f"{message}\n\n"
-            "User profile context (trusted app data):\n"
-            f"userId: {user_id}\n"
-            f"context: {context}\n\n"
-            "Historical summary (trusted app data):\n"
-            f"{history_summary or 'No history summary provided.'}\n\n"
-            "Response format:\n"
-            "- One short paragraph of advice\n"
-            "- Then 2-3 bullet next actions"
+    async def list_chats(self, user_id: str) -> list[dict[str, Any]]:
+        result = await self._session_service.list_sessions(
+            app_name=APP_NAME,
+            user_id=user_id,
         )
 
+        chats: list[dict[str, Any]] = []
+        for session in result.sessions:
+            preview = ""
+            for ev in session.events or []:
+                if ev.content and ev.content.role == "user" and ev.content.parts:
+                    preview = (ev.content.parts[0].text or "")[:100]
+                    break
+
+            chats.append({
+                "session_id": session.id,
+                "preview": preview or "New chat",
+                "last_update": session.last_update_time,
+            })
+
+        return chats
+
+    async def get_chat_history(
+        self, user_id: str, session_id: str
+    ) -> list[dict[str, Any]]:
+        session = await self._session_service.get_session(
+            app_name=APP_NAME,
+            user_id=user_id,
+            session_id=session_id,
+        )
+        if session is None:
+            return []
+
+        messages: list[dict[str, Any]] = []
+        for ev in session.events:
+            if not ev.content or not ev.content.parts:
+                continue
+            text = "\n".join(
+                part.text for part in ev.content.parts if part.text
+            ).strip()
+            if not text or ev.content.role not in ("user", "model"):
+                continue
+            messages.append({
+                "role": "user" if ev.content.role == "user" else "assistant",
+                "content": text,
+                "timestamp": ev.timestamp,
+                "author": ev.author,
+            })
+
+        return messages

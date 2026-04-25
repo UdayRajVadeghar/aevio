@@ -9,8 +9,8 @@ nutrition_context_agent = Agent(
     ),
     instruction=(
         "You are a nutrition context specialist for Aevio Coach.\n"
-        "Use only the trusted user summary/context provided in the conversation.\n"
-        "Extract relevant trends and key observations for the main coach.\n"
+        "The user's profile and nutrition data is: {user:profile?}\n"
+        "Use only this trusted context to extract relevant trends and key observations.\n"
         "Do not invent numbers or claim access to data that is not provided."
     ),
 )

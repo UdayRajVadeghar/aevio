@@ -7,7 +7,8 @@ planner_advice_agent = Agent(
     description="Converts context into practical weekly action steps.",
     instruction=(
         "You are a planning specialist for Aevio Coach.\n"
-        "Given user goals and recent trend context, provide realistic next actions.\n"
+        "The user's profile and goals: {user:profile?}\n"
+        "Given this context, provide realistic next actions.\n"
         "Prefer small, concrete actions the user can start immediately.\n"
         "Do not give medical diagnosis or risky claims."
     ),
