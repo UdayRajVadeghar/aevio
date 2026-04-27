@@ -11,6 +11,13 @@ import { z } from "zod";
 
 const goalSchema = z.object({
   goal: z.string().max(200, "Goal must be less than 200 characters").optional(),
+  caloriesIntake: z
+    .number()
+    .int("Calories intake must be a whole number")
+    .min(500, "Calories intake must be between 500 and 10000")
+    .max(10000, "Calories intake must be between 500 and 10000")
+    .optional(),
+  calorieGoalEndDate: z.coerce.date().optional(),
 });
 
 export function StepFinal() {
@@ -19,11 +26,28 @@ export function StepFinal() {
   const userId = authClient.useSession().data?.user?.id;
 
   const [goal, setGoal] = useState(data.goal || "");
+  const [caloriesIntake, setCaloriesIntake] = useState(
+    data.caloriesIntake !== null && data.caloriesIntake !== undefined
+      ? String(data.caloriesIntake)
+      : "",
+  );
+  const [calorieGoalEndDate, setCalorieGoalEndDate] = useState(
+    data.calorieGoalEndDate
+      ? new Date(data.calorieGoalEndDate).toISOString().split("T")[0]
+      : "",
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleFinish = async () => {
-    const result = goalSchema.safeParse({ goal });
+    const parsedCaloriesIntake = caloriesIntake.trim()
+      ? Number(caloriesIntake)
+      : undefined;
+    const result = goalSchema.safeParse({
+      goal,
+      caloriesIntake: parsedCaloriesIntake,
+      calorieGoalEndDate: calorieGoalEndDate || undefined,
+    });
 
     if (!result.success) {
       setError(result.error.issues[0].message);
@@ -37,6 +61,11 @@ export function StepFinal() {
 
     setIsSubmitting(true);
     updateData("goal", goal);
+    updateData("caloriesIntake", result.data.caloriesIntake ?? null);
+    updateData(
+      "calorieGoalEndDate",
+      result.data.calorieGoalEndDate ?? undefined,
+    );
 
     try {
       await completeOnboarding(userId);
@@ -44,7 +73,9 @@ export function StepFinal() {
     } catch (error) {
       console.error("Failed to complete onboarding", error);
       setError(
-        error instanceof Error ? error.message : "Failed to complete onboarding"
+        error instanceof Error
+          ? error.message
+          : "Failed to complete onboarding",
       );
       setIsSubmitting(false);
     }
@@ -72,6 +103,57 @@ export function StepFinal() {
 
       <div className="space-y-6">
         <div className="space-y-3">
+          <label htmlFor="caloriesIntake" className="block text-sm font-medium">
+            Daily calories intake target{" "}
+            <span className="text-muted-foreground font-normal">
+              (Optional)
+            </span>
+          </label>
+          <input
+            id="caloriesIntake"
+            type="number"
+            min={500}
+            max={10000}
+            step={1}
+            value={caloriesIntake}
+            onChange={(e) => {
+              setCaloriesIntake(e.target.value);
+              setError(null);
+            }}
+            className={cn(
+              "flex h-11 w-full rounded-xl border border-input bg-background/50 px-4 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/20 hover:border-primary/30",
+              error && "border-destructive focus-visible:ring-destructive",
+            )}
+            placeholder="e.g. 2200"
+          />
+        </div>
+
+        <div className="space-y-3">
+          <label
+            htmlFor="calorieGoalEndDate"
+            className="block text-sm font-medium"
+          >
+            Follow this calories goal until{" "}
+            <span className="text-muted-foreground font-normal">
+              (Optional)
+            </span>
+          </label>
+          <input
+            id="calorieGoalEndDate"
+            type="date"
+            value={calorieGoalEndDate}
+            onChange={(e) => {
+              setCalorieGoalEndDate(e.target.value);
+              setError(null);
+            }}
+            className={cn(
+              "flex h-11 w-full rounded-xl border border-input bg-background/50 px-4 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/20 hover:border-primary/30",
+              error && "border-destructive focus-visible:ring-destructive",
+            )}
+          />
+        </div>
+
+        <div className="space-y-3">
           <label htmlFor="goal" className="block text-sm font-medium">
             What goals are you working toward right now?{" "}
             <span className="text-muted-foreground font-normal">
@@ -91,7 +173,7 @@ export function StepFinal() {
               rows={4}
               className={cn(
                 "flex w-full rounded-xl border border-input bg-background/50 px-4 py-3 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none transition-all duration-300 hover:bg-accent/20 hover:border-primary/30",
-                error && "border-destructive focus-visible:ring-destructive"
+                error && "border-destructive focus-visible:ring-destructive",
               )}
               placeholder="e.g. Build consistency, improve sleep, and stay active most days."
             />

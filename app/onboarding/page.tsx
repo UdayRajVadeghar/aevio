@@ -15,58 +15,100 @@ import { StepHealthWellness } from "./components/step-health-wellness";
 export default function OnboardingPage() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
-  const { currentStep } = useOnboardingStore();
+  const { currentStep, updateData, setStep } = useOnboardingStore();
   const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const [hasHydratedProfileData, setHasHydratedProfileData] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
   useEffect(() => {
-    const checkOnboardingStatus = async () => {
-      // Wait for session to load
-      if (isPending) return;
+    if (!isMounted) return;
+    if (isPending) return;
 
-      // Check 1: User must be authenticated
-      if (!session?.user) {
-        router.push("/");
-        return;
-      }
+    if (!session?.user) {
+      router.push("/");
+      return;
+    }
 
-      // Check 2: Check if onboarding is already completed
+    setIsCheckingOnboarding(false);
+  }, [session, isPending, router, isMounted]);
+
+  useEffect(() => {
+    const hydrateProfileData = async () => {
+      if (!isMounted || isPending || !session?.user) return;
+      if (hasHydratedProfileData) return;
+
       try {
-        const response = await fetch("/api/user/onboarding/status", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: session.user.id,
-          }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const status = data.onBoardingStatus?.toLowerCase().toString().trim();
-
-          // If onboarding is completed, redirect to home
-          if (status === "completed") {
-            router.push("/");
-            return;
-          }
+        const response = await fetch(
+          `/api/user/profile?userId=${encodeURIComponent(session.user.id)}`
+        );
+        if (!response.ok) {
+          setHasHydratedProfileData(true);
+          return;
         }
+
+        const profileData = await response.json();
+        updateData("basicProfile", {
+          name: profileData.basicProfile?.name || "",
+          dob: profileData.basicProfile?.dob
+            ? new Date(profileData.basicProfile.dob)
+            : undefined,
+          gender: profileData.basicProfile?.gender || "",
+        });
+        updateData("healthWellness", {
+          height: profileData.healthWellness?.height ?? 170,
+          weight: profileData.healthWellness?.weight ?? 70,
+          activityLevel: profileData.healthWellness?.activityLevel || "",
+          primaryGoal: profileData.healthWellness?.primaryGoal || "",
+          dietaryPreference: profileData.healthWellness?.dietaryPreference || "",
+        });
+        updateData(
+          "habits",
+          (profileData.habits || []).map(
+            (habit: {
+              id?: string;
+              name?: string;
+              target?: number | null;
+              unit?: string | null;
+            }) => ({
+              id: habit.id || "",
+              name: habit.name || "",
+              frequency:
+                habit.target && habit.unit
+                  ? `${habit.target} ${habit.unit}`
+                  : "",
+            })
+          )
+        );
+        updateData("healthConditions", profileData.healthConditions || []);
+        updateData("goal", profileData.goal || "");
+        updateData("caloriesIntake", profileData.caloriesIntake ?? null);
+        updateData(
+          "calorieGoalEndDate",
+          profileData.calorieGoalEndDate
+            ? new Date(profileData.calorieGoalEndDate)
+            : undefined
+        );
+        setStep(1);
       } catch (error) {
-        console.error("Error checking onboarding status:", error);
+        console.error("Error hydrating onboarding data:", error);
       } finally {
-        setIsCheckingOnboarding(false);
+        setHasHydratedProfileData(true);
       }
     };
 
-    if (isMounted) {
-      checkOnboardingStatus();
-    }
-  }, [session, isPending, router, isMounted]);
+    hydrateProfileData();
+  }, [
+    hasHydratedProfileData,
+    isMounted,
+    isPending,
+    session,
+    setStep,
+    updateData,
+  ]);
 
   // Show loading screen while checking authentication and onboarding status
   if (!isMounted || isPending || isCheckingOnboarding) {

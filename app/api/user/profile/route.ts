@@ -37,6 +37,8 @@ export async function GET(req: NextRequest) {
             moodTrackingEnabled: true,
             healthConditions: true,
             thirtyDayGoal: true,
+            dailyCalorieIntakeGoal: true,
+            calorieGoalEndDate: true,
             onboardingCompleted: true,
             habits: {
               select: {
@@ -89,6 +91,8 @@ export async function GET(req: NextRequest) {
       habits: user.profile.habits,
       healthConditions: user.profile.healthConditions,
       goal: user.profile.thirtyDayGoal,
+      caloriesIntake: user.profile.dailyCalorieIntakeGoal,
+      calorieGoalEndDate: user.profile.calorieGoalEndDate,
     };
 
     return NextResponse.json(profileData, { status: 200 });
