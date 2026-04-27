@@ -37,31 +37,11 @@ export async function POST(req: NextRequest) {
       healthConditions,
       consent,
       goal,
+      caloriesIntake,
+      calorieGoalEndDate,
     } = result.data;
 
     // console.log(result.data);
-
-    const existingOnBoardingStatus = await db.onBoardingStatus.findUnique({
-      where: {
-        userId: userId,
-      },
-      select: {
-        id: true,
-        onBoardingStatus: true,
-      },
-    });
-
-    const status = existingOnBoardingStatus?.onBoardingStatus
-      ?.toLowerCase()
-      .toString()
-      .trim();
-
-    if (status === "completed") {
-      return NextResponse.json(
-        { message: "Onboarding is already completed" },
-        { status: 400 }
-      );
-    }
 
     // Calculate age from date of birth
     const calculateAge = (dob: Date): number => {
@@ -103,6 +83,8 @@ export async function POST(req: NextRequest) {
           // Consent & Goals
           dataUsageConsent: consent,
           thirtyDayGoal: goal,
+          dailyCalorieIntakeGoal: caloriesIntake,
+          calorieGoalEndDate: calorieGoalEndDate,
           // Onboarding Status
           onboardingCompleted: true,
         },
@@ -126,6 +108,8 @@ export async function POST(req: NextRequest) {
           // Consent & Goals
           dataUsageConsent: consent,
           thirtyDayGoal: goal,
+          dailyCalorieIntakeGoal: caloriesIntake,
+          calorieGoalEndDate: calorieGoalEndDate,
           // Onboarding Status
           onboardingCompleted: true,
         },

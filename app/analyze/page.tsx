@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
@@ -26,6 +27,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, {
   useCallback,
   useEffect,
@@ -100,9 +102,14 @@ const generateDataStreamEntries = (count: number) => {
 };
 
 export default function CalculatePage() {
+  const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const [mounted, setMounted] = useState(false);
   const { data: session, isPending } = useSession();
+  const [onboardingStatus, setOnboardingStatus] = useState<
+    "unknown" | "incomplete" | "completed"
+  >("unknown");
+  const [isProfilePromptOpen, setIsProfilePromptOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -164,6 +171,50 @@ export default function CalculatePage() {
     }
     fileInputRef.current?.click();
   };
+
+  const goToOnboarding = useCallback(() => {
+    if (onboardingStatus === "completed") {
+      router.push("/onboarding?mode=edit&source=analyze");
+      return;
+    }
+    router.push("/onboarding?source=analyze");
+  }, [onboardingStatus, router]);
+
+  useEffect(() => {
+    const loadOnboardingStatus = async () => {
+      if (isPending || !session?.user?.id) return;
+      try {
+        const response = await fetch("/api/user/onboarding/status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: session.user.id }),
+        });
+        if (!response.ok) {
+          setOnboardingStatus("unknown");
+          return;
+        }
+        const data = await response.json();
+        const status = String(data?.onBoardingStatus || "")
+          .toLowerCase()
+          .trim();
+        setOnboardingStatus(status === "completed" ? "completed" : "incomplete");
+      } catch {
+        setOnboardingStatus("unknown");
+      }
+    };
+
+    loadOnboardingStatus();
+  }, [isPending, session?.user?.id]);
+
+  useEffect(() => {
+    if (!mounted || isPending || !session?.user?.id) return;
+    if (onboardingStatus !== "incomplete") return;
+
+    const seenKey = `analyze-onboarding-prompt-seen:${session.user.id}`;
+    if (window.localStorage.getItem(seenKey) === "1") return;
+
+    setIsProfilePromptOpen(true);
+  }, [mounted, isPending, onboardingStatus, session?.user?.id]);
 
   const retake = () => {
     if (imageUrl) URL.revokeObjectURL(imageUrl);
@@ -294,6 +345,18 @@ export default function CalculatePage() {
             Take a photo of your meal and instantly get calories, protein,
             carbs, and fat breakdown.
           </p>
+          {session?.user && onboardingStatus !== "unknown" && (
+            <button
+              type="button"
+              onClick={goToOnboarding}
+              className="mt-4 inline-flex items-center gap-2 border border-black/20 bg-white px-4 py-2 text-xs font-mono uppercase tracking-widest text-black transition-colors hover:bg-neutral-100 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-neutral-900"
+            >
+              {onboardingStatus === "completed"
+                ? "Edit profile details"
+                : "Complete profile details"}
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          )}
         </motion.div>
 
         {/* Main card */}
@@ -532,7 +595,7 @@ export default function CalculatePage() {
                         >
                           <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 p-5 text-center">
                             <p className="text-sm font-bold tracking-tight mb-1 uppercase">
-                              How's this look?
+                              How&apos;s this look?
                             </p>
                             <p className="text-xs text-neutral-500 font-mono">
                               Make sure your meal is clearly visible.
@@ -580,7 +643,7 @@ export default function CalculatePage() {
                                   Meal Context
                                 </p>
                                 <p className="text-xs text-neutral-500 font-mono mt-1">
-                                  Know what you're eating? Add details like food
+                                  Know what you&apos;re eating? Add details like food
                                   name, brand, or portion size for better
                                   accuracy.
                                 </p>
@@ -927,6 +990,53 @@ export default function CalculatePage() {
               Free forever. No credit card required.
             </p>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isProfilePromptOpen} onOpenChange={setIsProfilePromptOpen}>
+        <DialogContent className="sm:max-w-[460px] border border-black/10 bg-white dark:border-white/10 dark:bg-black">
+          <DialogHeader>
+            <DialogTitle className="text-black dark:text-white">
+              Add profile details for better analysis?
+            </DialogTitle>
+            <DialogDescription className="text-neutral-600 dark:text-neutral-400">
+              Your details help us understand your meals and personalize insights
+              better. You can skip for now and add them anytime from this page.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-2 sm:justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                if (session?.user?.id) {
+                  window.localStorage.setItem(
+                    `analyze-onboarding-prompt-seen:${session.user.id}`,
+                    "1"
+                  );
+                }
+                setIsProfilePromptOpen(false);
+              }}
+              className="inline-flex h-10 items-center justify-center border border-black/20 px-4 text-xs font-mono uppercase tracking-widest text-black hover:bg-neutral-100 dark:border-white/20 dark:text-white dark:hover:bg-neutral-900"
+            >
+              Not now
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (session?.user?.id) {
+                  window.localStorage.setItem(
+                    `analyze-onboarding-prompt-seen:${session.user.id}`,
+                    "1"
+                  );
+                }
+                setIsProfilePromptOpen(false);
+                goToOnboarding();
+              }}
+              className="inline-flex h-10 items-center justify-center bg-black px-4 text-xs font-mono uppercase tracking-widest text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
+            >
+              Yes, continue
+            </button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </main>
