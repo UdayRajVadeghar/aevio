@@ -53,5 +53,12 @@ export const onBoardingDataSchema = z
       .max(200, "Goal must be less than 200 characters")
       .optional()
       .default(""),
+    caloriesIntake: z
+      .number()
+      .int("Calories intake must be a whole number")
+      .min(500, "Calories intake must be between 500 and 10000")
+      .max(10000, "Calories intake must be between 500 and 10000")
+      .optional(),
+    calorieGoalEndDate: z.coerce.date().optional(),
   })
   .optional();

@@ -28,6 +28,8 @@ export interface ProfileData {
   }>;
   healthConditions: string[];
   goal: string | null;
+  caloriesIntake: number | null;
+  calorieGoalEndDate: Date | null;
 }
 
 const fetchProfile = async (userId: string): Promise<ProfileData> => {
@@ -42,6 +44,9 @@ const fetchProfile = async (userId: string): Promise<ProfileData> => {
   // Convert date string to Date object
   if (data.basicProfile.dob) {
     data.basicProfile.dob = new Date(data.basicProfile.dob);
+  }
+  if (data.calorieGoalEndDate) {
+    data.calorieGoalEndDate = new Date(data.calorieGoalEndDate);
   }
 
   return data;

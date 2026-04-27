@@ -15,14 +15,16 @@ export interface OnboardingState {
       dob: Date | undefined;
       gender: string;
     };
-    healthWellness: Record<string, any>;
+    healthWellness: Record<string, unknown>;
     habits: Habit[];
     healthConditions: string[];
     consent: boolean;
     goal: string;
+    caloriesIntake: number | null;
+    calorieGoalEndDate: Date | undefined;
   };
   setStep: (step: number) => void;
-  updateData: (section: string, data: any) => void;
+  updateData: (section: string, data: unknown) => void;
   saveProgress: () => Promise<void>;
   completeOnboarding: (userId: string) => Promise<void>;
 }
@@ -42,6 +44,8 @@ export const useOnboardingStore = create<OnboardingState>()(
         healthConditions: [],
         consent: false,
         goal: "",
+        caloriesIntake: null,
+        calorieGoalEndDate: undefined,
       },
       setStep: (step) => set({ currentStep: step }),
       updateData: (section, data) =>
@@ -132,6 +136,11 @@ export const useOnboardingStore = create<OnboardingState>()(
           consent:
             typeof storeData.consent === "boolean" ? storeData.consent : false,
           goal: storeData.goal || "",
+          caloriesIntake:
+            typeof storeData.caloriesIntake === "number"
+              ? storeData.caloriesIntake
+              : undefined,
+          calorieGoalEndDate: storeData.calorieGoalEndDate,
         };
 
         const response = await fetch("/api/user/onboarding/complete", {
