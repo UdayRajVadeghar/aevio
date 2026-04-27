@@ -18,18 +18,15 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const params: Parameters<typeof openai.audio.speech.create>[0] = {
+    const response = await openai.audio.speech.create({
       model,
       voice,
       input: text,
       response_format: "mp3",
-    };
-
-    if (instructions && model === "gpt-4o-mini-tts") {
-      (params as Record<string, unknown>).instructions = instructions;
-    }
-
-    const response = await openai.audio.speech.create(params);
+      ...(instructions && model === "gpt-4o-mini-tts"
+        ? { instructions: String(instructions) }
+        : {}),
+    });
 
     const arrayBuffer = await response.arrayBuffer();
     const base64 = Buffer.from(arrayBuffer).toString("base64");
