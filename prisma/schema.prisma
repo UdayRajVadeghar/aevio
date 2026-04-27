@@ -143,6 +143,8 @@ model UserProfile {
   // Consent & Goals
   dataUsageConsent Boolean @default(false)
   thirtyDayGoal    String?
+  dailyCalorieIntakeGoal Int?
+  calorieGoalEndDate DateTime?
 
   // Onboarding Status
   onboardingCompleted Boolean @default(false)
