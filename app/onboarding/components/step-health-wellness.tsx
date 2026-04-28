@@ -32,11 +32,11 @@ export function StepHealthWellness() {
   const { data, updateData, setStep } = useOnboardingStore();
 
   const [formData, setFormData] = useState({
-    height: data.healthWellness.height || 170,
-    weight: data.healthWellness.weight || 70,
-    activityLevel: data.healthWellness.activityLevel || "",
-    primaryGoal: data.healthWellness.primaryGoal || "",
-    dietaryPreference: data.healthWellness.dietaryPreference || "",
+    height: Number(data.healthWellness.height) || 170,
+    weight: Number(data.healthWellness.weight) || 70,
+    activityLevel: (data.healthWellness.activityLevel as string) || "",
+    primaryGoal: (data.healthWellness.primaryGoal as string) || "",
+    dietaryPreference: (data.healthWellness.dietaryPreference as string) || "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
