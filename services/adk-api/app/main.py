@@ -7,6 +7,8 @@ from .schemas import (
     ChatMessage,
     ChatRequest,
     ChatResponse,
+    EstimateCaloriesRequest,
+    EstimateCaloriesResponse,
 )
 from .settings import settings
 
@@ -40,6 +42,24 @@ async def chat(payload: ChatRequest):
         answer=result["answer"],
         model=result["model"],
         sessionId=result["session_id"],
+    )
+
+
+@app.post("/estimate-calories", response_model=EstimateCaloriesResponse)
+async def estimate_calories(payload: EstimateCaloriesRequest):
+    try:
+        result = await coach_service.estimate_calories(
+            user_id=payload.userId,
+            profile=payload.profile,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500, detail=f"ADK calorie estimate failed: {exc}"
+        ) from exc
+
+    return EstimateCaloriesResponse(
+        calories=result["calories"],
+        model=result["model"],
     )
 
 

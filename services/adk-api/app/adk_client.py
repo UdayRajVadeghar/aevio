@@ -11,6 +11,7 @@ from google.genai import types
 
 from .agent import root_agent
 from .settings import settings
+from .sub_agents.estimate_calories_agent.agent import estimate_calories_agent
 
 APP_NAME = "aevio"
 
@@ -41,6 +42,12 @@ class AdkCoachService:
         self._runner = Runner(
             app_name=APP_NAME,
             agent=root_agent,
+            session_service=self._session_service,
+            memory_service=self._memory_service,
+        )
+        self._estimate_calories_runner = Runner(
+            app_name=APP_NAME,
+            agent=estimate_calories_agent,
             session_service=self._session_service,
             memory_service=self._memory_service,
         )
@@ -98,6 +105,63 @@ class AdkCoachService:
         return {
             "answer": final_text,
             "session_id": session_id,
+            "model": settings.adk_model,
+        }
+
+    async def estimate_calories(
+        self,
+        *,
+        user_id: str,
+        profile: dict[str, Any],
+    ) -> dict[str, Any]:
+        session_id = f"estimate-calories-{uuid.uuid4().hex[:12]}"
+        await self._session_service.create_session(
+            app_name=APP_NAME,
+            user_id=user_id,
+            session_id=session_id,
+            state={
+                "user:profile": profile,
+                "user:user_id": user_id,
+            },
+        )
+
+        content = types.Content(
+            role="user",
+            parts=[
+                types.Part.from_text(
+                    text=(
+                        "Estimate this user's daily calorie intake target. "
+                        "Respond with only one whole number."
+                    )
+                )
+            ],
+        )
+
+        final_text = ""
+        async for event in self._estimate_calories_runner.run_async(
+            user_id=user_id,
+            session_id=session_id,
+            new_message=content,
+        ):
+            if not event.is_final_response() or not event.content:
+                continue
+            parts = event.content.parts or []
+            final_text = "\n".join(
+                part.text for part in parts if part.text
+            ).strip()
+            if final_text:
+                break
+
+        digits = "".join(char for char in final_text if char.isdigit())
+        if not digits:
+            raise RuntimeError("ADK returned an invalid calorie estimate.")
+
+        calories = int(digits)
+        if calories < 500 or calories > 10000:
+            raise RuntimeError("ADK calorie estimate was outside the valid range.")
+
+        return {
+            "calories": calories,
             "model": settings.adk_model,
         }
 

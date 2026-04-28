@@ -17,6 +17,17 @@ class ChatResponse(BaseModel):
     advisor: str = "aevio-coach"
 
 
+class EstimateCaloriesRequest(BaseModel):
+    userId: str = Field(min_length=1)
+    profile: dict[str, Any] = Field(default_factory=dict)
+
+
+class EstimateCaloriesResponse(BaseModel):
+    calories: int
+    model: str
+    advisor: str = "estimate-calories"
+
+
 class ChatMessage(BaseModel):
     role: str
     content: str
