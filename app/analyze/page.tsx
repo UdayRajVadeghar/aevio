@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/shadcn/dialog";
 import { useSession } from "@/lib/auth-client";
+import { useNutritionStore } from "@/lib/store/nutrition-store";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
@@ -114,6 +115,7 @@ export default function CalculatePage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [stage, setStage] = useState<Stage>("idle");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -127,6 +129,10 @@ export default function CalculatePage() {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const addConsumedCalories = useNutritionStore(
+    (state) => state.addConsumedCalories,
+  );
+  const syncToday = useNutritionStore((state) => state.syncToday);
   const trimmedMealHint = mealHint.trim();
   const isActiveStage = stage !== "idle";
   const captureStageClass = "w-full max-w-5xl";
@@ -150,6 +156,10 @@ export default function CalculatePage() {
         low: "bg-red-100 text-red-800 border-red-300 dark:bg-red-500/20 dark:text-red-200 dark:border-red-400/40",
       }[result.confidence]
     : "";
+
+  useEffect(() => {
+    syncToday();
+  }, [syncToday]);
 
   const handleCapture = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -197,7 +207,9 @@ export default function CalculatePage() {
         const status = String(data?.onBoardingStatus || "")
           .toLowerCase()
           .trim();
-        setOnboardingStatus(status === "completed" ? "completed" : "incomplete");
+        setOnboardingStatus(
+          status === "completed" ? "completed" : "incomplete",
+        );
       } catch {
         setOnboardingStatus("unknown");
       }
@@ -288,12 +300,13 @@ export default function CalculatePage() {
 
       const data = (await analyzeRes.json()) as AnalyzeResult;
       setResult(data);
+      addConsumedCalories(data.calories);
       setStage("result");
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : String(err));
       setStage("error");
     }
-  }, [file, trimmedMealHint]);
+  }, [addConsumedCalories, file, trimmedMealHint]);
 
   return (
     <main className="relative min-h-[100dvh] overflow-x-clip bg-white font-sans text-black selection:bg-black selection:text-white dark:bg-black dark:text-white dark:selection:bg-white dark:selection:text-black">
@@ -643,8 +656,8 @@ export default function CalculatePage() {
                                   Meal Context
                                 </p>
                                 <p className="text-xs text-neutral-500 font-mono mt-1">
-                                  Know what you&apos;re eating? Add details like food
-                                  name, brand, or portion size for better
+                                  Know what you&apos;re eating? Add details like
+                                  food name, brand, or portion size for better
                                   accuracy.
                                 </p>
                               </div>
@@ -1000,8 +1013,9 @@ export default function CalculatePage() {
               Add profile details for better analysis?
             </DialogTitle>
             <DialogDescription className="text-neutral-600 dark:text-neutral-400">
-              Your details help us understand your meals and personalize insights
-              better. You can skip for now and add them anytime from this page.
+              Your details help us understand your meals and personalize
+              insights better. You can skip for now and add them anytime from
+              this page.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-2 sm:justify-end">
@@ -1011,7 +1025,7 @@ export default function CalculatePage() {
                 if (session?.user?.id) {
                   window.localStorage.setItem(
                     `analyze-onboarding-prompt-seen:${session.user.id}`,
-                    "1"
+                    "1",
                   );
                 }
                 setIsProfilePromptOpen(false);
@@ -1026,7 +1040,7 @@ export default function CalculatePage() {
                 if (session?.user?.id) {
                   window.localStorage.setItem(
                     `analyze-onboarding-prompt-seen:${session.user.id}`,
-                    "1"
+                    "1",
                   );
                 }
                 setIsProfilePromptOpen(false);
