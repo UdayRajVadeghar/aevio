@@ -2,6 +2,8 @@
 
 import { ThemeToggle } from "@/components/ui/hero-section/theme-toggle";
 import { signOut, useSession } from "@/lib/auth-client";
+import { useNutritionStore } from "@/lib/store/nutrition-store";
+import { useOnboardingStore } from "@/lib/store/onboarding-store";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -9,6 +11,7 @@ import {
   BookOpen,
   Camera,
   ChevronRight,
+  Flame,
   LogOut,
   MessageCircle,
   Menu,
@@ -40,6 +43,14 @@ export function Navbar() {
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   const { data: session, isPending } = useSession();
+  const calorieGoal = useOnboardingStore((state) => state.data.caloriesIntake);
+  const consumedCalories = useNutritionStore((state) => state.consumedCalories);
+  const syncToday = useNutritionStore((state) => state.syncToday);
+  const hasCalorieGoal = typeof calorieGoal === "number" && calorieGoal > 0;
+
+  useEffect(() => {
+    syncToday();
+  }, [syncToday]);
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -77,6 +88,11 @@ export function Navbar() {
     await signOut();
     setIsUserMenuOpen(false);
     router.push("/");
+  };
+
+  const handleCalorieGoalClick = () => {
+    setIsMobileMenuOpen(false);
+    router.push("/onboarding?source=navbar");
   };
 
   return (
@@ -127,6 +143,30 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2">
+            {session?.user && (
+              <div className="hidden items-center gap-2 rounded-md border border-black/10 dark:border-white/10 px-2.5 py-1.5 sm:flex">
+                <Flame size={14} className="text-orange-500" />
+                <span className="text-xs font-medium text-neutral-500">Today</span>
+                <span className="text-xs font-semibold text-black dark:text-white">
+                  {Math.round(consumedCalories)}
+                </span>
+                <span className="text-xs text-neutral-500">/</span>
+                {hasCalorieGoal ? (
+                  <span className="text-xs font-semibold text-black dark:text-white">
+                    {Math.round(calorieGoal)} kcal
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleCalorieGoalClick}
+                    className="flex size-5 items-center justify-center rounded-full border border-black/20 text-xs font-semibold text-black transition-colors hover:bg-neutral-100 dark:border-white/20 dark:text-white dark:hover:bg-white/10 cursor-pointer"
+                    title="Set your calorie goal"
+                  >
+                    ?
+                  </button>
+                )}
+              </div>
+            )}
             <ThemeToggle />
 
             {session?.user ? (
@@ -273,6 +313,30 @@ export function Navbar() {
                     className="flex flex-col gap-3"
                   >
                     <div className="rounded-lg border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 px-3 py-3">
+                      <div className="mb-3 flex items-center gap-2 rounded-md border border-black/10 dark:border-white/10 px-2.5 py-2">
+                        <Flame size={14} className="text-orange-500" />
+                        <span className="text-xs font-medium text-neutral-500">
+                          Today
+                        </span>
+                        <span className="text-xs font-semibold text-black dark:text-white">
+                          {Math.round(consumedCalories)}
+                        </span>
+                        <span className="text-xs text-neutral-500">/</span>
+                        {hasCalorieGoal ? (
+                          <span className="text-xs font-semibold text-black dark:text-white">
+                            {Math.round(calorieGoal)} kcal
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={handleCalorieGoalClick}
+                            className="flex size-5 items-center justify-center rounded-full border border-black/20 text-xs font-semibold text-black transition-colors hover:bg-neutral-100 dark:border-white/20 dark:text-white dark:hover:bg-white/10 cursor-pointer"
+                            title="Set your calorie goal"
+                          >
+                            ?
+                          </button>
+                        )}
+                      </div>
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-sm font-semibold text-primary shrink-0">

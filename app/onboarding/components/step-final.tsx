@@ -4,7 +4,7 @@ import { authClient } from "@/lib/auth-client";
 import { useOnboardingStore } from "@/lib/store/onboarding-store";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { z } from "zod";
@@ -20,6 +20,15 @@ const goalSchema = z.object({
   calorieGoalEndDate: z.coerce.date().optional(),
 });
 
+const formatDateInputValue = (value: Date | string | undefined) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toISOString().split("T")[0];
+};
+
 export function StepFinal() {
   const { data, updateData, completeOnboarding } = useOnboardingStore();
   const router = useRouter();
@@ -32,12 +41,74 @@ export function StepFinal() {
       : "",
   );
   const [calorieGoalEndDate, setCalorieGoalEndDate] = useState(
-    data.calorieGoalEndDate
-      ? new Date(data.calorieGoalEndDate).toISOString().split("T")[0]
-      : "",
+    formatDateInputValue(data.calorieGoalEndDate),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEstimatingCalories, setIsEstimatingCalories] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const getAge = (dob: Date | string | undefined) => {
+    if (!dob) return null;
+    const birthDate = new Date(dob);
+    if (Number.isNaN(birthDate.getTime())) return null;
+
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDelta = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDelta < 0 ||
+      (monthDelta === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age -= 1;
+    }
+    return age > 0 ? age : null;
+  };
+
+  const handleAskAi = async () => {
+    setError(null);
+    setIsEstimatingCalories(true);
+
+    try {
+      const response = await fetch("/api/onboarding/estimate-calories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          profile: {
+            basicProfile: {
+              name: data.basicProfile.name,
+              gender: data.basicProfile.gender,
+              age: getAge(data.basicProfile.dob),
+            },
+            healthWellness: data.healthWellness,
+            habits: data.habits,
+            healthConditions: data.healthConditions,
+            goal,
+          },
+        }),
+      });
+
+      const result = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(result?.error || "Failed to estimate calories");
+      }
+
+      if (typeof result?.calories !== "number") {
+        throw new Error("AI did not return a calorie number");
+      }
+
+      setCaloriesIntake(String(result.calories));
+      updateData("caloriesIntake", result.calories);
+    } catch (error) {
+      console.error("Failed to estimate calories", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to estimate calories",
+      );
+    } finally {
+      setIsEstimatingCalories(false);
+    }
+  };
 
   const handleFinish = async () => {
     const parsedCaloriesIntake = caloriesIntake.trim()
@@ -109,23 +180,40 @@ export function StepFinal() {
               (Optional)
             </span>
           </label>
-          <input
-            id="caloriesIntake"
-            type="number"
-            min={500}
-            max={10000}
-            step={1}
-            value={caloriesIntake}
-            onChange={(e) => {
-              setCaloriesIntake(e.target.value);
-              setError(null);
-            }}
-            className={cn(
-              "flex h-11 w-full rounded-xl border border-input bg-background/50 px-4 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/20 hover:border-primary/30",
-              error && "border-destructive focus-visible:ring-destructive",
-            )}
-            placeholder="e.g. 2200"
-          />
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              id="caloriesIntake"
+              type="number"
+              min={500}
+              max={10000}
+              step={1}
+              value={caloriesIntake}
+              onChange={(e) => {
+                setCaloriesIntake(e.target.value);
+                setError(null);
+              }}
+              className={cn(
+                "flex h-11 w-full rounded-xl border border-input bg-background/50 px-4 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:bg-accent/20 hover:border-primary/30",
+                error && "border-destructive focus-visible:ring-destructive",
+              )}
+              placeholder="e.g. 2200"
+            />
+            <button
+              type="button"
+              onClick={handleAskAi}
+              disabled={isEstimatingCalories || isSubmitting}
+              className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 px-4 text-sm font-medium text-primary transition-all duration-300 hover:bg-primary/15 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+            >
+              {isEstimatingCalories ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Asking...
+                </>
+              ) : (
+                "Ask AI"
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="space-y-3">
