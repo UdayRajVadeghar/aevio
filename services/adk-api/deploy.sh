@@ -14,16 +14,18 @@ if [ ! -f "${SCRIPT_DIR}/.env" ]; then
 fi
 
 echo "==> Loading env vars from .env"
-ENV_VARS=""
+ENV_VARS_FILE=$(mktemp /tmp/env-vars-XXXXXX.yaml)
+trap "rm -f ${ENV_VARS_FILE}" EXIT
+
 while IFS='=' read -r key value; do
   [[ -z "$key" || "$key" =~ ^# ]] && continue
+  key=$(echo "$key" | xargs)
+  [[ -z "$value" ]] && continue
   value="${value%\"}"
   value="${value#\"}"
-  if [ -n "$ENV_VARS" ]; then
-    ENV_VARS="${ENV_VARS},${key}=${value}"
-  else
-    ENV_VARS="${key}=${value}"
-  fi
+  value="${value%\'}"
+  value="${value#\'}"
+  printf '%s: "%s"\n' "$key" "$value" >> "${ENV_VARS_FILE}"
 done < "${SCRIPT_DIR}/.env"
 
 echo "==> Building container image"
@@ -36,7 +38,7 @@ gcloud run deploy "${SERVICE}" \
   --memory 1Gi \
   --cpu 1 \
   --allow-unauthenticated \
-  --set-env-vars "${ENV_VARS}" \
+  --env-vars-file="${ENV_VARS_FILE}" \
   --quiet
 
 echo "==> Verifying health"

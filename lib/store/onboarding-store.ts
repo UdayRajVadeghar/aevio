@@ -56,6 +56,9 @@ export const useOnboardingStore = create<OnboardingState>()(
           if (Array.isArray(data)) {
             // Arrays: replace directly
             newValue = data;
+          } else if (data instanceof Date) {
+            // Dates should be stored as values, not spread like plain objects.
+            newValue = data;
           } else if (typeof data === "object" && data !== null) {
             // Objects: merge with existing
             newValue = {
