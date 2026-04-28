@@ -99,6 +99,18 @@ export async function getObjectMetadata(objectKey: string): Promise<{
   };
 }
 
+export async function createSignedImageReadUrl(objectKey: string): Promise<string> {
+  const bucket = getStorage().bucket(getBucketName());
+  const file = bucket.file(objectKey);
+  const [readUrl] = await file.getSignedUrl({
+    version: "v4",
+    action: "read",
+    expires: Date.now() + 15 * 60 * 1000,
+  });
+
+  return readUrl;
+}
+
 export async function uploadImage(
   buffer: Buffer,
   mimeType: string,
