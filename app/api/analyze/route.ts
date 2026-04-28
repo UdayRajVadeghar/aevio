@@ -2,17 +2,19 @@ import { auth } from "@/lib/auth";
 import { refreshCoachContext } from "@/lib/coach-context";
 import { db } from "@/lib/db";
 import {
+  createSignedImageReadUrl,
   getObjectMetadata,
   getUploadResultFromObjectKey,
   isUserOwnedObjectKey,
 } from "@/lib/gcs";
 import { analyzeMealFromGcs } from "@/lib/gemini";
 import { getCurrentIstTime } from "@/lib/ist-time";
+import { estimateVolumeFromImageUrl } from "@/lib/vision-api";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const ALLOWED_MIME = new Set([
   "image/jpeg",
@@ -126,10 +128,17 @@ export async function POST(req: NextRequest) {
   });
 
   try {
+    const signedImageReadUrl = await createSignedImageReadUrl(objectKey);
+    const volumeEstimate = await estimateVolumeFromImageUrl({
+      imageUrl: signedImageReadUrl,
+      gcsUri: uploaded.gcsUri,
+      mimeType,
+    });
     const { result, rawText } = await analyzeMealFromGcs(
       uploaded.gcsUri,
       mimeType,
       mealHint || undefined,
+      volumeEstimate,
     );
     const detectedItems = result.plateContents.items;
     const istNow = await getCurrentIstTime();
@@ -196,6 +205,15 @@ export async function POST(req: NextRequest) {
       loggedDateIst: dailyCalories.dateKey,
       loggedTimezone: dailyCalories.timezone,
       todayCaloriesTotal: dailyCalories.totalCalories,
+      depthAnalysis: volumeEstimate
+        ? {
+            used: true,
+            calibrationDetected: volumeEstimate.calibration.detected,
+            regionsDetected: volumeEstimate.regions.length,
+            inferenceMs: volumeEstimate.depth.inferenceMs,
+            warnings: volumeEstimate.warnings,
+          }
+        : { used: false },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

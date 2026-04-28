@@ -58,6 +58,16 @@ type PlateContents = {
   items: FoodItem[];
 };
 
+type DepthAnalysis =
+  | { used: false }
+  | {
+      used: true;
+      calibrationDetected: boolean;
+      regionsDetected: number;
+      inferenceMs: number;
+      warnings: string[];
+    };
+
 type AnalyzeResult = {
   id: string;
   imageUrl: string;
@@ -69,6 +79,7 @@ type AnalyzeResult = {
   plateContents: PlateContents;
   confidence: "low" | "medium" | "high";
   llmResponse: string;
+  depthAnalysis?: DepthAnalysis;
 };
 
 type SignedUploadResponse = {
@@ -825,6 +836,35 @@ export default function CalculatePage() {
                       ))}
                     </div>
                   </div>
+
+                  {result.depthAnalysis && (
+                    <div className="border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 px-5 py-3 flex items-center gap-3">
+                      {result.depthAnalysis.used ? (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                            Depth map analyzed{" "}
+                            <span className="text-neutral-400">
+                              • {result.depthAnalysis.regionsDetected} region
+                              {result.depthAnalysis.regionsDetected !== 1
+                                ? "s"
+                                : ""}{" "}
+                              • {result.depthAnalysis.inferenceMs}ms
+                              {!result.depthAnalysis.calibrationDetected &&
+                                " • no ref card"}
+                            </span>
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+                          <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                            Depth analysis unavailable — vision-only estimate
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  )}
 
                   {result.foodItems.length > 0 && (
                     <div className="border border-black/10 dark:border-white/10">
