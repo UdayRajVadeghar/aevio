@@ -15,12 +15,26 @@ export async function GET() {
     const upstream = await forwardToAdk(
       `/chats/${encodeURIComponent(session.user.id)}`,
     );
-    const data = await upstream.json();
-    return NextResponse.json(data, { status: upstream.status });
-  } catch {
-    return NextResponse.json(
-      { error: "ADK service is unavailable" },
-      { status: 502 },
-    );
+
+    let data: unknown;
+    try {
+      data = await upstream.json();
+    } catch {
+      console.error(
+        "ADK /chats returned non-JSON response, status:",
+        upstream.status,
+      );
+      return NextResponse.json({ chats: [] });
+    }
+
+    if (!upstream.ok) {
+      console.error("ADK /chats error:", upstream.status, data);
+      return NextResponse.json({ chats: [] });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("ADK service unreachable for /chats:", error);
+    return NextResponse.json({ chats: [] });
   }
 }
