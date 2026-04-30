@@ -14,6 +14,7 @@ import {
   User,
 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -37,6 +38,16 @@ type ChatHistoryResponse = {
   messages: { role: string; content: string }[];
 };
 
+type AgentSuggestionsResponse = {
+  suggestions?: string[];
+};
+
+const DEFAULT_SUGGESTIONS = [
+  "Analyze my diet",
+  "How much protein today?",
+  "Suggest a dinner",
+];
+
 export default function AgentPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [chatList, setChatList] = useState<ChatListItem[]>([]);
@@ -50,6 +61,7 @@ export default function AgentPage() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [includeUserProfile, setIncludeUserProfile] = useState(true);
+  const [suggestions, setSuggestions] = useState(DEFAULT_SUGGESTIONS);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -81,6 +93,34 @@ export default function AgentPage() {
   useEffect(() => {
     fetchChatList();
   }, [fetchChatList]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchSuggestions() {
+      try {
+        const res = await fetch("/api/agent/suggestions");
+        if (!res.ok) return;
+
+        const data = (await res.json()) as AgentSuggestionsResponse;
+        if (
+          !cancelled &&
+          Array.isArray(data.suggestions) &&
+          data.suggestions.length > 0
+        ) {
+          setSuggestions(data.suggestions.slice(0, 3));
+        }
+      } catch {
+        /* suggestions are best-effort */
+      }
+    }
+
+    fetchSuggestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     // Default sidebar to closed on mobile on mount
@@ -175,7 +215,15 @@ export default function AgentPage() {
         }),
       });
 
-      const data = (await res.json()) as AgentApiResponse;
+      const text = await res.text();
+      let data: AgentApiResponse = {};
+      if (text) {
+        try {
+          data = JSON.parse(text) as AgentApiResponse;
+        } catch {
+          data = { error: text };
+        }
+      }
       if (!res.ok) throw new Error(data.error || "Failed to get response.");
 
       if (data.sessionId) {
@@ -366,6 +414,7 @@ export default function AgentPage() {
             <AnimatePresence mode="popLayout">
               {historyLoading ? (
                 <motion.div
+                  key="history-loading"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -393,6 +442,7 @@ export default function AgentPage() {
                 </motion.div>
               ) : messages.length === 0 ? (
                 <motion.div
+                  key="empty-state"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-col items-center justify-center py-10 md:py-20 text-center gap-4 md:gap-6"
@@ -409,13 +459,9 @@ export default function AgentPage() {
                     </p>
                   </div>
                   <div className="flex flex-wrap justify-center gap-2 mt-4">
-                    {[
-                      "Analyze my diet",
-                      "How much protein today?",
-                      "Suggest a dinner",
-                    ].map((suggestion) => (
+                    {suggestions.map((suggestion, index) => (
                       <button
-                        key={suggestion}
+                        key={`${suggestion || "suggestion"}-${index}`}
                         onClick={() => setMessage(suggestion)}
                         className="px-4 py-2 rounded-full border border-black/10 dark:border-white/10 text-[10px] font-mono uppercase tracking-widest text-neutral-600 dark:text-neutral-400 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors cursor-pointer shadow-sm"
                       >
@@ -451,19 +497,50 @@ export default function AgentPage() {
                     </div>
                     <div
                       className={cn(
-                        "px-5 py-4 text-[13px] md:text-sm leading-relaxed whitespace-pre-wrap shadow-md",
+                        "px-5 py-4 text-[13px] md:text-sm leading-relaxed shadow-md",
                         entry.role === "user"
-                          ? "bg-black text-white dark:bg-white dark:text-black rounded-2xl rounded-br-sm"
+                          ? "bg-black text-white dark:bg-white dark:text-black rounded-2xl rounded-br-sm whitespace-pre-wrap"
                           : "bg-white/80 dark:bg-black/80 backdrop-blur-md border border-black/5 dark:border-white/5 rounded-2xl rounded-bl-sm",
                       )}
                     >
-                      {entry.content}
+                      {entry.role === "assistant" ? (
+                        <ReactMarkdown
+                          components={{
+                            p: ({ children }) => (
+                              <p className="mb-3 last:mb-0">{children}</p>
+                            ),
+                            ul: ({ children }) => (
+                              <ul className="mb-3 list-disc space-y-1 pl-5 last:mb-0">
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="mb-3 list-decimal space-y-1 pl-5 last:mb-0">
+                                {children}
+                              </ol>
+                            ),
+                            li: ({ children }) => (
+                              <li className="pl-1">{children}</li>
+                            ),
+                            strong: ({ children }) => (
+                              <strong className="font-semibold text-black dark:text-white">
+                                {children}
+                              </strong>
+                            ),
+                          }}
+                        >
+                          {entry.content}
+                        </ReactMarkdown>
+                      ) : (
+                        entry.content
+                      )}
                     </div>
                   </motion.div>
                 ))
               )}
               {isSending && (
                 <motion.div
+                  key="assistant-loading"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-col gap-1.5 max-w-[85%] self-start items-start"
