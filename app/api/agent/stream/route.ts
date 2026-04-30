@@ -14,6 +14,8 @@ type StreamRequestPayload = {
   message?: unknown;
   sessionId?: unknown;
   includeUserProfile?: unknown;
+  historySummary?: unknown;
+  context?: unknown;
 };
 
 export async function POST(req: NextRequest) {
@@ -43,30 +45,41 @@ export async function POST(req: NextRequest) {
   const includeUserProfile =
     payload.includeUserProfile === false ? false : true;
 
-  const [row, userProfile] = await Promise.all([
-    getOrBuildCoachContextForAdk(userId),
-    includeUserProfile
-      ? db.userProfile.findUnique({
-          where: { userId },
-          select: {
-            thirtyDayGoal: true,
-            healthConditions: true,
-            dietaryPreference: true,
-            primaryGoal: true,
-            activityLevel: true,
-            height: true,
-            weight: true,
-            age: true,
-            gender: true,
-          },
-        })
-      : null,
-  ]);
-  const { historySummary, context } = coachContextToAdkPayload(row, userProfile);
-  try {
-    context.todayNutrition = await getTodayNutritionContext(userId);
-  } catch (error) {
-    console.error("Failed to load today nutrition context:", error);
+  let historySummary =
+    typeof payload.historySummary === "string" ? payload.historySummary : "";
+  let context =
+    payload.context && typeof payload.context === "object"
+      ? (payload.context as Record<string, unknown>)
+      : null;
+
+  if (!context) {
+    const [row, userProfile] = await Promise.all([
+      getOrBuildCoachContextForAdk(userId),
+      includeUserProfile
+        ? db.userProfile.findUnique({
+            where: { userId },
+            select: {
+              thirtyDayGoal: true,
+              healthConditions: true,
+              dietaryPreference: true,
+              primaryGoal: true,
+              activityLevel: true,
+              height: true,
+              weight: true,
+              age: true,
+              gender: true,
+            },
+          })
+        : null,
+    ]);
+    const payloadContext = coachContextToAdkPayload(row, userProfile);
+    historySummary = payloadContext.historySummary;
+    context = payloadContext.context;
+    try {
+      context.todayNutrition = await getTodayNutritionContext(userId);
+    } catch (error) {
+      console.error("Failed to load today nutrition context:", error);
+    }
   }
 
   const sessionId =
