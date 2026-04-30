@@ -1,5 +1,6 @@
-import { coachContextToAdkPayload } from "@/lib/agent-coach-payload";
 import { forwardToAdk } from "@/lib/adk-upstream";
+import { coachContextToAdkPayload } from "@/lib/agent-coach-payload";
+import { getTodayNutritionContext } from "@/lib/agent-today-context";
 import { auth } from "@/lib/auth";
 import { getOrBuildCoachContextForAdk } from "@/lib/coach-context";
 import { db } from "@/lib/db";
@@ -44,24 +45,31 @@ export async function POST(req: NextRequest) {
   const includeUserProfile =
     payload.includeUserProfile === false ? false : true;
 
-  const row = await getOrBuildCoachContextForAdk(userId);
-  const userProfile = includeUserProfile
-    ? await db.userProfile.findUnique({
-        where: { userId },
-        select: {
-          thirtyDayGoal: true,
-          healthConditions: true,
-          dietaryPreference: true,
-          primaryGoal: true,
-          activityLevel: true,
-          height: true,
-          weight: true,
-          age: true,
-          gender: true,
-        },
-      })
-    : null;
+  const [row, userProfile] = await Promise.all([
+    getOrBuildCoachContextForAdk(userId),
+    includeUserProfile
+      ? db.userProfile.findUnique({
+          where: { userId },
+          select: {
+            thirtyDayGoal: true,
+            healthConditions: true,
+            dietaryPreference: true,
+            primaryGoal: true,
+            activityLevel: true,
+            height: true,
+            weight: true,
+            age: true,
+            gender: true,
+          },
+        })
+      : null,
+  ]);
   const { historySummary, context } = coachContextToAdkPayload(row, userProfile);
+  try {
+    context.todayNutrition = await getTodayNutritionContext(userId);
+  } catch (error) {
+    console.error("Failed to load today nutrition context:", error);
+  }
 
   let upstream: Response;
   try {
