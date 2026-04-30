@@ -33,6 +33,7 @@ async def chat(payload: ChatRequest):
             user_id=payload.userId,
             session_id=payload.sessionId,
             message=payload.message,
+            history_summary=payload.historySummary,
             context=payload.context,
         )
     except Exception as exc:

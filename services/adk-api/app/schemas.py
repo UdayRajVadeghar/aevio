@@ -7,6 +7,7 @@ class ChatRequest(BaseModel):
     userId: str = Field(min_length=1)
     message: str = Field(min_length=1, max_length=4000)
     sessionId: str | None = Field(default=None)
+    historySummary: str = ""
     context: dict[str, Any] = Field(default_factory=dict)
 
 

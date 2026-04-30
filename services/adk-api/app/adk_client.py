@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import os
+import time
 import uuid
 from datetime import datetime
 from typing import Any
 
+from google.adk.events import Event, EventActions
 from google.adk.memory import InMemoryMemoryService
 from google.adk.runners import Runner
 from google.adk.sessions import VertexAiSessionService
@@ -30,6 +32,15 @@ def _session_fallback_title(session_id: str, last_update_time: Any) -> str:
         date = datetime.fromtimestamp(last_update_time).strftime("%b %-d")
         return f"Chat from {date}"
     return f"Chat {session_id.removeprefix('chat-')[:8]}"
+
+
+def _build_user_profile_state(
+    context: dict[str, Any] | None,
+    history_summary: str,
+) -> dict[str, Any]:
+    profile = dict(context or {})
+    profile["historySummary"] = history_summary
+    return profile
 
 
 class AdkCoachService:
@@ -74,10 +85,16 @@ class AdkCoachService:
         user_id: str,
         session_id: str | None = None,
         message: str,
+        history_summary: str = "",
         context: dict[str, Any] | None = None,
     ) -> dict[str, str]:
         if not session_id:
             session_id = f"chat-{uuid.uuid4().hex[:12]}"
+
+        state_delta = {
+            "user:profile": _build_user_profile_state(context, history_summary),
+            "user:user_id": user_id,
+        }
 
         existing = await self._session_service.get_session(
             app_name=APP_NAME,
@@ -90,10 +107,19 @@ class AdkCoachService:
                 user_id=user_id,
                 session_id=session_id,
                 state={
-                    "user:profile": context or {},
-                    "user:user_id": user_id,
+                    **state_delta,
                     "chat_title": _clean_chat_title(message),
                 },
+            )
+        else:
+            await self._session_service.append_event(
+                existing,
+                Event(
+                    invocation_id=f"context-refresh-{uuid.uuid4().hex[:12]}",
+                    author="system",
+                    actions=EventActions(state_delta=state_delta),
+                    timestamp=time.time(),
+                ),
             )
 
         content = types.Content(
