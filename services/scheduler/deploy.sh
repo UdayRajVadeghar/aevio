@@ -15,7 +15,7 @@ echo "==> Deploying to Cloud Run"
 gcloud run deploy "${SERVICE}" \
   --image "${IMAGE}" \
   --region "${REGION}" \
-  --memory 256Mi \
+  --memory 512Mi \
   --cpu 1 \
   --min-instances 1 \
   --max-instances 1 \
