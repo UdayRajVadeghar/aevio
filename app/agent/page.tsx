@@ -10,6 +10,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Send,
+  Trash2,
   User,
 } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
@@ -128,6 +129,23 @@ export default function AgentPage() {
     textareaRef.current?.focus();
     if (window.innerWidth < 768) {
       setSidebarOpen(false);
+    }
+  }
+
+  async function deleteChat(sessionId: string) {
+    try {
+      const res = await fetch(
+        `/api/agent/chats/${encodeURIComponent(sessionId)}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) return;
+      setChatList((prev) => prev.filter((c) => c.session_id !== sessionId));
+      if (activeSessionId === sessionId) {
+        setActiveSessionId(null);
+        setMessages([]);
+      }
+    } catch {
+      /* best-effort */
     }
   }
 
@@ -265,9 +283,8 @@ export default function AgentPage() {
           ) : (
             <div className="flex flex-col divide-y divide-black/5 dark:divide-white/5">
               {chatList.map((chat) => (
-                <button
+                <div
                   key={chat.session_id}
-                  onClick={() => loadChat(chat.session_id)}
                   className={cn(
                     "w-full px-5 py-4 text-left transition-colors group relative",
                     chat.session_id === activeSessionId
@@ -278,20 +295,33 @@ export default function AgentPage() {
                   {chat.session_id === activeSessionId && (
                     <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-black dark:bg-white" />
                   )}
-                  <p
-                    className={cn(
-                      "truncate text-sm font-medium tracking-tight mb-1",
-                      chat.session_id === activeSessionId
-                        ? "text-black dark:text-white"
-                        : "text-neutral-700 dark:text-neutral-300 group-hover:text-black dark:group-hover:text-white",
-                    )}
+                  <div className="flex items-start justify-between gap-2">
+                    <button
+                      onClick={() => loadChat(chat.session_id)}
+                      className={cn(
+                        "truncate text-left text-sm font-medium tracking-tight mb-1 flex-1 min-w-0 cursor-pointer",
+                        chat.session_id === activeSessionId
+                          ? "text-black dark:text-white"
+                          : "text-neutral-700 dark:text-neutral-300 group-hover:text-black dark:group-hover:text-white",
+                      )}
+                    >
+                      {chat.preview || "New Session"}
+                    </button>
+                    <button
+                      onClick={() => deleteChat(chat.session_id)}
+                      className="shrink-0 p-1 rounded text-neutral-400 opacity-0 group-hover:opacity-100 hover:text-red-500 hover:bg-red-500/10 transition-all cursor-pointer"
+                      title="Delete chat"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => loadChat(chat.session_id)}
+                    className="block text-left text-[10px] font-mono uppercase tracking-widest text-neutral-400 cursor-pointer"
                   >
-                    {chat.preview || "New Session"}
-                  </p>
-                  <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-400">
                     {formatTime(chat.last_update)}
-                  </p>
-                </button>
+                  </button>
+                </div>
               ))}
             </div>
           )}
