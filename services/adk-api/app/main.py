@@ -1,4 +1,8 @@
+import json
+import asyncio
+
 from fastapi import FastAPI, HTTPException
+from starlette.responses import StreamingResponse
 
 from .adk_client import AdkCoachService
 from .schemas import (
@@ -14,6 +18,17 @@ from .settings import settings
 
 app = FastAPI(title="Aevio ADK API")
 coach_service = AdkCoachService()
+
+
+@app.on_event("startup")
+async def warm_adk_in_background():
+    async def warm():
+        try:
+            await coach_service.warm_up()
+        except Exception as exc:
+            print(f"ADK warm-up failed: {exc}")
+
+    asyncio.create_task(warm())
 
 
 @app.get("/")
@@ -43,6 +58,31 @@ async def chat(payload: ChatRequest):
         answer=result["answer"],
         model=result["model"],
         sessionId=result["session_id"],
+    )
+
+
+@app.post("/chat/stream")
+async def chat_stream(payload: ChatRequest):
+    async def event_generator():
+        try:
+            async for event_type, data in coach_service.chat_stream(
+                user_id=payload.userId,
+                session_id=payload.sessionId,
+                message=payload.message,
+                history_summary=payload.historySummary,
+                context=payload.context,
+            ):
+                yield f"event: {event_type}\ndata: {json.dumps(data)}\n\n"
+        except Exception as exc:
+            yield f"event: error\ndata: {json.dumps(str(exc))}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
     )
 
 

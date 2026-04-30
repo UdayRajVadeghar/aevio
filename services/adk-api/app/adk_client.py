@@ -1,20 +1,14 @@
 from __future__ import annotations
 
+import asyncio
 import os
+import threading
 import time
 import uuid
 from datetime import datetime
 from typing import Any
 
-from google.adk.events import Event, EventActions
-from google.adk.memory import InMemoryMemoryService
-from google.adk.runners import Runner
-from google.adk.sessions import VertexAiSessionService
-from google.genai import types
-
-from .agent import root_agent
 from .settings import settings
-from .sub_agents.estimate_calories_agent.agent import estimate_calories_agent
 
 APP_NAME = "aevio"
 MAX_CHAT_TITLE_LENGTH = 64
@@ -57,27 +51,51 @@ class AdkCoachService:
 
     def __init__(self) -> None:
         os.environ["GOOGLE_API_KEY"] = settings.google_api_key
+        self._session_service = None
+        self._memory_service = None
+        self._runner = None
+        self._estimate_calories_runner = None
+        self._services_lock = threading.Lock()
 
-        self._session_service = VertexAiSessionService(
-            project=settings.google_cloud_project,
-            location=settings.google_cloud_location,
-            agent_engine_id=settings.vertex_agent_engine_id or None,
-        )
+    def _ensure_services(self) -> None:
+        if self._runner is not None and self._estimate_calories_runner is not None:
+            return
 
-        self._memory_service = InMemoryMemoryService()
+        with self._services_lock:
+            if self._runner is not None and self._estimate_calories_runner is not None:
+                return
 
-        self._runner = Runner(
-            app_name=APP_NAME,
-            agent=root_agent,
-            session_service=self._session_service,
-            memory_service=self._memory_service,
-        )
-        self._estimate_calories_runner = Runner(
-            app_name=APP_NAME,
-            agent=estimate_calories_agent,
-            session_service=self._session_service,
-            memory_service=self._memory_service,
-        )
+            # ADK has expensive eager imports; keep them off the FastAPI startup path.
+            from google.adk.memory import InMemoryMemoryService
+            from google.adk.runners import Runner
+            from google.adk.sessions import VertexAiSessionService
+
+            from .agent import root_agent
+            from .sub_agents.estimate_calories_agent.agent import estimate_calories_agent
+
+            self._session_service = VertexAiSessionService(
+                project=settings.google_cloud_project,
+                location=settings.google_cloud_location,
+                agent_engine_id=settings.vertex_agent_engine_id or None,
+            )
+
+            self._memory_service = InMemoryMemoryService()
+
+            self._runner = Runner(
+                app_name=APP_NAME,
+                agent=root_agent,
+                session_service=self._session_service,
+                memory_service=self._memory_service,
+            )
+            self._estimate_calories_runner = Runner(
+                app_name=APP_NAME,
+                agent=estimate_calories_agent,
+                session_service=self._session_service,
+                memory_service=self._memory_service,
+            )
+
+    async def warm_up(self) -> None:
+        await asyncio.to_thread(self._ensure_services)
 
     async def chat(
         self,
@@ -88,6 +106,9 @@ class AdkCoachService:
         history_summary: str = "",
         context: dict[str, Any] | None = None,
     ) -> dict[str, str]:
+        self._ensure_services()
+        from google.genai import types
+
         if not session_id:
             session_id = f"chat-{uuid.uuid4().hex[:12]}"
 
@@ -112,6 +133,8 @@ class AdkCoachService:
                 },
             )
         else:
+            from google.adk.events import Event, EventActions
+
             await self._session_service.append_event(
                 existing,
                 Event(
@@ -151,12 +174,97 @@ class AdkCoachService:
             "model": settings.adk_model,
         }
 
+    async def chat_stream(
+        self,
+        *,
+        user_id: str,
+        session_id: str | None = None,
+        message: str,
+        history_summary: str = "",
+        context: dict[str, Any] | None = None,
+    ):
+        """Yields (event_type, data) tuples for SSE streaming."""
+        self._ensure_services()
+        from google.genai import types
+
+        if not session_id:
+            session_id = f"chat-{uuid.uuid4().hex[:12]}"
+
+        state_delta = {
+            "user:profile": _build_user_profile_state(context, history_summary),
+            "user:user_id": user_id,
+        }
+
+        existing = await self._session_service.get_session(
+            app_name=APP_NAME,
+            user_id=user_id,
+            session_id=session_id,
+        )
+        if existing is None:
+            await self._session_service.create_session(
+                app_name=APP_NAME,
+                user_id=user_id,
+                session_id=session_id,
+                state={
+                    **state_delta,
+                    "chat_title": _clean_chat_title(message),
+                },
+            )
+        else:
+            from google.adk.events import Event, EventActions
+
+            # Fire-and-forget: state refresh doesn't need to block the stream start
+            asyncio.ensure_future(
+                self._session_service.append_event(
+                    existing,
+                    Event(
+                        invocation_id=f"context-refresh-{uuid.uuid4().hex[:12]}",
+                        author="system",
+                        actions=EventActions(state_delta=state_delta),
+                        timestamp=time.time(),
+                    ),
+                )
+            )
+
+        content = types.Content(
+            role="user",
+            parts=[types.Part.from_text(text=message)],
+        )
+
+        yield "session", session_id
+
+        from google.adk.agents.run_config import RunConfig, StreamingMode
+
+        streamed_any_partial = False
+        async for event in self._runner.run_async(
+            user_id=user_id,
+            session_id=session_id,
+            new_message=content,
+            run_config=RunConfig(streaming_mode=StreamingMode.SSE),
+        ):
+            if not event.content or not event.content.parts:
+                continue
+            for part in event.content.parts:
+                if not part.text:
+                    continue
+                if getattr(event, "partial", False):
+                    streamed_any_partial = True
+                    yield "token", part.text
+                elif event.is_final_response() and not streamed_any_partial:
+                    # Models that don't emit partials send only the final blob
+                    yield "token", part.text
+
+        yield "done", ""
+
     async def estimate_calories(
         self,
         *,
         user_id: str,
         profile: dict[str, Any],
     ) -> dict[str, Any]:
+        self._ensure_services()
+        from google.genai import types
+
         session_id = f"estimate-calories-{uuid.uuid4().hex[:12]}"
         await self._session_service.create_session(
             app_name=APP_NAME,

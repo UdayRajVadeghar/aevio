@@ -2,7 +2,6 @@ from google.adk.agents import Agent
 
 from .sub_agents.nutrition_context_agent.agent import nutrition_context_agent
 from .sub_agents.planner_advice_agent.agent import planner_advice_agent
-from .tools.web_search import web_search
 
 
 root_agent = Agent(
@@ -20,14 +19,13 @@ root_agent = Agent(
         "key facts in the state key 'conversation_summary' so sub-agents have context.\n"
         "Delegate nutrition trend analysis to nutrition_context_agent.\n"
         "Delegate action planning to planner_advice_agent.\n"
-        "Use the web_search tool for general background lookups when useful.\n"
+        "Use only the trusted app-provided context and your general nutrition knowledge.\n"
         "Be practical, concise, and non-judgmental.\n"
         "Always return:\n"
         "1) A short guidance paragraph\n"
         "2) 2-3 bullet next actions\n"
         "If data is insufficient, say what is missing and provide safe general guidance."
     ),
-    tools=[web_search],
     sub_agents=[nutrition_context_agent, planner_advice_agent],
 )
 
