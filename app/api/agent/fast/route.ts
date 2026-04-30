@@ -1,3 +1,4 @@
+import { ensureGoogleCredentials } from "@/lib/google/credentials";
 import { GoogleGenAI } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -41,6 +42,8 @@ function getGenAI(): GoogleGenAI {
   if (!project) {
     throw new Error("GEMINI_API_KEY or GCP_PROJECT_ID is not configured");
   }
+
+  ensureGoogleCredentials();
 
   cachedClient = new GoogleGenAI({
     vertexai: true,
