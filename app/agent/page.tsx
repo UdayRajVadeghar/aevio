@@ -43,9 +43,9 @@ type AgentSuggestionsResponse = {
 };
 
 const DEFAULT_SUGGESTIONS = [
-  "Analyze my diet",
-  "How much protein today?",
-  "Suggest a dinner",
+  "Review my meals today",
+  "Suggest a balanced next meal",
+  "What should I prioritize today?",
 ];
 
 export default function AgentPage() {
@@ -204,8 +204,10 @@ export default function AgentPage() {
         window.innerWidth < 768 ? "48px" : "56px";
     }
 
+    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
     try {
-      const res = await fetch("/api/agent", {
+      const res = await fetch("/api/agent/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -215,28 +217,87 @@ export default function AgentPage() {
         }),
       });
 
-      const text = await res.text();
-      let data: AgentApiResponse = {};
-      if (text) {
+      if (!res.ok) {
+        let errMsg = "Failed to get response.";
         try {
-          data = JSON.parse(text) as AgentApiResponse;
-        } catch {
-          data = { error: text };
+          const errData = await res.json();
+          if (errData.error) errMsg = errData.error;
+        } catch { /* ignore */ }
+        throw new Error(errMsg);
+      }
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error("No response stream.");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let currentEvent = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            currentEvent = line.slice(7).trim();
+          } else if (line.startsWith("data: ")) {
+            const rawData = line.slice(6);
+            let parsed = "";
+            try {
+              parsed = JSON.parse(rawData) as string;
+            } catch {
+              currentEvent = "";
+              continue;
+            }
+
+            if (currentEvent === "session" && parsed) {
+              setActiveSessionId(parsed);
+            } else if (currentEvent === "token" && parsed) {
+              setMessages((prev) => {
+                const updated = [...prev];
+                const last = updated[updated.length - 1];
+                if (last?.role === "assistant") {
+                  updated[updated.length - 1] = {
+                    ...last,
+                    content: last.content + parsed,
+                  };
+                }
+                return updated;
+              });
+            } else if (currentEvent === "error") {
+              throw new Error(parsed || "Stream error");
+            }
+            currentEvent = "";
+          }
         }
       }
-      if (!res.ok) throw new Error(data.error || "Failed to get response.");
 
-      if (data.sessionId) {
-        setActiveSessionId(data.sessionId);
-      }
       setIncludeUserProfile(false);
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.answer || "No response received." },
-      ]);
+
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant" && !last.content.trim()) {
+          return [
+            ...prev.slice(0, -1),
+            { role: "assistant" as const, content: "No response received." },
+          ];
+        }
+        return prev;
+      });
 
       fetchChatList();
     } catch (err) {
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant" && !last.content.trim()) {
+          return prev.slice(0, -1);
+        }
+        return prev;
+      });
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setIsSending(false);
@@ -471,7 +532,7 @@ export default function AgentPage() {
                   </div>
                 </motion.div>
               ) : (
-                messages.map((entry, index) => (
+                messages.filter((e) => e.role !== "assistant" || e.content).map((entry, index) => (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -538,7 +599,9 @@ export default function AgentPage() {
                   </motion.div>
                 ))
               )}
-              {isSending && (
+              {isSending &&
+                (!messages.length ||
+                  !messages[messages.length - 1]?.content) && (
                 <motion.div
                   key="assistant-loading"
                   initial={{ opacity: 0, y: 10 }}
