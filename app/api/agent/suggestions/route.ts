@@ -35,7 +35,14 @@ function buildSuggestions(today: Awaited<ReturnType<typeof getTodayNutritionCont
 }
 
 export async function GET() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  let session: Awaited<ReturnType<typeof auth.api.getSession>> | null = null;
+  try {
+    session = await auth.api.getSession({ headers: await headers() });
+  } catch (error) {
+    console.error("Failed to resolve auth session for suggestions:", error);
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
