@@ -44,13 +44,33 @@ CREATE TABLE IF NOT EXISTS "user_daily_calories" (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS "user_daily_calories_userId_dateKey_key"
   ON "user_daily_calories" ("userId", "dateKey");
+
+CREATE TABLE IF NOT EXISTS "coach_contexts" (
+  "id" TEXT PRIMARY KEY,
+  "userId" TEXT NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
+  "historySummary" TEXT NOT NULL,
+  "threeMonthsContext" JSONB NOT NULL,
+  "twoMonthsContext" JSONB NOT NULL,
+  "oneMonthContext" JSONB NOT NULL,
+  "twoWeeksContext" JSONB NOT NULL,
+  "oneWeekContext" JSONB NOT NULL,
+  "todayContext" JSONB NOT NULL,
+  "source" TEXT,
+  "version" INTEGER NOT NULL DEFAULT 1,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "coach_contexts_userId_key"
+  ON "coach_contexts" ("userId");
+CREATE INDEX IF NOT EXISTS "coach_contexts_updatedAt_idx"
+  ON "coach_contexts" ("updatedAt");
 `;
 
 async function main() {
   const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
   try {
     await pool.query(SQL);
-    console.log("meal_analysis table ready");
+    console.log("meal analysis and coach context tables ready");
   } finally {
     await pool.end();
   }

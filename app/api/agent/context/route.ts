@@ -10,45 +10,53 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function GET() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+
+    const [row, userProfile, todayNutrition] = await Promise.all([
+      getOrBuildCoachContextForAdk(userId),
+      db.userProfile.findUnique({
+        where: { userId },
+        select: {
+          thirtyDayGoal: true,
+          healthConditions: true,
+          dietaryPreference: true,
+          primaryGoal: true,
+          activityLevel: true,
+          height: true,
+          weight: true,
+          age: true,
+          gender: true,
+        },
+      }),
+      getTodayNutritionContext(userId).catch((error) => {
+        console.error("Failed to load today nutrition context:", error);
+        return null;
+      }),
+    ]);
+
+    const { historySummary, context } = coachContextToAdkPayload(
+      row,
+      userProfile,
+    );
+    if (todayNutrition) {
+      context.todayNutrition = todayNutrition;
+    }
+
+    return NextResponse.json({
+      historySummary,
+      context,
+    });
+  } catch (error) {
+    console.error("Failed to load agent context:", error);
+    return NextResponse.json(
+      { error: "Failed to load agent context" },
+      { status: 500 },
+    );
   }
-
-  const userId = session.user.id;
-
-  const [row, userProfile, todayNutrition] = await Promise.all([
-    getOrBuildCoachContextForAdk(userId),
-    db.userProfile.findUnique({
-      where: { userId },
-      select: {
-        thirtyDayGoal: true,
-        healthConditions: true,
-        dietaryPreference: true,
-        primaryGoal: true,
-        activityLevel: true,
-        height: true,
-        weight: true,
-        age: true,
-        gender: true,
-      },
-    }),
-    getTodayNutritionContext(userId).catch((error) => {
-      console.error("Failed to load today nutrition context:", error);
-      return null;
-    }),
-  ]);
-
-  const { historySummary, context } = coachContextToAdkPayload(
-    row,
-    userProfile,
-  );
-  if (todayNutrition) {
-    context.todayNutrition = todayNutrition;
-  }
-
-  return NextResponse.json({
-    historySummary,
-    context,
-  });
 }
