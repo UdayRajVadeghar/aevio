@@ -57,6 +57,57 @@ function buildLoggedDateIst(year: number, month: number, day: number): string {
   return `${year}-${pad(month)}-${pad(day)}`;
 }
 
+/** Fixed English labels so SSR and the browser always match (Node vs Chromium `Intl` differs for `en-IN`). */
+const WEEKDAY_LONG_EN = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+] as const;
+
+const WEEKDAY_SHORT_EN = [
+  "Sun",
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+] as const;
+
+const MONTH_LONG_EN = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const;
+
+const MONTH_SHORT_EN = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
 function parseDateKeyParts(dateKey: string): {
   year: number;
   month: number;
@@ -140,16 +191,22 @@ export function formatIstDateKey(
   }
 
   const { year, month, day } = parseDateKeyParts(dateKey);
-  const date = new Date(Date.UTC(year, month - 1, day));
+  const utc = new Date(Date.UTC(year, month - 1, day));
+  const weekdayIndex = utc.getUTCDay();
 
-  return new Intl.DateTimeFormat("en-IN", {
-    timeZone: IST_TIMEZONE,
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    ...options,
-  }).format(date);
+  const weekday = options?.weekday ?? "short";
+  const monthStyle = options?.month ?? "short";
+
+  const weekdayLabel =
+    weekday === "long"
+      ? WEEKDAY_LONG_EN[weekdayIndex]
+      : WEEKDAY_SHORT_EN[weekdayIndex];
+  const monthLabel =
+    monthStyle === "long"
+      ? MONTH_LONG_EN[month - 1]
+      : MONTH_SHORT_EN[month - 1];
+
+  return `${weekdayLabel}, ${day} ${monthLabel} ${year}`;
 }
 
 function parseIstDateTime(dateTime: string): Date {

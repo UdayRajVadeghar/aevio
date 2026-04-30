@@ -1,12 +1,7 @@
-"use client";
-
-import { Navbar } from "@/components/navbar";
-import { SiteFooter } from "@/components/site-footer";
-import { ThemeProvider } from "@/components/theme-provider";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ClientAppShell } from "@/components/client-app-shell";
+import { THEME_INIT_SCRIPT } from "@/lib/theme-init-script";
 import { Geist, Geist_Mono } from "next/font/google";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,28 +19,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [queryClient] = useState(() => new QueryClient());
-  const pathname = usePathname();
-  const hideFooter = pathname === "/agent";
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
-        suppressHydrationWarning
       >
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Navbar />
-            {children}
-            {!hideFooter && <SiteFooter />}
-          </ThemeProvider>
-        </QueryClientProvider>
+        <Script id="aevio-theme-init" strategy="beforeInteractive">
+          {THEME_INIT_SCRIPT}
+        </Script>
+        <ClientAppShell>{children}</ClientAppShell>
       </body>
     </html>
   );
