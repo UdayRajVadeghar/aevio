@@ -286,14 +286,14 @@ export default function AgentPage() {
                 <div
                   key={chat.session_id}
                   className={cn(
-                    "w-full px-5 py-4 text-left transition-colors group relative",
+                    "w-[calc(100%-16px)] mx-2 mb-1 px-4 py-3 rounded-xl text-left transition-colors group relative",
                     chat.session_id === activeSessionId
-                      ? "bg-black/[0.03] dark:bg-white/[0.05]"
+                      ? "bg-black/[0.04] dark:bg-white/[0.08]"
                       : "hover:bg-black/[0.02] dark:hover:bg-white/[0.02]",
                   )}
                 >
                   {chat.session_id === activeSessionId && (
-                    <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-black dark:bg-white" />
+                    <div className="absolute -left-2 top-2 bottom-2 w-1 bg-black dark:bg-white rounded-r-full" />
                   )}
                   <div className="flex items-start justify-between gap-2">
                     <button
@@ -354,7 +354,7 @@ export default function AgentPage() {
             </span>
           </div>
           {activeSessionId && (
-            <span className="ml-auto hidden sm:inline-block text-[10px] font-mono uppercase tracking-widest text-neutral-500 border border-black/10 dark:border-white/10 px-2 py-1 bg-white/50 dark:bg-black/50">
+            <span className="ml-auto hidden sm:inline-block text-[10px] font-mono uppercase tracking-widest text-neutral-500 border border-black/10 dark:border-white/10 rounded-lg px-2.5 py-1 bg-white/50 dark:bg-black/50 shadow-sm">
               ID: {activeSessionId.slice(0, 8)}...
             </span>
           )}
@@ -397,7 +397,7 @@ export default function AgentPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-col items-center justify-center py-10 md:py-20 text-center gap-4 md:gap-6"
                 >
-                  <div className="w-12 h-12 md:w-16 md:h-16 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 flex items-center justify-center">
+                  <div className="w-12 h-12 md:w-16 md:h-16 border border-black/10 dark:border-white/10 bg-neutral-50 dark:bg-white/5 flex items-center justify-center rounded-2xl shadow-sm">
                     <Brain className="w-6 h-6 md:w-8 md:h-8 text-neutral-400" />
                   </div>
                   <div className="space-y-2 max-w-md">
@@ -417,7 +417,7 @@ export default function AgentPage() {
                       <button
                         key={suggestion}
                         onClick={() => setMessage(suggestion)}
-                        className="px-3 py-1.5 border border-black/10 dark:border-white/10 text-[10px] font-mono uppercase tracking-widest text-neutral-600 dark:text-neutral-400 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors cursor-pointer"
+                        className="px-4 py-2 rounded-full border border-black/10 dark:border-white/10 text-[10px] font-mono uppercase tracking-widest text-neutral-600 dark:text-neutral-400 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors cursor-pointer shadow-sm"
                       >
                         {suggestion}
                       </button>
@@ -451,10 +451,10 @@ export default function AgentPage() {
                     </div>
                     <div
                       className={cn(
-                        "px-5 py-4 text-[13px] md:text-sm leading-relaxed whitespace-pre-wrap shadow-sm",
+                        "px-5 py-4 text-[13px] md:text-sm leading-relaxed whitespace-pre-wrap shadow-md",
                         entry.role === "user"
-                          ? "bg-black text-white dark:bg-white dark:text-black border border-black dark:border-white"
-                          : "bg-white/80 dark:bg-black/80 backdrop-blur-sm border border-black/10 dark:border-white/10",
+                          ? "bg-black text-white dark:bg-white dark:text-black rounded-2xl rounded-br-sm"
+                          : "bg-white/80 dark:bg-black/80 backdrop-blur-md border border-black/5 dark:border-white/5 rounded-2xl rounded-bl-sm",
                       )}
                     >
                       {entry.content}
@@ -471,7 +471,7 @@ export default function AgentPage() {
                   <div className="flex items-center gap-1.5 px-1 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
                     <Brain className="w-3 h-3" /> Aevio
                   </div>
-                  <div className="bg-white/80 dark:bg-black/80 backdrop-blur-sm border border-black/10 dark:border-white/10 px-5 py-4 flex items-center gap-2 shadow-sm">
+                  <div className="bg-white/80 dark:bg-black/80 backdrop-blur-md border border-black/5 dark:border-white/5 px-5 py-4 flex items-center gap-2 shadow-md rounded-2xl rounded-bl-sm">
                     <span className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 animate-bounce [animation-delay:-0.3s]" />
                     <span className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 animate-bounce [animation-delay:-0.15s]" />
                     <span className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 animate-bounce" />
@@ -487,7 +487,7 @@ export default function AgentPage() {
         <div className="shrink-0 bg-gradient-to-t from-white via-white to-white/50 dark:from-black dark:via-black dark:to-black/50 backdrop-blur-sm pt-1 md:pt-2">
           <div className="mx-auto max-w-3xl px-3 md:px-6 pb-3 md:pb-6">
             {error && (
-              <div className="mb-3 flex items-center gap-2 border border-red-200 bg-red-50/80 px-4 py-2.5 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400 backdrop-blur-sm">
+              <div className="mb-3 flex items-center gap-2 border border-red-200 bg-red-50/80 px-4 py-2.5 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400 backdrop-blur-sm rounded-xl shadow-sm">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <p>{error}</p>
               </div>
@@ -495,7 +495,7 @@ export default function AgentPage() {
 
             <form
               onSubmit={handleSubmit}
-              className="relative flex items-end shadow-sm"
+              className="relative flex items-end shadow-lg rounded-2xl bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-white/10 focus-within:border-black/30 focus-within:ring-1 focus-within:ring-black/30 dark:focus-within:border-white/30 dark:focus-within:ring-white/30 transition-all"
             >
               <textarea
                 ref={textareaRef}
@@ -503,12 +503,12 @@ export default function AgentPage() {
                 onChange={handleInput}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about your diet, request an analysis, or set a goal..."
-                className="w-full resize-none bg-white dark:bg-[#0a0a0a] border border-black/20 dark:border-white/20 pl-4 pr-14 py-3 md:py-4 text-base md:text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black dark:focus:border-white dark:focus:ring-white transition-all placeholder:text-neutral-400 custom-scrollbar h-[48px] md:h-[56px] min-h-[48px] md:min-h-[56px] max-h-[200px]"
+                className="w-full resize-none bg-transparent pl-5 pr-14 py-3 md:py-4 text-base md:text-sm focus:outline-none placeholder:text-neutral-400 custom-scrollbar h-[48px] md:h-[56px] min-h-[48px] md:min-h-[56px] max-h-[200px]"
               />
               <button
                 type="submit"
                 disabled={isSending || !message.trim()}
-                className="absolute right-2 bottom-2 w-10 h-10 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="absolute right-2 bottom-2 w-10 h-10 flex items-center justify-center bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group rounded-xl"
               >
                 <Send className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </button>
