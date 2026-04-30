@@ -6,12 +6,12 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 export async function GET() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const upstream = await forwardToAdk(
       `/chats/${encodeURIComponent(session.user.id)}`,
     );
@@ -34,7 +34,7 @@ export async function GET() {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("ADK service unreachable for /chats:", error);
+    console.error("Failed to load agent chats:", error);
     return NextResponse.json({ chats: [] });
   }
 }
