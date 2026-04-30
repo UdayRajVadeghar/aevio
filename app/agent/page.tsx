@@ -222,7 +222,9 @@ export default function AgentPage() {
         try {
           const errData = await res.json();
           if (errData.error) errMsg = errData.error;
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
         throw new Error(errMsg);
       }
 
@@ -532,92 +534,94 @@ export default function AgentPage() {
                   </div>
                 </motion.div>
               ) : (
-                messages.filter((e) => e.role !== "assistant" || e.content).map((entry, index) => (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    key={`${entry.role}-${index}`}
-                    className={cn(
-                      "flex flex-col gap-1.5 max-w-[85%] md:max-w-[80%]",
-                      entry.role === "user"
-                        ? "self-end items-end"
-                        : "self-start items-start",
-                    )}
-                  >
-                    <div className="flex items-center gap-1.5 px-1 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
-                      {entry.role === "user" ? (
-                        <>
-                          You <User className="w-3 h-3" />
-                        </>
-                      ) : (
-                        <>
-                          <Brain className="w-3 h-3" /> Aevio
-                        </>
-                      )}
-                    </div>
-                    <div
+                messages
+                  .filter((e) => e.role !== "assistant" || e.content)
+                  .map((entry, index) => (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      key={`${entry.role}-${index}`}
                       className={cn(
-                        "px-5 py-4 text-[13px] md:text-sm leading-relaxed shadow-md",
+                        "flex flex-col gap-1.5 max-w-[85%] md:max-w-[80%]",
                         entry.role === "user"
-                          ? "bg-black text-white dark:bg-white dark:text-black rounded-2xl rounded-br-sm whitespace-pre-wrap"
-                          : "bg-white/80 dark:bg-black/80 backdrop-blur-md border border-black/5 dark:border-white/5 rounded-2xl rounded-bl-sm",
+                          ? "self-end items-end"
+                          : "self-start items-start",
                       )}
                     >
-                      {entry.role === "assistant" ? (
-                        <ReactMarkdown
-                          components={{
-                            p: ({ children }) => (
-                              <p className="mb-3 last:mb-0">{children}</p>
-                            ),
-                            ul: ({ children }) => (
-                              <ul className="mb-3 list-disc space-y-1 pl-5 last:mb-0">
-                                {children}
-                              </ul>
-                            ),
-                            ol: ({ children }) => (
-                              <ol className="mb-3 list-decimal space-y-1 pl-5 last:mb-0">
-                                {children}
-                              </ol>
-                            ),
-                            li: ({ children }) => (
-                              <li className="pl-1">{children}</li>
-                            ),
-                            strong: ({ children }) => (
-                              <strong className="font-semibold text-black dark:text-white">
-                                {children}
-                              </strong>
-                            ),
-                          }}
-                        >
-                          {entry.content}
-                        </ReactMarkdown>
-                      ) : (
-                        entry.content
-                      )}
-                    </div>
-                  </motion.div>
-                ))
+                      <div className="flex items-center gap-1.5 px-1 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                        {entry.role === "user" ? (
+                          <>
+                            You <User className="w-3 h-3" />
+                          </>
+                        ) : (
+                          <>
+                            <Brain className="w-3 h-3" /> Aevio
+                          </>
+                        )}
+                      </div>
+                      <div
+                        className={cn(
+                          "px-5 py-4 text-[13px] md:text-sm leading-relaxed shadow-md",
+                          entry.role === "user"
+                            ? "bg-black text-white dark:bg-white dark:text-black rounded-2xl rounded-br-sm whitespace-pre-wrap"
+                            : "bg-white/80 dark:bg-black/80 backdrop-blur-md border border-black/5 dark:border-white/5 rounded-2xl rounded-bl-sm",
+                        )}
+                      >
+                        {entry.role === "assistant" ? (
+                          <ReactMarkdown
+                            components={{
+                              p: ({ children }) => (
+                                <p className="mb-3 last:mb-0">{children}</p>
+                              ),
+                              ul: ({ children }) => (
+                                <ul className="mb-3 list-disc space-y-1 pl-5 last:mb-0">
+                                  {children}
+                                </ul>
+                              ),
+                              ol: ({ children }) => (
+                                <ol className="mb-3 list-decimal space-y-1 pl-5 last:mb-0">
+                                  {children}
+                                </ol>
+                              ),
+                              li: ({ children }) => (
+                                <li className="pl-1">{children}</li>
+                              ),
+                              strong: ({ children }) => (
+                                <strong className="font-semibold text-black dark:text-white">
+                                  {children}
+                                </strong>
+                              ),
+                            }}
+                          >
+                            {entry.content}
+                          </ReactMarkdown>
+                        ) : (
+                          entry.content
+                        )}
+                      </div>
+                    </motion.div>
+                  ))
               )}
               {isSending &&
                 (!messages.length ||
                   !messages[messages.length - 1]?.content) && (
-                <motion.div
-                  key="assistant-loading"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col gap-1.5 max-w-[85%] self-start items-start"
-                >
-                  <div className="flex items-center gap-1.5 px-1 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
-                    <Brain className="w-3 h-3" /> Aevio
-                  </div>
-                  <div className="bg-white/80 dark:bg-black/80 backdrop-blur-md border border-black/5 dark:border-white/5 px-5 py-4 flex items-center gap-2 shadow-md rounded-2xl rounded-bl-sm">
-                    <span className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 animate-bounce [animation-delay:-0.3s]" />
-                    <span className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 animate-bounce [animation-delay:-0.15s]" />
-                    <span className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 animate-bounce" />
-                  </div>
-                </motion.div>
-              )}
+                  <motion.div
+                    key="assistant-loading"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col gap-1.5 max-w-[85%] self-start items-start"
+                  >
+                    <div className="flex items-center gap-1.5 px-1 text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                      <Brain className="w-3 h-3" /> Aevio
+                    </div>
+                    <div className="bg-white/80 dark:bg-black/80 backdrop-blur-md border border-black/5 dark:border-white/5 px-5 py-4 flex items-center gap-2 shadow-md rounded-2xl rounded-bl-sm">
+                      <span className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 animate-bounce [animation-delay:-0.15s]" />
+                      <span className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 animate-bounce" />
+                    </div>
+                  </motion.div>
+                )}
             </AnimatePresence>
             <div ref={messagesEndRef} className="h-px w-full" />
           </div>
