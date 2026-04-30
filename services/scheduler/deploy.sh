@@ -17,18 +17,21 @@ gcloud run deploy "${SERVICE}" \
   --region "${REGION}" \
   --memory 256Mi \
   --cpu 1 \
+  --min-instances 1 \
   --max-instances 1 \
+  --no-cpu-throttling \
+  --set-env-vars PING_INTERVAL_SECONDS=300 \
   --allow-unauthenticated \
   --quiet
 
-echo "==> Setting up Cloud Scheduler (every 10 min, 6AM–11PM IST)"
+echo "==> Setting up Cloud Scheduler backup ping (every 5 min, 24/7)"
 SERVICE_URL=$(gcloud run services describe "${SERVICE}" --region "${REGION}" --format="value(status.url)")
 
 gcloud scheduler jobs delete aevio-keepalive --location="${REGION}" --quiet 2>/dev/null || true
 
 gcloud scheduler jobs create http aevio-keepalive \
   --location "${REGION}" \
-  --schedule "*/10 * * * *" \
+  --schedule "*/5 * * * *" \
   --uri "${SERVICE_URL}/ping" \
   --http-method GET \
   --attempt-deadline 60s
@@ -38,7 +41,7 @@ HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${SERVICE_URL}/health")
 
 if [ "$HTTP_STATUS" = "200" ]; then
   echo "==> Deploy successful: ${SERVICE_URL}"
-  echo "==> Scheduler will ping ${SERVICE_URL}/ping every 10 min (24/7)"
+  echo "==> Internal keepalive loop runs every 5 min with Cloud Scheduler backup"
 else
   echo "==> WARNING: health check returned HTTP ${HTTP_STATUS}"
   echo "    Check logs: gcloud run services logs read ${SERVICE} --region ${REGION} --limit 30"
