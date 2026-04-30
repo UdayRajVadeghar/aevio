@@ -21,6 +21,8 @@ type ChatMessage = {
   content: string;
 };
 
+type ChatMode = "normal" | "think";
+
 type ChatListItem = {
   session_id: string;
   preview: string;
@@ -40,6 +42,12 @@ type ChatHistoryResponse = {
 
 type AgentSuggestionsResponse = {
   suggestions?: string[];
+};
+
+type AgentContextResponse = {
+  historySummary?: string;
+  context?: Record<string, unknown>;
+  error?: string;
 };
 
 const DEFAULT_SUGGESTIONS = [
@@ -62,6 +70,9 @@ export default function AgentPage() {
   const [error, setError] = useState<string | null>(null);
   const [includeUserProfile, setIncludeUserProfile] = useState(true);
   const [suggestions, setSuggestions] = useState(DEFAULT_SUGGESTIONS);
+  const [chatMode, setChatMode] = useState<ChatMode>("normal");
+  const [agentContext, setAgentContext] =
+    useState<AgentContextResponse | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -93,6 +104,28 @@ export default function AgentPage() {
   useEffect(() => {
     fetchChatList();
   }, [fetchChatList]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function preloadAgentContext() {
+      try {
+        const res = await fetch("/api/agent/context");
+        const data = (await res.json()) as AgentContextResponse;
+        if (!cancelled && res.ok) {
+          setAgentContext(data);
+        }
+      } catch {
+        /* fast mode can still answer with limited context */
+      }
+    }
+
+    preloadAgentContext();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -196,7 +229,6 @@ export default function AgentPage() {
 
     setError(null);
     setIsSending(true);
-    setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setMessage("");
 
     if (textareaRef.current) {
@@ -204,9 +236,39 @@ export default function AgentPage() {
         window.innerWidth < 768 ? "48px" : "56px";
     }
 
-    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+    const outgoingMessages = messages;
+    setMessages((prev) => {
+      const next = [...prev, { role: "user" as const, content: trimmed }];
+      if (chatMode === "think") {
+        next.push({ role: "assistant", content: "" });
+      }
+      return next;
+    });
 
     try {
+      if (chatMode === "normal") {
+        const res = await fetch("/api/agent/fast", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: trimmed,
+            context: agentContext?.context ?? {},
+            historySummary: agentContext?.historySummary ?? "",
+            recentMessages: outgoingMessages,
+          }),
+        });
+
+        const data = (await res.json()) as AgentApiResponse;
+        if (!res.ok) throw new Error(data.error || "Failed to get response.");
+
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: data.answer || "No response received." },
+        ]);
+        setIncludeUserProfile(false);
+        return;
+      }
+
       const res = await fetch("/api/agent/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -214,6 +276,8 @@ export default function AgentPage() {
           message: trimmed,
           sessionId: activeSessionId || undefined,
           includeUserProfile,
+          context: agentContext?.context,
+          historySummary: agentContext?.historySummary,
         }),
       });
 
@@ -233,49 +297,61 @@ export default function AgentPage() {
 
       const decoder = new TextDecoder();
       let buffer = "";
-      let currentEvent = "";
+      const processEvent = (chunk: string) => {
+        const lines = chunk.split(/\r?\n/);
+        let eventName = "message";
+        const dataLines: string[] = [];
+
+        for (const line of lines) {
+          if (line.startsWith("event:")) {
+            eventName = line.slice(6).trim();
+          } else if (line.startsWith("data:")) {
+            dataLines.push(line.slice(5).trimStart());
+          }
+        }
+
+        if (!dataLines.length) return;
+
+        let parsed = "";
+        try {
+          parsed = JSON.parse(dataLines.join("\n")) as string;
+        } catch {
+          return;
+        }
+
+        if (eventName === "session" && parsed) {
+          setActiveSessionId(parsed);
+        } else if (eventName === "token" && parsed) {
+          setMessages((prev) => {
+            const updated = [...prev];
+            const last = updated[updated.length - 1];
+            if (last?.role === "assistant") {
+              updated[updated.length - 1] = {
+                ...last,
+                content: last.content + parsed,
+              };
+            }
+            return updated;
+          });
+        } else if (eventName === "error") {
+          throw new Error(parsed || "Stream error");
+        }
+      };
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
+        const events = buffer.split(/\r?\n\r?\n/);
+        buffer = events.pop() || "";
 
-        for (const line of lines) {
-          if (line.startsWith("event: ")) {
-            currentEvent = line.slice(7).trim();
-          } else if (line.startsWith("data: ")) {
-            const rawData = line.slice(6);
-            let parsed = "";
-            try {
-              parsed = JSON.parse(rawData) as string;
-            } catch {
-              currentEvent = "";
-              continue;
-            }
-
-            if (currentEvent === "session" && parsed) {
-              setActiveSessionId(parsed);
-            } else if (currentEvent === "token" && parsed) {
-              setMessages((prev) => {
-                const updated = [...prev];
-                const last = updated[updated.length - 1];
-                if (last?.role === "assistant") {
-                  updated[updated.length - 1] = {
-                    ...last,
-                    content: last.content + parsed,
-                  };
-                }
-                return updated;
-              });
-            } else if (currentEvent === "error") {
-              throw new Error(parsed || "Stream error");
-            }
-            currentEvent = "";
-          }
+        for (const eventChunk of events) {
+          processEvent(eventChunk);
         }
+      }
+      if (buffer.trim()) {
+        processEvent(buffer);
       }
 
       setIncludeUserProfile(false);
@@ -293,13 +369,17 @@ export default function AgentPage() {
 
       fetchChatList();
     } catch (err) {
-      setMessages((prev) => {
-        const last = prev[prev.length - 1];
-        if (last?.role === "assistant" && !last.content.trim()) {
-          return prev.slice(0, -1);
-        }
-        return prev;
-      });
+      if (chatMode === "think") {
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last?.role === "assistant" && !last.content.trim()) {
+            return prev.slice(0, -1);
+          }
+          return prev;
+        });
+      } else {
+        setMessage(trimmed);
+      }
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setIsSending(false);
@@ -464,11 +544,35 @@ export default function AgentPage() {
               System Online
             </span>
           </div>
-          {activeSessionId && (
-            <span className="ml-auto hidden sm:inline-block text-[10px] font-mono uppercase tracking-widest text-neutral-500 border border-black/10 dark:border-white/10 rounded-lg px-2.5 py-1 bg-white/50 dark:bg-black/50 shadow-sm">
-              ID: {activeSessionId.slice(0, 8)}...
-            </span>
-          )}
+          <div className="ml-auto flex items-center gap-2">
+            <div className="flex rounded-xl border border-black/10 bg-white/60 p-1 shadow-sm dark:border-white/10 dark:bg-black/60">
+              {(["normal", "think"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setChatMode(mode)}
+                  className={cn(
+                    "rounded-lg px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest transition-colors cursor-pointer",
+                    chatMode === mode
+                      ? "bg-black text-white dark:bg-white dark:text-black"
+                      : "text-neutral-500 hover:text-black dark:hover:text-white",
+                  )}
+                  title={
+                    mode === "normal"
+                      ? "Fast direct Gemini mode"
+                      : "Slower ADK thinking mode"
+                  }
+                >
+                  {mode === "normal" ? "Normal" : "Think"}
+                </button>
+              ))}
+            </div>
+            {activeSessionId && (
+              <span className="hidden sm:inline-block text-[10px] font-mono uppercase tracking-widest text-neutral-500 border border-black/10 dark:border-white/10 rounded-lg px-2.5 py-1 bg-white/50 dark:bg-black/50 shadow-sm">
+                ID: {activeSessionId.slice(0, 8)}...
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Messages */}
@@ -604,7 +708,8 @@ export default function AgentPage() {
                   ))
               )}
               {isSending &&
-                (!messages.length ||
+                (chatMode === "normal" ||
+                  !messages.length ||
                   !messages[messages.length - 1]?.content) && (
                   <motion.div
                     key="assistant-loading"
