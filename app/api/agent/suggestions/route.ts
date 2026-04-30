@@ -12,36 +12,22 @@ function buildSuggestions(today: Awaited<ReturnType<typeof getTodayNutritionCont
   if (today.totals.mealCount > 0) {
     suggestions.push("Review my meals today");
 
-    if (remainingCalories !== null) {
-      if (remainingCalories > 150) {
-        suggestions.push(
-          `I have ${Math.round(remainingCalories)} calories left. What should I eat?`,
-        );
-      } else if (remainingCalories < -100) {
-        suggestions.push(
-          `I'm ${Math.abs(Math.round(remainingCalories))} calories over. How should I adjust dinner?`,
-        );
-      }
-    }
-
-    if (today.totals.protein < 80) {
-      suggestions.push(
-        `I'm at ${Math.round(today.totals.protein)}g protein today. What should I add?`,
-      );
+    if (remainingCalories !== null && remainingCalories > 150) {
+      suggestions.push("What should I eat with my remaining calories?");
+    } else if (remainingCalories !== null && remainingCalories < -100) {
+      suggestions.push("I'm over my calorie goal. How should I adjust?");
     } else {
       suggestions.push("Suggest a balanced next meal");
     }
+
+    if (today.totals.protein < 80) {
+      suggestions.push("How can I get more protein today?");
+    } else {
+      suggestions.push("What should I prioritize today?");
+    }
   } else {
     suggestions.push("Plan my meals for today");
-
-    if (today.goalCalories) {
-      suggestions.push(
-        `Build a ${today.goalCalories} calorie day with enough protein`,
-      );
-    } else {
-      suggestions.push("Suggest my first meal");
-    }
-
+    suggestions.push("Suggest my first meal");
     suggestions.push("What should I prioritize today?");
   }
 
