@@ -73,6 +73,17 @@ async def list_chats(user_id: str):
         ) from exc
 
 
+@app.delete("/chats/{user_id}/{session_id}")
+async def delete_chat(user_id: str, session_id: str):
+    try:
+        await coach_service.delete_chat(user_id, session_id)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to delete chat: {exc}"
+        ) from exc
+    return {"ok": True}
+
+
 @app.get("/chats/{user_id}/{session_id}", response_model=ChatHistoryResponse)
 async def get_chat_history(user_id: str, session_id: str):
     try:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import uuid
+from datetime import datetime
 from typing import Any
 
 from google.adk.memory import InMemoryMemoryService
@@ -14,6 +15,21 @@ from .settings import settings
 from .sub_agents.estimate_calories_agent.agent import estimate_calories_agent
 
 APP_NAME = "aevio"
+MAX_CHAT_TITLE_LENGTH = 64
+
+
+def _clean_chat_title(text: str) -> str:
+    title = " ".join(text.split())
+    if len(title) <= MAX_CHAT_TITLE_LENGTH:
+        return title
+    return f"{title[: MAX_CHAT_TITLE_LENGTH - 1].rstrip()}..."
+
+
+def _session_fallback_title(session_id: str, last_update_time: Any) -> str:
+    if isinstance(last_update_time, int | float):
+        date = datetime.fromtimestamp(last_update_time).strftime("%b %-d")
+        return f"Chat from {date}"
+    return f"Chat {session_id.removeprefix('chat-')[:8]}"
 
 
 class AdkCoachService:
@@ -76,6 +92,7 @@ class AdkCoachService:
                 state={
                     "user:profile": context or {},
                     "user:user_id": user_id,
+                    "chat_title": _clean_chat_title(message),
                 },
             )
 
@@ -173,19 +190,31 @@ class AdkCoachService:
 
         chats: list[dict[str, Any]] = []
         for session in result.sessions:
-            preview = ""
-            for ev in session.events or []:
-                if ev.content and ev.content.role == "user" and ev.content.parts:
-                    preview = (ev.content.parts[0].text or "")[:100]
-                    break
+            state = getattr(session, "state", None) or {}
+            title = state.get("chat_title", "")
+
+            if not title:
+                for ev in session.events or []:
+                    if ev.content and ev.content.role == "user" and ev.content.parts:
+                        title = _clean_chat_title(ev.content.parts[0].text or "")
+                        break
 
             chats.append({
                 "session_id": session.id,
-                "preview": preview or "New chat",
+                "preview": title
+                or _session_fallback_title(session.id, session.last_update_time),
                 "last_update": session.last_update_time,
             })
 
         return chats
+
+    async def delete_chat(self, user_id: str, session_id: str) -> bool:
+        await self._session_service.delete_session(
+            app_name=APP_NAME,
+            user_id=user_id,
+            session_id=session_id,
+        )
+        return True
 
     async def get_chat_history(
         self, user_id: str, session_id: str
