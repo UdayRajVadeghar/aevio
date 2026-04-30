@@ -54,9 +54,9 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Failed to load agent context:", error);
-    return NextResponse.json(
-      { error: "Failed to load agent context" },
-      { status: 500 },
-    );
+    return NextResponse.json({
+      historySummary: "",
+      context: {},
+    });
   }
 }

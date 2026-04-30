@@ -49,9 +49,13 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Failed to build agent suggestions:", error);
-    return NextResponse.json(
-      { error: "Failed to load suggestions" },
-      { status: 500 },
-    );
+    return NextResponse.json({
+      suggestions: [
+        "Plan my meals for today",
+        "Suggest my first meal",
+        "What should I prioritize today?",
+      ],
+      todayNutrition: null,
+    });
   }
 }
